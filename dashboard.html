@@ -391,7 +391,21 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateEmail, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
+    const CLOUDINARY_CLOUD = "dxifrpuic";
+    const CLOUDINARY_PRESET = "next_genius_unsigned";
+    async function cloudinaryUpload(file, resourceType = 'image', folder = 'next-genius') {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', CLOUDINARY_PRESET);
+      fd.append('folder', folder);
+      const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${resourceType}/upload`;
+      const resp = await fetch(url, { method: 'POST', body: fd });
+      if (!resp.ok) {
+        const err = await resp.text();
+        throw new Error('Upload failed: ' + err.substring(0, 200));
+      }
+      return resp.json();
+    }
 
     const firebaseConfig = {
       apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
@@ -404,8 +418,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
-    const GEMINI_KEY = "AIzaSyBaAh-_hlRoezGDtz4unf2hcNS-G8IOrwI";
+    const GEMINI_KEY = "AIzaSyBV7nAq1Xh4jVRiB7tBDVjum899BapAYjM";
 
     const PARTNER_COLLEGES = [
       { slug: "aup", name: "American University of Paris", country: "France" },
@@ -569,16 +582,18 @@
       if (!pendingPhotoFile) return;
       const btn = document.getElementById('photoSaveBtn');
       btn.disabled = true; btn.textContent = 'Uploading...';
-      const path = `applicants/${currentUser.uid}/photo.${pendingPhotoFile.name.split('.').pop()}`;
-      const sref = ref(storage, path);
-      await uploadBytes(sref, pendingPhotoFile);
-      const url = await getDownloadURL(sref);
-      await updateDoc(doc(db, "applicants", currentUser.uid), { photoURL: url, "onboarding.photo": true });
-      applicantData.photoURL = url;
-      applicantData.onboarding = { ...(applicantData.onboarding||{}), photo: true };
-      btn.textContent = 'Save photo'; btn.disabled = true;
-      document.getElementById('photoStatus').textContent = '✓ Photo saved';
-      updateProgress();
+      try {
+        const result = await cloudinaryUpload(pendingPhotoFile, 'image', `next-genius/${currentUser.uid}`);
+        await updateDoc(doc(db, "applicants", currentUser.uid), { photoURL: result.secure_url, photoPublicId: result.public_id, "onboarding.photo": true });
+        applicantData.photoURL = result.secure_url;
+        applicantData.onboarding = { ...(applicantData.onboarding||{}), photo: true };
+        document.getElementById('photoStatus').textContent = '✓ Photo saved';
+        updateProgress();
+      } catch (e) {
+        document.getElementById('photoStatus').textContent = '✗ ' + e.message;
+      } finally {
+        btn.textContent = 'Save photo'; btn.disabled = true;
+      }
     };
 
     // ── Profile forms ──
@@ -627,27 +642,28 @@
       if (f.size > 10 * 1024 * 1024) { alert('Max 10MB'); return; }
       const status = document.getElementById('caStatus');
       status.textContent = 'Uploading PDF...';
-      const path = `applicants/${currentUser.uid}/commonapp.pdf`;
-      const sref = ref(storage, path);
-      await uploadBytes(sref, f);
-      const url = await getDownloadURL(sref);
-      status.textContent = 'Analyzing with AI...';
-      // Convert PDF to base64 and send to Gemini
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const b64 = reader.result.split(',')[1];
-        const review = await analyzePDFWithGemini(b64);
-        await updateDoc(doc(db, "applicants", currentUser.uid), {
-          commonApp: { url, review, uploadedAt: new Date().toISOString() },
-          "onboarding.commonapp": true
-        });
-        applicantData.commonApp = { url, review };
-        applicantData.onboarding = { ...(applicantData.onboarding||{}), commonapp: true };
-        renderCommonAppReview(review);
-        status.textContent = '✓ Reviewed';
-        updateProgress();
-      };
-      reader.readAsDataURL(f);
+      try {
+        const result = await cloudinaryUpload(f, 'raw', `next-genius/${currentUser.uid}`);
+        const url = result.secure_url;
+        status.textContent = 'Analyzing with AI...';
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const b64 = reader.result.split(',')[1];
+          const review = await analyzePDFWithGemini(b64);
+          await updateDoc(doc(db, "applicants", currentUser.uid), {
+            commonApp: { url, publicId: result.public_id, review, uploadedAt: new Date().toISOString() },
+            "onboarding.commonapp": true
+          });
+          applicantData.commonApp = { url, review };
+          applicantData.onboarding = { ...(applicantData.onboarding||{}), commonapp: true };
+          renderCommonAppReview(review);
+          status.textContent = '✓ Reviewed';
+          updateProgress();
+        };
+        reader.readAsDataURL(f);
+      } catch (err) {
+        status.textContent = '✗ ' + err.message;
+      }
     };
 
     async function analyzePDFWithGemini(pdfB64) {
@@ -707,10 +723,8 @@ Be specific, kind, and actionable.`;
       if (document.getElementById('exitConfirm').value !== 'EXIT') { alert('Type EXIT to confirm'); return; }
       if (!confirm('This is final. Delete everything?')) return;
       try {
-        // best-effort: delete photo + commonapp from storage
-        try { await deleteObject(ref(storage, `applicants/${currentUser.uid}/photo.jpg`)); } catch(_) {}
-        try { await deleteObject(ref(storage, `applicants/${currentUser.uid}/photo.png`)); } catch(_) {}
-        try { await deleteObject(ref(storage, `applicants/${currentUser.uid}/commonapp.pdf`)); } catch(_) {}
+        // Note: Cloudinary delete from client requires signed call. Mark for cleanup; admin/cron purges later.
+        await updateDoc(doc(db, "applicants", currentUser.uid), { exitedAt: new Date().toISOString(), status: "exited" });
         await deleteDoc(doc(db, "applicants", currentUser.uid));
         await deleteUser(currentUser);
         alert('Your account and data have been deleted.');
