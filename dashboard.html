@@ -37,7 +37,11 @@
     .sidebar a.locked:hover { background: transparent; }
     .sidebar a .icon { width: 18px; text-align: center; font-size: 14px; }
     .sidebar a .check { margin-left: auto; color: #4caf50; font-size: 14px; display: none; }
-    .sidebar a .lock { margin-left: auto; color: #bbb; font-size: 12px; display: none; }
+    .sidebar a .lock {
+      margin-left: auto; color: #999; font-size: 11px; display: none;
+      letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500;
+      background: #f0f0f0; padding: 2px 8px; border-radius: 4px;
+    }
     .sidebar a.locked .lock { display: inline; }
 
     .main { padding: 32px 40px; max-width: 920px; }
@@ -165,10 +169,11 @@
     /* Bot widget */
     .bot-fab {
       position: fixed; bottom: 24px; right: 24px; z-index: 100;
-      width: 56px; height: 56px; border-radius: 50%; background: #FFC72C;
+      width: 64px; height: 64px; border-radius: 50%; background: #FFC72C;
       box-shadow: 0 4px 16px rgba(0,0,0,0.15);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 24px; border: none;
+      cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px;
+      color: #111; border: none;
       transition: transform 0.15s;
     }
     .bot-fab:hover { transform: scale(1.05); }
@@ -243,12 +248,12 @@
     <div class="layout">
       <nav class="sidebar" id="sidebar">
         <a data-tab="home" class="active"><span class="icon">⌂</span> Home</a>
-        <a data-tab="photo" data-requires=""><span class="icon">⊙</span> Photo <span class="check" data-check="photo">✓</span><span class="lock" data-lock="photo">🔒</span></a>
-        <a data-tab="personal" data-requires="photo"><span class="icon">☰</span> Personal Profile <span class="check" data-check="personal">✓</span><span class="lock" data-lock="personal">🔒</span></a>
-        <a data-tab="academic" data-requires="personal"><span class="icon">⬢</span> Academic Profile <span class="check" data-check="academic">✓</span><span class="lock" data-lock="academic">🔒</span></a>
-        <a data-tab="college" data-requires="academic"><span class="icon">⛬</span> College Discovery <span class="check" data-check="college">✓</span><span class="lock" data-lock="college">🔒</span></a>
-        <a data-tab="checklist" data-requires="college"><span class="icon">✓</span> Application Checklist <span class="check" data-check="checklist">✓</span><span class="lock" data-lock="checklist">🔒</span></a>
-        <a data-tab="interview" data-requires="checklist"><span class="icon">▶</span> Interview <span class="check" data-check="interview">✓</span><span class="lock" data-lock="interview">🔒</span></a>
+        <a data-tab="photo" data-requires=""><span class="icon">⊙</span> Photo <span class="check" data-check="photo">✓</span><span class="lock" data-lock="photo">Locked</span></a>
+        <a data-tab="personal" data-requires="photo"><span class="icon">☰</span> Personal Profile <span class="check" data-check="personal">✓</span><span class="lock" data-lock="personal">Locked</span></a>
+        <a data-tab="academic" data-requires="personal"><span class="icon">⬢</span> Academic Profile <span class="check" data-check="academic">✓</span><span class="lock" data-lock="academic">Locked</span></a>
+        <a data-tab="college" data-requires="academic"><span class="icon">⛬</span> College Discovery <span class="check" data-check="college">✓</span><span class="lock" data-lock="college">Locked</span></a>
+        <a data-tab="checklist"><span class="icon">✓</span> Application Checklist <span class="check" data-check="checklist">✓</span></a>
+        <a data-tab="interview" data-requires="checklist"><span class="icon">▶</span> Interview <span class="check" data-check="interview">✓</span><span class="lock" data-lock="interview">Locked</span></a>
         <a data-tab="status"><span class="icon">◷</span> Status</a>
         <a data-tab="settings"><span class="icon">⚙</span> Settings</a>
         <a data-tab="exit" style="margin-top:auto; color:#d93025;"><span class="icon">✕</span> Exit Process</a>
@@ -278,13 +283,13 @@
           </div>
 
           <div class="card" id="nextStepCard">
-            <h2 style="display:flex; align-items:center; gap:10px;"><span style="background:#FFC72C; color:#111; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:600;">→</span> What's next</h2>
+            <h2>What's next</h2>
             <p id="nextStep" style="font-size:15px;">Upload your photo to begin.</p>
             <button class="btn" id="nextBtn" onclick="goToNextStep()">Continue</button>
           </div>
 
           <div class="card">
-            <h2 style="display:flex; align-items:center; gap:10px;"><span>📥</span> Inbox <span id="unreadBadge" style="background:#d93025; color:#fff; font-size:11px; padding:2px 8px; border-radius:999px; display:none; font-weight:600;"></span></h2>
+            <h2 style="display:flex; align-items:center; gap:10px;">Inbox <span id="unreadBadge" style="background:#d93025; color:#fff; font-size:11px; padding:2px 8px; border-radius:999px; display:none; font-weight:600;"></span></h2>
             <p style="color:#888; font-size:13px; margin-top:-4px;">Messages and notifications from the Next Genius team</p>
             <div id="inboxList" style="margin-top:16px;"></div>
           </div>
@@ -461,7 +466,7 @@
   </div>
 
   <!-- Bot widget -->
-  <button class="bot-fab" id="botFab" onclick="toggleBot()" title="Ask the Next Genius bot">💬</button>
+  <button class="bot-fab" id="botFab" onclick="toggleBot()" title="Ask the Next Genius bot">Ask</button>
   <div class="bot-panel" id="botPanel">
     <div class="bot-header">
       <span>Next Genius Assistant</span>
@@ -533,14 +538,14 @@
       { id: 'teacherRecos', label: '2–3 School Teacher Reco Letters' },
       { id: 'externalRecos', label: '2–3 External (Non-School) Reco Letters' },
       { id: 'resumePdf', label: 'Resume PDF' },
-      { id: 'essaysApproved', label: 'All Essays approved by NM' },
+      { id: 'essaysWritten', label: 'All Essays written' },
       { id: 'scholarshipFinAid', label: 'Scholarship / Financial Aid' },
       { id: 'proofOfFunds', label: 'Proof of Funds' },
       { id: 'emailedAdmissions', label: 'Emailed Admissions' },
       { id: 'followCollegeSocial', label: 'Follow college on Social Media' },
       { id: 'portfolio', label: 'Portfolio (Optional)' },
-      { id: 'finalReviewSquad', label: 'Final review with NM Squad' },
-      { id: 'finalReviewNM', label: 'Final review with NM' },
+      { id: 'finalReviewFirst', label: 'Final review (1st pass)' },
+      { id: 'finalReviewSecond', label: 'Final review (2nd pass)' },
       { id: 'submitted', label: 'Submitted!' }
     ];
 
