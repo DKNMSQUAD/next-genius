@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Critical Thinking Test | Next Genius</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #fff; color: #111;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh; padding: 32px 20px;
+    }
+    .container { max-width: 760px; margin: 0 auto; }
+    .logo { width: 80px; height: 80px; margin-bottom: 20px; }
+    h1 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    .subtitle { font-size: 16px; color: #444; margin-bottom: 24px; }
+
+    .timer {
+      position: sticky; top: 16px; float: right;
+      background: #FFC72C; color: #111; font-family: 'Poppins', sans-serif;
+      font-weight: 600; padding: 8px 18px; border-radius: 999px; font-size: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 10;
+    }
+    .timer.warn { background: #FF6B35; color: #fff; }
+
+    .gate { padding: 16px 0; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+    .field input {
+      width: 100%; padding: 11px 14px; font-size: 15px; font-family: inherit;
+      border: 1px solid #ddd; border-radius: 8px; outline: none;
+    }
+    .field input:focus { border-color: #FFC72C; }
+
+    .section-tag {
+      display: inline-block; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase; color: #555;
+      background: #f4f4f4; padding: 4px 10px; border-radius: 4px; margin-bottom: 12px;
+    }
+    .question { padding: 24px 0; border-top: 1px solid #eee; }
+    .question:first-of-type { border-top: none; }
+    .q-num { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; color: #888; margin-bottom: 6px; }
+    .q-text { font-size: 17px; line-height: 1.55; margin-bottom: 16px; white-space: pre-wrap; }
+    .options { display: flex; flex-direction: column; gap: 8px; }
+    .options label {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px;
+      cursor: pointer; font-size: 15px; line-height: 1.4;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .options label:hover { background: #fffaf0; }
+    .options input[type="radio"] { margin-top: 2px; accent-color: #FFC72C; }
+    .options label.selected { border-color: #FFC72C; background: #fffaf0; }
+
+    .submit-btn {
+      font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 500; color: #111;
+      background: #FFC72C; border: none; border-radius: 999px;
+      padding: 14px 56px; cursor: pointer; margin-top: 32px;
+    }
+    .submit-btn:hover:not(:disabled) { background: #F0B71F; }
+    .submit-btn:disabled { opacity: 0.6; cursor: wait; }
+
+    .result { padding: 40px 0; }
+    .result h2 { font-family: 'Poppins', sans-serif; font-size: 24px; margin-bottom: 12px; }
+    .result .score-big { font-family: 'Poppins', sans-serif; font-size: 56px; font-weight: 700; color: #FFC72C; margin: 16px 0; }
+    .result .breakdown { background: #f7f7f7; border-radius: 12px; padding: 20px; margin: 24px 0; }
+    .result .breakdown div { display: flex; justify-content: space-between; padding: 6px 0; font-size: 15px; }
+    .result .breakdown div span:last-child { font-weight: 600; }
+    .result p { line-height: 1.6; color: #444; }
+
+    .error-banner {
+      background: #fee; color: #b00020; border: 1px solid #fcc;
+      padding: 12px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html"><img class="logo" src="NG_Logo.avif" alt="Next Genius"></a>
+
+    <div id="gate" class="gate">
+      <h1>Critical Thinking Assessment</h1>
+      <p class="subtitle">Level 1 · 18 questions · 1 hour · auto-graded</p>
+      <p style="font-size:15px; line-height:1.6; color:#333; margin-bottom:20px;">Three sections of 6 questions each: Logical Inquiry, Functional Literacy, Data Analysis. Once you start, the timer cannot be paused. Answer every question — there is no negative marking.</p>
+      <div class="field">
+        <label>Enter the email you registered with <span style="color:#d93025;">*</span></label>
+        <input type="email" id="gateEmail" autocomplete="email">
+      </div>
+      <script>try { const e = sessionStorage.getItem('ng_email'); if (e) document.getElementById('gateEmail').value = e; } catch(_) {}</script>
+      <button class="submit-btn" onclick="startTest()">Start Test</button>
+    </div>
+
+    <div id="testWrap" style="display:none;">
+      <div class="timer" id="timer">60:00</div>
+      <h1>Critical Thinking Assessment</h1>
+      <p class="subtitle" id="testEmailLabel"></p>
+      <div id="errorBanner" class="error-banner" style="display:none;"></div>
+      <div id="questions"></div>
+      <button class="submit-btn" onclick="submitTest()">Submit Test</button>
+    </div>
+
+    <div id="resultWrap" style="display:none;" class="result">
+      <h2>Submitted</h2>
+      <p>Your responses have been recorded.</p>
+      <div class="score-big" id="scoreBig"></div>
+      <div class="breakdown" id="breakdown"></div>
+      <p>The Next Genius team will review your results and reach out shortly.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUESTIONS = [
+      // ── Logical Inquiry (6) ──
+      { section: "Logical Inquiry", q: "All roses are flowers. Some flowers fade quickly. Which conclusion is necessarily true?", opts: ["All roses fade quickly.", "Some roses fade quickly.", "No roses fade quickly.", "It is uncertain whether any roses fade quickly."], correct: 3 },
+      { section: "Logical Inquiry", q: "If today is Wednesday, what day will it be 100 days from now?", opts: ["Monday", "Tuesday", "Friday", "Saturday"], correct: 2 },
+      { section: "Logical Inquiry", q: "A statement: \"Whenever it rains, the streets are wet.\" The streets are wet. What can you logically conclude?", opts: ["It rained.", "It did not rain.", "It may or may not have rained.", "It will rain again."], correct: 2 },
+      { section: "Logical Inquiry", q: "Find the odd one out: 8, 27, 64, 100, 125", opts: ["8", "27", "100", "125"], correct: 2 },
+      { section: "Logical Inquiry", q: "Five friends sit in a row. A is to the left of B but to the right of C. D is to the right of B. E is between A and B. Who sits in the middle?", opts: ["A", "B", "C", "E"], correct: 3 },
+      { section: "Logical Inquiry", q: "Complete the series: 2, 6, 12, 20, 30, ?", opts: ["36", "40", "42", "44"], correct: 2 },
+
+      // ── Functional Literacy (6) ──
+      { section: "Functional Literacy", q: "Read: \"Despite considerable evidence to the contrary, the chairman remained adamant about his position.\" What does \"adamant\" mean here?", opts: ["Hesitant", "Refusing to be persuaded", "Embarrassed", "Apologetic"], correct: 1 },
+      { section: "Functional Literacy", q: "A passage says: \"The policy, while well-intentioned, has produced unintended consequences that disproportionately affect low-income households.\" The author's stance is best described as:", opts: ["Strongly supportive", "Strongly opposed", "Critical but not dismissive", "Indifferent"], correct: 2 },
+      { section: "Functional Literacy", q: "Choose the sentence with correct grammar:", opts: ["Each of the students have submitted their assignment.", "Each of the students has submitted their assignment.", "Each of the students have submitted his assignment.", "Each of the student has submitted their assignment."], correct: 1 },
+      { section: "Functional Literacy", q: "\"The argument is specious — it appears reasonable but is actually flawed.\" The word \"specious\" most nearly means:", opts: ["Genuine", "Misleadingly attractive", "Obviously incorrect", "Highly technical"], correct: 1 },
+      { section: "Functional Literacy", q: "Which sentence uses a semicolon correctly?", opts: ["She loves coffee; but hates tea.", "She loves coffee; she hates tea.", "She loves coffee, she hates tea;", "She; loves coffee and hates tea."], correct: 1 },
+      { section: "Functional Literacy", q: "An author writes: \"To call this a small problem would be a gross understatement.\" The author means the problem is:", opts: ["Trivial", "Moderate", "Severe", "Unclear"], correct: 2 },
+
+      // ── Data Analysis (6) ──
+      { section: "Data Analysis", q: "A shop sold 120 items in January and 150 in February. What is the percentage increase?", opts: ["20%", "25%", "30%", "33%"], correct: 1 },
+      { section: "Data Analysis", q: "If a car travels 240 km in 3 hours, then 180 km in 2 hours, what is its average speed for the whole trip?", opts: ["80 km/h", "84 km/h", "85 km/h", "90 km/h"], correct: 1 },
+      { section: "Data Analysis", q: "A pie chart shows: Rent 40%, Food 25%, Transport 15%, Savings 20%. If total income is ₹50,000, how much is spent on Food and Transport combined?", opts: ["₹15,000", "₹17,500", "₹20,000", "₹22,500"], correct: 2 },
+      { section: "Data Analysis", q: "The mean of 5 numbers is 12. If a sixth number 18 is added, what is the new mean?", opts: ["12.5", "13", "13.5", "14"], correct: 1 },
+      { section: "Data Analysis", q: "A table shows sales doubling every 2 years starting from 100 units in Year 1. What is the sales figure in Year 7?", opts: ["400", "600", "800", "1600"], correct: 2 },
+      { section: "Data Analysis", q: "Probability: A bag has 4 red and 6 blue balls. Two balls are drawn without replacement. What is the probability both are red?", opts: ["2/15", "1/5", "4/25", "6/45"], correct: 0 }
+    ];
+
+    let testEmail = "";
+    let startedAt = null;
+    let timerInterval = null;
+    const TEST_DURATION_SEC = 60 * 60;
+
+    function startTest() {
+      const e = document.getElementById('gateEmail').value.trim();
+      if (!e || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { alert('Please enter a valid email'); return; }
+      testEmail = e;
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('testWrap').style.display = 'block';
+      document.getElementById('testEmailLabel').textContent = e;
+      renderQuestions();
+      startedAt = Date.now();
+      tickTimer();
+      timerInterval = setInterval(tickTimer, 1000);
+    }
+
+    function renderQuestions() {
+      const wrap = document.getElementById('questions');
+      let lastSection = null;
+      wrap.innerHTML = QUESTIONS.map((q, i) => {
+        const sectionHeader = q.section !== lastSection ? `<div class="section-tag">${q.section}</div>` : '';
+        lastSection = q.section;
+        const opts = q.opts.map((o, oi) => `<label><input type="radio" name="q${i}" value="${oi}" onchange="this.closest('.options').querySelectorAll('label').forEach(l=>l.classList.remove('selected'));this.closest('label').classList.add('selected')"><span>${o}</span></label>`).join('');
+        return `${sectionHeader}<div class="question"><div class="q-num">Question ${i+1}</div><div class="q-text">${escapeHtml(q.q)}</div><div class="options">${opts}</div></div>`;
+      }).join('');
+    }
+
+    function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+    function tickTimer() {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const remaining = TEST_DURATION_SEC - elapsed;
+      const t = document.getElementById('timer');
+      if (remaining <= 0) { clearInterval(timerInterval); t.textContent = "0:00"; submitTest(true); return; }
+      const m = Math.floor(remaining / 60), s = remaining % 60;
+      t.textContent = `${m}:${String(s).padStart(2,'0')}`;
+      if (remaining < 5 * 60) t.classList.add('warn');
+    }
+
+    async function submitTest(auto = false) {
+      const answers = QUESTIONS.map((q, i) => {
+        const sel = document.querySelector(`input[name="q${i}"]:checked`);
+        return sel ? Number(sel.value) : null;
+      });
+      const unanswered = answers.filter(a => a === null).length;
+      if (!auto && unanswered > 0) {
+        if (!confirm(`${unanswered} question(s) unanswered. Submit anyway?`)) return;
+      }
+      const breakdown = {}; let totalCorrect = 0;
+      QUESTIONS.forEach((q, i) => {
+        breakdown[q.section] = breakdown[q.section] || { correct: 0, total: 0 };
+        breakdown[q.section].total += 1;
+        if (answers[i] === q.correct) { breakdown[q.section].correct += 1; totalCorrect += 1; }
+      });
+      const result = {
+        email: testEmail,
+        startedAt: new Date(startedAt).toISOString(),
+        submittedAt: new Date().toISOString(),
+        durationSec: Math.floor((Date.now() - startedAt) / 1000),
+        autoSubmitted: auto,
+        score: totalCorrect,
+        total: QUESTIONS.length,
+        percentage: Math.round((totalCorrect / QUESTIONS.length) * 100),
+        breakdown: breakdown,
+        answers: answers
+      };
+      const btn = document.querySelector('#testWrap .submit-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+      try { await window.__saveTestResult(result); }
+      catch (err) {
+        console.error(err);
+        document.getElementById('errorBanner').style.display = 'block';
+        document.getElementById('errorBanner').textContent = 'Save failed: ' + (err.message || err) + '. Please screenshot and email nextgeniusindia@gmail.com';
+        if (btn) { btn.disabled = false; btn.textContent = 'Retry Submit'; }
+        return;
+      }
+      clearInterval(timerInterval);
+      document.getElementById('testWrap').style.display = 'none';
+      document.getElementById('resultWrap').style.display = 'block';
+      document.getElementById('scoreBig').textContent = `${totalCorrect} / ${QUESTIONS.length}`;
+      document.getElementById('breakdown').innerHTML = Object.entries(breakdown).map(([s, b]) => `<div><span>${s}</span><span>${b.correct} / ${b.total}</span></div>`).join('');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
+      authDomain: "next-genius-auto.firebaseapp.com",
+      projectId: "next-genius-auto",
+      storageBucket: "next-genius-auto.firebasestorage.app",
+      messagingSenderId: "557092273631",
+      appId: "1:557092273631:web:192264bb43324a69a4186a"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
+
+    window.__saveTestResult = async function(result) {
+      const enriched = { ...result, createdAt: serverTimestamp() };
+      const tasks = [ addDoc(collection(db, "tests"), enriched) ];
+      tasks.push(fetch(SHEET_WEBHOOK_URL + "?type=test", { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(result) }));
+      return Promise.allSettled(tasks);
+    };
+  </script>
+</body>
+</html>

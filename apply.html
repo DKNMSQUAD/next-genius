@@ -188,9 +188,10 @@
       btn.disabled = true; btn.textContent = 'Submitting...';
       try { await window.__saveApplicant(payload); }
       catch (err) { console.error(err); alert('Submission failed. Please try again.'); btn.disabled = false; btn.textContent = 'Submit'; return; }
-      document.getElementById('successText').textContent = 'Thank you, ' + payload.firstName + '. We will be in touch shortly.';
+      document.getElementById('successText').innerHTML = 'Thank you, ' + payload.firstName + '. The next step is the Critical Thinking Assessment — 18 questions, 1 hour.<br><br><a href="test.html" style="display:inline-block;background:#FFC72C;color:#111;padding:12px 32px;border-radius:999px;font-weight:600;text-decoration:none;font-family:Poppins,sans-serif;">Start Test</a>';
       document.getElementById('formContent').style.display = 'none';
       document.getElementById('successMsg').style.display = 'block';
+      try { sessionStorage.setItem('ng_email', payload.email); } catch(e) {}
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     function markError(fieldId, msg) {
