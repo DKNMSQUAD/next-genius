@@ -26,6 +26,7 @@
 
     .field { margin-bottom: 18px; }
     .field label { display: block; font-size: 14px; font-weight: 500; color: #111; margin-bottom: 6px; }
+    .field label .req { color: #d93025; margin-left: 2px; }
     .field input, .field select {
       width: 100%; padding: 11px 14px; font-size: 15px;
       font-family: inherit; border: 1px solid #ddd; border-radius: 8px;
@@ -71,32 +72,36 @@
       <p class="subtitle">The Next Genius Scholarship Program</p>
 
       <div class="field" id="f-firstName">
-        <label>Student First Name</label>
+        <label>Student First Name <span class="req">*</span></label>
         <input type="text" id="firstName" autocomplete="given-name">
       </div>
       <div class="field" id="f-lastName">
-        <label>Family Name</label>
+        <label>Family Name <span class="req">*</span></label>
         <input type="text" id="lastName" autocomplete="family-name">
       </div>
       <div class="field" id="f-city">
-        <label>City</label>
-        <select id="city">
+        <label>City <span class="req">*</span></label>
+        <select id="city" onchange="onCityChange()">
           <option value="">Select your city</option>
           <option>Agra</option><option>Ahmedabad</option><option>Ajmer</option><option>Aligarh</option><option>Allahabad (Prayagraj)</option><option>Amravati</option><option>Amritsar</option><option>Asansol</option><option>Aurangabad</option><option>Bangalore (Bengaluru)</option><option>Bareilly</option><option>Belgaum</option><option>Bhavnagar</option><option>Bhilai</option><option>Bhopal</option><option>Bhubaneswar</option><option>Bikaner</option><option>Bilaspur</option><option>Chandigarh</option><option>Chennai</option><option>Coimbatore</option><option>Cuttack</option><option>Dehradun</option><option>Delhi</option><option>Dhanbad</option><option>Durgapur</option><option>Erode</option><option>Faridabad</option><option>Firozabad</option><option>Ghaziabad</option><option>Goa (Panaji)</option><option>Gorakhpur</option><option>Gulbarga</option><option>Guntur</option><option>Gurgaon (Gurugram)</option><option>Guwahati</option><option>Gwalior</option><option>Howrah</option><option>Hubli–Dharwad</option><option>Hyderabad</option><option>Indore</option><option>Jabalpur</option><option>Jaipur</option><option>Jalandhar</option><option>Jammu</option><option>Jamnagar</option><option>Jamshedpur</option><option>Jhansi</option><option>Jodhpur</option><option>Kakinada</option><option>Kalyan-Dombivli</option><option>Kanpur</option><option>Kochi (Cochin)</option><option>Kolhapur</option><option>Kolkata</option><option>Kollam</option><option>Kota</option><option>Kozhikode (Calicut)</option><option>Lucknow</option><option>Ludhiana</option><option>Madurai</option><option>Malegaon</option><option>Mangalore</option><option>Mathura</option><option>Meerut</option><option>Moradabad</option><option>Mumbai</option><option>Mysore (Mysuru)</option><option>Nagpur</option><option>Nanded</option><option>Nashik</option><option>Navi Mumbai</option><option>Nellore</option><option>Noida</option><option>Patna</option><option>Pondicherry (Puducherry)</option><option>Pune</option><option>Raipur</option><option>Rajahmundry</option><option>Rajkot</option><option>Ranchi</option><option>Rourkela</option><option>Saharanpur</option><option>Salem</option><option>Sangli</option><option>Shimla</option><option>Siliguri</option><option>Solapur</option><option>Srinagar</option><option>Surat</option><option>Thane</option><option>Thiruvananthapuram (Trivandrum)</option><option>Thrissur</option><option>Tiruchirappalli (Trichy)</option><option>Tirunelveli</option><option>Tirupati</option><option>Tiruppur</option><option>Udaipur</option><option>Ujjain</option><option>Vadodara</option><option>Varanasi</option><option>Vasai-Virar</option><option>Vijayawada</option><option>Visakhapatnam (Vizag)</option><option>Warangal</option>
           <option value="International">International</option>
           <option value="Other">Other</option>
         </select>
       </div>
+      <div class="field" id="f-cityOther" style="display:none;">
+        <label id="cityOtherLabel">Please specify your city <span class="req">*</span></label>
+        <input type="text" id="cityOther">
+      </div>
       <div class="field" id="f-school">
-        <label>School</label>
+        <label>School <span class="req">*</span></label>
         <input type="text" id="school">
       </div>
       <div class="field" id="f-email">
-        <label>Student Email ID</label>
+        <label>Student Email ID <span class="req">*</span></label>
         <input type="email" id="email" autocomplete="email">
       </div>
       <div class="field" id="f-whatsapp">
-        <label>Student WhatsApp Number</label>
+        <label>Student WhatsApp Number <span class="req">*</span></label>
         <input type="tel" id="whatsapp" autocomplete="tel">
       </div>
 
@@ -133,13 +138,25 @@
     };
   </script>
   <script>
+    function onCityChange() {
+      const v = document.getElementById('city').value;
+      const wrap = document.getElementById('f-cityOther');
+      const lbl = document.getElementById('cityOtherLabel');
+      const showIt = (v === 'International' || v === 'Other');
+      wrap.style.display = showIt ? 'block' : 'none';
+      if (showIt) {
+        lbl.innerHTML = (v === 'International' ? 'Country &amp; city' : 'Please specify your city') + ' <span class="req">*</span>';
+      } else {
+        document.getElementById('cityOther').value = '';
+      }
+    }
     async function submitForm() {
       document.querySelectorAll('.field').forEach(f => { f.classList.remove('error'); const em = f.querySelector('.error-msg'); if (em) em.remove(); });
       let valid = true;
       const fields = [
         ['f-firstName','firstName','First name is required'],
         ['f-lastName','lastName','Family name is required'],
-        ['f-city','city','City is required'],
+        ['f-city','city','Please select a city'],
         ['f-school','school','School is required'],
         ['f-email','email','Email is required'],
         ['f-whatsapp','whatsapp','WhatsApp number is required']
@@ -147,14 +164,22 @@
       fields.forEach(([fId, inputId, msg]) => {
         if (!document.getElementById(inputId).value.trim()) { markError(fId, msg); valid = false; }
       });
+      const cityVal = document.getElementById('city').value;
+      if ((cityVal === 'International' || cityVal === 'Other') && !document.getElementById('cityOther').value.trim()) {
+        markError('f-cityOther', 'Please specify your ' + (cityVal === 'International' ? 'country & city' : 'city'));
+        valid = false;
+      }
       const email = document.getElementById('email').value.trim();
       if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { markError('f-email', 'Enter a valid email'); valid = false; }
       if (!valid) { document.querySelector('.field.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
 
+      const cityRaw = document.getElementById('city').value;
+      const cityOther = document.getElementById('cityOther').value.trim();
+      const cityFinal = (cityRaw === 'International' || cityRaw === 'Other') ? (cityRaw + ': ' + cityOther) : cityRaw;
       const payload = {
         firstName: document.getElementById('firstName').value.trim(),
         lastName: document.getElementById('lastName').value.trim(),
-        city: document.getElementById('city').value.trim(),
+        city: cityFinal,
         school: document.getElementById('school').value.trim(),
         email: email,
         whatsapp: document.getElementById('whatsapp').value.trim()
