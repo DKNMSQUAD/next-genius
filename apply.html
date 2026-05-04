@@ -117,7 +117,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     const firebaseConfig = {
       apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
       authDomain: "next-genius-auto.firebaseapp.com",
@@ -128,13 +129,34 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
     const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
 
+    function genTempPassword() {
+      const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+      let p = ''; for (let i = 0; i < 12; i++) p += chars[Math.floor(Math.random() * chars.length)];
+      return p;
+    }
+
     window.__saveApplicant = async function(payload) {
-      const enriched = { ...payload, createdAt: serverTimestamp(), source: "next-genius.pages.dev", status: "registered" };
-      const tasks = [ addDoc(collection(db, "applicants"), enriched) ];
-      tasks.push(fetch(SHEET_WEBHOOK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ ...payload, createdAt: new Date().toISOString(), status: "registered" }) }));
-      return Promise.allSettled(tasks);
+      const tempPw = genTempPassword();
+      let uid;
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, payload.email, tempPw);
+        uid = cred.user.uid;
+      } catch (e) {
+        if (e.code === 'auth/email-already-in-use') {
+          throw new Error('This email is already registered. Please sign in to your dashboard.');
+        }
+        throw e;
+      }
+      const enriched = { ...payload, uid, createdAt: serverTimestamp(), source: "next-genius.pages.dev", status: "registered", onboarding: { photo: false, personal: false, academic: false, college: false, commonapp: false, interview: false } };
+      await setDoc(doc(db, "applicants", uid), enriched);
+      // Mirror to Sheet (fire-and-forget)
+      fetch(SHEET_WEBHOOK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ ...payload, uid, createdAt: new Date().toISOString(), status: "registered" }) }).catch(()=>{});
+      // Send password reset email so the student sets their own password and gets login link
+      try { await sendPasswordResetEmail(auth, payload.email); } catch(_) {}
+      return { uid, tempPw };
     };
   </script>
   <script>
@@ -188,7 +210,7 @@
       btn.disabled = true; btn.textContent = 'Submitting...';
       try { await window.__saveApplicant(payload); }
       catch (err) { console.error(err); alert('Submission failed. Please try again.'); btn.disabled = false; btn.textContent = 'Submit'; return; }
-      document.getElementById('successText').innerHTML = 'Thank you, ' + payload.firstName + '. The next step is the Critical Thinking Assessment — 18 questions, 1 hour.<br><br><a href="test.html" style="display:inline-block;background:#FFC72C;color:#111;padding:12px 32px;border-radius:999px;font-weight:600;text-decoration:none;font-family:Poppins,sans-serif;">Start Test</a>';
+      document.getElementById('successText').innerHTML = `Thank you, ${payload.firstName}!<br><br>We just sent a password setup link to <strong>${payload.email}</strong>. Set your password, then sign in to your dashboard to upload your photo, complete your profile, and take the Critical Thinking Test.<br><br><a href="dashboard.html" style="display:inline-block;background:#FFC72C;color:#111;padding:12px 32px;border-radius:999px;font-weight:600;text-decoration:none;font-family:Poppins,sans-serif;">Go to Dashboard</a>`;
       document.getElementById('formContent').style.display = 'none';
       document.getElementById('successMsg').style.display = 'block';
       try { sessionStorage.setItem('ng_email', payload.email); } catch(e) {}

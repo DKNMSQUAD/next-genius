@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Next Genius</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #fafafa; color: #111; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px; background: #fff; border-bottom: 1px solid #eee;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar .brand { display: flex; align-items: center; gap: 12px; }
+    .topbar .brand img { width: 40px; height: 40px; }
+    .topbar .brand span { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; }
+    .topbar .user { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+    .topbar .user button { background: none; border: 1px solid #ddd; padding: 6px 14px; border-radius: 6px; font-family: inherit; cursor: pointer; font-size: 13px; }
+    .topbar .user button:hover { background: #f5f5f5; }
+
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 73px); }
+    .sidebar { background: #fff; border-right: 1px solid #eee; padding: 24px 0; }
+    .sidebar a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 24px; font-size: 14px; font-weight: 500; color: #444;
+      text-decoration: none; border-left: 3px solid transparent;
+      cursor: pointer;
+    }
+    .sidebar a:hover { background: #fafafa; }
+    .sidebar a.active { color: #111; border-left-color: #FFC72C; background: #fffaf0; }
+    .sidebar a.locked { opacity: 0.4; cursor: not-allowed; }
+    .sidebar a .icon { width: 18px; text-align: center; font-size: 14px; }
+    .sidebar a .check { margin-left: auto; color: #4caf50; font-size: 14px; }
+
+    .main { padding: 32px 40px; max-width: 920px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .panel h1 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    .panel .subtitle { color: #555; font-size: 14px; margin-bottom: 24px; }
+
+    .status-banner {
+      background: #fff; border: 1px solid #eee; border-radius: 12px;
+      padding: 20px 24px; margin-bottom: 24px;
+    }
+    .status-banner h3 { font-family: 'Poppins', sans-serif; font-size: 15px; margin-bottom: 8px; color: #111; font-weight: 600; }
+    .status-banner .progress { display: flex; gap: 4px; height: 6px; border-radius: 3px; overflow: hidden; margin: 12px 0 8px; background: #f0f0f0; }
+    .status-banner .progress div { flex: 1; background: #f0f0f0; }
+    .status-banner .progress div.done { background: #FFC72C; }
+    .status-banner .progress-text { font-size: 13px; color: #666; }
+
+    .card {
+      background: #fff; border: 1px solid #eee; border-radius: 12px;
+      padding: 24px; margin-bottom: 16px;
+    }
+    .card h2 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+    .card p { font-size: 14px; line-height: 1.55; color: #555; margin-bottom: 14px; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #333; }
+    .field label .req { color: #d93025; margin-left: 2px; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit;
+      border: 1px solid #ddd; border-radius: 8px; outline: none; background: #fff;
+    }
+    .field textarea { min-height: 84px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #FFC72C; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .btn {
+      font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500; color: #111;
+      background: #FFC72C; border: none; border-radius: 999px;
+      padding: 11px 28px; cursor: pointer;
+    }
+    .btn:hover:not(:disabled) { background: #F0B71F; }
+    .btn:disabled { opacity: 0.5; cursor: wait; }
+    .btn-secondary { background: #fff; border: 1px solid #ddd; }
+    .btn-secondary:hover:not(:disabled) { background: #f5f5f5; }
+    .btn-danger { background: #fff; border: 1px solid #d93025; color: #d93025; }
+    .btn-danger:hover:not(:disabled) { background: #fee; }
+
+    /* Photo upload */
+    .photo-upload {
+      display: flex; align-items: center; gap: 20px; padding: 16px;
+      background: #fafafa; border-radius: 8px; margin-bottom: 16px;
+    }
+    .photo-preview {
+      width: 96px; height: 96px; border-radius: 50%; background: #eee;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: #aaa; overflow: hidden; flex-shrink: 0;
+    }
+    .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Bot widget */
+    .bot-fab {
+      position: fixed; bottom: 24px; right: 24px; z-index: 100;
+      width: 56px; height: 56px; border-radius: 50%; background: #FFC72C;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 24px; border: none;
+      transition: transform 0.15s;
+    }
+    .bot-fab:hover { transform: scale(1.05); }
+    .bot-panel {
+      position: fixed; bottom: 96px; right: 24px; z-index: 100;
+      width: 360px; max-height: 540px; background: #fff;
+      border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      display: none; flex-direction: column; overflow: hidden;
+    }
+    .bot-panel.open { display: flex; }
+    .bot-header {
+      background: #FFC72C; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px;
+    }
+    .bot-header button { background: none; border: none; font-size: 18px; cursor: pointer; padding: 0 4px; }
+    .bot-msgs {
+      flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+      max-height: 380px;
+    }
+    .bot-msg { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; max-width: 85%; }
+    .bot-msg.user { background: #FFC72C; color: #111; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .bot-msg.bot { background: #f0f0f0; color: #111; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .bot-msg.bot.loading { color: #999; font-style: italic; }
+    .bot-input {
+      display: flex; padding: 10px; border-top: 1px solid #eee; gap: 8px;
+    }
+    .bot-input input {
+      flex: 1; padding: 10px 12px; font-size: 14px; font-family: inherit;
+      border: 1px solid #ddd; border-radius: 999px; outline: none;
+    }
+    .bot-input input:focus { border-color: #FFC72C; }
+    .bot-input button { background: #FFC72C; border: none; border-radius: 999px; padding: 0 16px; cursor: pointer; font-weight: 600; }
+
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: flex; overflow-x: auto; padding: 0; border-right: none; border-bottom: 1px solid #eee; }
+      .sidebar a { white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; padding: 14px 16px; }
+      .sidebar a.active { border-left: none; border-bottom-color: #FFC72C; }
+      .sidebar a .check { display: none; }
+      .main { padding: 20px; }
+      .field-row { grid-template-columns: 1fr; }
+      .bot-panel { width: calc(100vw - 32px); right: 16px; bottom: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth gate -->
+  <div id="authGate" style="display:none; min-height: 100vh; padding: 60px 24px; background: #fafafa;">
+    <div style="max-width: 420px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #eee;">
+      <a href="index.html"><img src="NG_Logo.avif" style="width:80px; height:80px; margin-bottom: 20px;" alt="Next Genius"></a>
+      <h1 style="font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 4px;">Sign in</h1>
+      <p style="color:#555; font-size: 14px; margin-bottom: 24px;">Enter the email you registered with.</p>
+      <div class="field"><label>Email</label><input type="email" id="loginEmail"></div>
+      <div class="field"><label>Password</label><input type="password" id="loginPassword"></div>
+      <button class="btn" onclick="loginUser()" style="width:100%;">Sign in</button>
+      <p style="text-align:center; margin-top:16px; font-size:13px;"><a href="#" onclick="resetPassword();return false;" style="color:#888;">Forgot password?</a></p>
+      <div id="loginErr" style="color:#d93025; font-size:13px; margin-top:12px; text-align:center;"></div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboardWrap" style="display:none;">
+    <div class="topbar">
+      <div class="brand"><img src="NG_Logo.avif" alt="NG"><span>Next Genius</span></div>
+      <div class="user">
+        <span id="userEmail"></span>
+        <button onclick="logoutUser()">Sign out</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <nav class="sidebar" id="sidebar">
+        <a data-tab="home" class="active"><span class="icon">⌂</span> Home</a>
+        <a data-tab="photo"><span class="icon">⊙</span> Photo <span class="check" data-check="photo">✓</span></a>
+        <a data-tab="personal"><span class="icon">☰</span> Personal Profile <span class="check" data-check="personal">✓</span></a>
+        <a data-tab="academic"><span class="icon">⬢</span> Academic Profile <span class="check" data-check="academic">✓</span></a>
+        <a data-tab="college"><span class="icon">⛬</span> College Discovery <span class="check" data-check="college">✓</span></a>
+        <a data-tab="commonapp"><span class="icon">📄</span> CommonApp Review <span class="check" data-check="commonapp">✓</span></a>
+        <a data-tab="interview"><span class="icon">▶</span> Interview <span class="check" data-check="interview">✓</span></a>
+        <a data-tab="status"><span class="icon">◷</span> Status</a>
+        <a data-tab="settings"><span class="icon">⚙</span> Settings</a>
+        <a data-tab="exit" style="margin-top:auto; color:#d93025;"><span class="icon">✕</span> Exit Process</a>
+      </nav>
+
+      <main class="main">
+
+        <!-- HOME -->
+        <section class="panel active" id="panel-home">
+          <h1>Welcome <span id="welcomeName"></span></h1>
+          <p class="subtitle">Your scholarship journey at a glance</p>
+          <div class="status-banner">
+            <h3>Onboarding progress</h3>
+            <div class="progress" id="progressBar">
+              <div data-step="photo"></div>
+              <div data-step="personal"></div>
+              <div data-step="academic"></div>
+              <div data-step="college"></div>
+              <div data-step="commonapp"></div>
+              <div data-step="interview"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 of 6 steps complete</div>
+          </div>
+          <div class="card">
+            <h2>What's next</h2>
+            <p id="nextStep">Upload your photo to get started.</p>
+            <button class="btn" id="nextBtn" onclick="goToNextStep()">Continue</button>
+          </div>
+        </section>
+
+        <!-- PHOTO -->
+        <section class="panel" id="panel-photo">
+          <h1>Profile Photo</h1>
+          <p class="subtitle">Required. Clear, recent photo of your face.</p>
+          <div class="photo-upload">
+            <div class="photo-preview" id="photoPreview">+</div>
+            <div>
+              <input type="file" id="photoFile" accept="image/*" style="display:none;" onchange="handlePhotoSelect(event)">
+              <button class="btn-secondary btn" onclick="document.getElementById('photoFile').click()">Choose photo</button>
+              <p style="font-size:12px; color:#888; margin-top:8px;">JPG/PNG, under 5MB</p>
+            </div>
+          </div>
+          <button class="btn" id="photoSaveBtn" onclick="uploadPhoto()" disabled>Save photo</button>
+          <div id="photoStatus" style="margin-top:12px; font-size:13px;"></div>
+        </section>
+
+        <!-- PERSONAL -->
+        <section class="panel" id="panel-personal">
+          <h1>Personal Profile</h1>
+          <p class="subtitle">All fields required. Saved automatically as you type.</p>
+          <div class="card">
+            <div class="field-row">
+              <div class="field"><label>Date of Birth <span class="req">*</span></label><input type="date" data-personal="dob"></div>
+              <div class="field"><label>Gender <span class="req">*</span></label><select data-personal="gender"><option value="">Select</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select></div>
+            </div>
+            <div class="field"><label>Citizenship <span class="req">*</span></label><select data-personal="citizenship"><option value="">Select</option><option>Indian</option><option>Nepali</option><option>Bangladeshi</option><option>Sri Lankan</option><option>Other</option></select></div>
+            <div class="field"><label>Home Address <span class="req">*</span></label><textarea data-personal="address"></textarea></div>
+            <div class="field-row">
+              <div class="field"><label>Father's Name <span class="req">*</span></label><input data-personal="fatherName"></div>
+              <div class="field"><label>Father's Occupation <span class="req">*</span></label><input data-personal="fatherOccupation"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Mother's Name <span class="req">*</span></label><input data-personal="motherName"></div>
+              <div class="field"><label>Mother's Occupation <span class="req">*</span></label><input data-personal="motherOccupation"></div>
+            </div>
+            <div class="field"><label>Annual Family Income (INR) <span class="req">*</span></label><select data-personal="familyIncome"><option value="">Select</option><option>Below 5 lakh</option><option>5–10 lakh</option><option>10–20 lakh</option><option>20–40 lakh</option><option>40 lakh – 1 crore</option><option>Above 1 crore</option></select></div>
+            <div class="field-row">
+              <div class="field"><label>Number of Siblings <span class="req">*</span></label><input type="number" data-personal="siblings" min="0"></div>
+              <div class="field"><label>Languages Spoken <span class="req">*</span></label><input data-personal="languages" placeholder="e.g. Hindi, English, Marathi"></div>
+            </div>
+            <button class="btn" onclick="savePersonal()">Save Personal Profile</button>
+            <span id="personalStatus" style="margin-left:16px; font-size:13px; color:#4caf50;"></span>
+          </div>
+        </section>
+
+        <!-- ACADEMIC -->
+        <section class="panel" id="panel-academic">
+          <h1>Academic Profile</h1>
+          <p class="subtitle">All fields required.</p>
+          <div class="card">
+            <div class="field"><label>Current School <span class="req">*</span></label><input data-academic="school"></div>
+            <div class="field-row">
+              <div class="field"><label>Grade 10 Board <span class="req">*</span></label><select data-academic="grade10Board"><option value="">Select</option><option>CBSE</option><option>ICSE</option><option>IB</option><option>IGCSE</option><option>State Board</option><option>Other</option></select></div>
+              <div class="field"><label>Grade 10 % / CGPA <span class="req">*</span></label><input data-academic="grade10Score" placeholder="e.g. 92% or 9.4 CGPA"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Grade 11 % (if completed)</label><input data-academic="grade11Score"></div>
+              <div class="field"><label>Predicted Grade 12 % <span class="req">*</span></label><input data-academic="predicted12Score"></div>
+            </div>
+            <div class="field"><label>Subjects in Grade 12 <span class="req">*</span></label><input data-academic="subjects" placeholder="e.g. Physics, Chemistry, Math, English, CS"></div>
+            <div class="field-row">
+              <div class="field"><label>SAT Score (if taken)</label><input data-academic="sat" placeholder="e.g. 1450"></div>
+              <div class="field"><label>ACT Score (if taken)</label><input data-academic="act"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>TOEFL/IELTS Score (if taken)</label><input data-academic="english"></div>
+              <div class="field"><label>Intended Major <span class="req">*</span></label><input data-academic="major" placeholder="e.g. Computer Science"></div>
+            </div>
+            <div class="field"><label>Top 3 Extracurriculars <span class="req">*</span></label><textarea data-academic="extracurriculars" placeholder="One per line"></textarea></div>
+            <div class="field"><label>Awards & Honors</label><textarea data-academic="awards"></textarea></div>
+            <button class="btn" onclick="saveAcademic()">Save Academic Profile</button>
+            <span id="academicStatus" style="margin-left:16px; font-size:13px; color:#4caf50;"></span>
+          </div>
+        </section>
+
+        <!-- COLLEGE -->
+        <section class="panel" id="panel-college">
+          <h1>College Discovery</h1>
+          <p class="subtitle">Rank your top choices among Next Genius partner colleges.</p>
+          <div class="card">
+            <p>Drag to reorder, or assign a rank (1 = top choice). Submit when you're ready.</p>
+            <div id="collegeList"></div>
+            <button class="btn" onclick="saveColleges()" style="margin-top:16px;">Submit College Choices</button>
+            <span id="collegeStatus" style="margin-left:16px; font-size:13px;"></span>
+          </div>
+        </section>
+
+        <!-- COMMONAPP -->
+        <section class="panel" id="panel-commonapp">
+          <h1>CommonApp Review</h1>
+          <p class="subtitle">Upload your CommonApp PDF — AI checks completeness and suggests fixes.</p>
+          <div class="card">
+            <input type="file" id="caFile" accept="application/pdf" style="display:none;" onchange="uploadCommonApp(event)">
+            <button class="btn" onclick="document.getElementById('caFile').click()">Upload PDF</button>
+            <span id="caStatus" style="margin-left:16px; font-size:13px;"></span>
+            <div id="caReview" style="margin-top:20px;"></div>
+          </div>
+        </section>
+
+        <!-- INTERVIEW -->
+        <section class="panel" id="panel-interview">
+          <h1>Interview Videos</h1>
+          <p class="subtitle">Unlocks after college allocation.</p>
+          <div class="card">
+            <p>Upload your videos as <strong>Unlisted</strong> on YouTube and paste the URLs here.</p>
+            <div class="field"><label>Student Video (YouTube Unlisted URL) <span class="req">*</span></label><input type="url" data-interview="studentVideo" placeholder="https://youtu.be/..."></div>
+            <div class="field"><label>Family Video (YouTube Unlisted URL) <span class="req">*</span></label><input type="url" data-interview="familyVideo" placeholder="https://youtu.be/..."></div>
+            <button class="btn" onclick="saveInterview()">Submit Videos</button>
+            <span id="interviewStatus" style="margin-left:16px; font-size:13px;"></span>
+          </div>
+        </section>
+
+        <!-- STATUS -->
+        <section class="panel" id="panel-status">
+          <h1>Status</h1>
+          <p class="subtitle">Where you are in the process.</p>
+          <div class="card" id="statusBox">Loading...</div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section class="panel" id="panel-settings">
+          <h1>Settings</h1>
+          <p class="subtitle">Account preferences.</p>
+          <div class="card">
+            <h2>Email</h2>
+            <p>Current: <span id="settingsEmail"></span></p>
+            <div class="field"><label>New email</label><input type="email" id="newEmail"></div>
+            <div class="field"><label>Current password</label><input type="password" id="currentPasswordEmail"></div>
+            <button class="btn-secondary btn" onclick="changeEmail()">Change Email</button>
+          </div>
+          <div class="card">
+            <h2>Password</h2>
+            <div class="field"><label>Current password</label><input type="password" id="currentPassword"></div>
+            <div class="field"><label>New password</label><input type="password" id="newPassword"></div>
+            <button class="btn-secondary btn" onclick="changePassword()">Change Password</button>
+          </div>
+        </section>
+
+        <!-- EXIT -->
+        <section class="panel" id="panel-exit">
+          <h1>Exit the Scholarship Process</h1>
+          <p class="subtitle">This action permanently deletes your account and all data.</p>
+          <div class="card">
+            <p>If you choose to exit, we will:</p>
+            <ul style="font-size:14px; line-height:1.7; color:#444; padding-left:24px; margin-bottom: 20px;">
+              <li>Permanently delete your registration, profile, test scores, photo, and all uploaded files</li>
+              <li>Remove you from any college allocation pools</li>
+              <li>Stop sending all emails, WhatsApp messages, and calls</li>
+              <li>This is irreversible — you cannot rejoin with the same email</li>
+            </ul>
+            <div class="field"><label>Type <strong>EXIT</strong> to confirm</label><input id="exitConfirm" placeholder="EXIT"></div>
+            <button class="btn-danger btn" onclick="exitProcess()">Permanently delete my account</button>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Bot widget -->
+  <button class="bot-fab" id="botFab" onclick="toggleBot()" title="Ask the Next Genius bot">💬</button>
+  <div class="bot-panel" id="botPanel">
+    <div class="bot-header">
+      <span>Next Genius Assistant</span>
+      <button onclick="toggleBot()">×</button>
+    </div>
+    <div class="bot-msgs" id="botMsgs">
+      <div class="bot-msg bot">Hi! I'm the Next Genius assistant. Ask me about the application process, your dashboard, the partner colleges, or anything about your scholarship journey.</div>
+    </div>
+    <div class="bot-input">
+      <input id="botInput" placeholder="Ask anything..." onkeydown="if(event.key==='Enter') sendBot()">
+      <button onclick="sendBot()">→</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateEmail, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
+      authDomain: "next-genius-auto.firebaseapp.com",
+      projectId: "next-genius-auto",
+      storageBucket: "next-genius-auto.firebasestorage.app",
+      messagingSenderId: "557092273631",
+      appId: "1:557092273631:web:192264bb43324a69a4186a"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const GEMINI_KEY = "AIzaSyBaAh-_hlRoezGDtz4unf2hcNS-G8IOrwI";
+
+    const PARTNER_COLLEGES = [
+      { slug: "aup", name: "American University of Paris", country: "France" },
+      { slug: "centre", name: "Centre College", country: "USA (Kentucky)" },
+      { slug: "capital", name: "Capital University", country: "USA (Ohio)" },
+      { slug: "cottey", name: "Cottey College", country: "USA (Missouri)" },
+      { slug: "ithaca", name: "Ithaca College", country: "USA (New York)" },
+      { slug: "ie", name: "IE University", country: "Spain" },
+      { slug: "lynn", name: "Lynn University", country: "USA (Florida)" },
+      { slug: "masters-union", name: "Masters' Union", country: "India" },
+      { slug: "muhlenberg", name: "Muhlenberg College", country: "USA (Pennsylvania)" },
+      { slug: "nuq", name: "Northwestern University in Qatar", country: "Qatar" },
+      { slug: "syracuse", name: "Syracuse University", country: "USA (New York)" },
+      { slug: "charleston", name: "University of Charleston", country: "USA (West Virginia)" }
+    ];
+
+    let currentUser = null;
+    let applicantData = {};
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('authGate').style.display = 'none';
+        document.getElementById('dashboardWrap').style.display = 'block';
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('settingsEmail').textContent = user.email;
+        await loadApplicantData();
+        renderColleges();
+        updateProgress();
+      } else {
+        currentUser = null;
+        document.getElementById('authGate').style.display = 'block';
+        document.getElementById('dashboardWrap').style.display = 'none';
+      }
+    });
+
+    async function loadApplicantData() {
+      const ref = doc(db, "applicants", currentUser.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        applicantData = snap.data();
+      } else {
+        applicantData = { email: currentUser.email, status: "registered", onboarding: { photo: false, personal: false, academic: false, college: false } };
+        await setDoc(ref, { ...applicantData, createdAt: serverTimestamp() });
+      }
+      document.getElementById('welcomeName').textContent = applicantData.firstName || '';
+      // populate forms from saved data
+      ['personal','academic','interview'].forEach(group => {
+        document.querySelectorAll(`[data-${group}]`).forEach(el => {
+          const k = el.getAttribute(`data-${group}`);
+          const v = (applicantData[group] || {})[k];
+          if (v != null) el.value = v;
+        });
+      });
+      if (applicantData.photoURL) {
+        document.getElementById('photoPreview').innerHTML = `<img src="${applicantData.photoURL}">`;
+      }
+      // commonApp review
+      if (applicantData.commonApp && applicantData.commonApp.review) {
+        renderCommonAppReview(applicantData.commonApp.review);
+      }
+      renderStatus();
+    }
+
+    function updateProgress() {
+      const ob = applicantData.onboarding || {};
+      const steps = ['photo','personal','academic','college','commonapp','interview'];
+      let done = 0;
+      steps.forEach(s => {
+        const bar = document.querySelector(`#progressBar div[data-step="${s}"]`);
+        const check = document.querySelector(`.sidebar a[data-tab="${s}"] [data-check="${s}"]`);
+        if (ob[s]) { if (bar) bar.classList.add('done'); if (check) check.style.display = 'inline'; done++; }
+        else { if (bar) bar.classList.remove('done'); if (check) check.style.display = 'none'; }
+      });
+      document.getElementById('progressText').textContent = `${done} of ${steps.length} steps complete`;
+      // next step prompt
+      const next = steps.find(s => !ob[s]);
+      if (next) {
+        const labels = { photo: 'Upload your photo', personal: 'Fill the personal profile', academic: 'Fill the academic profile', college: 'Pick your college choices', commonapp: 'Upload your CommonApp PDF', interview: 'Submit your interview videos' };
+        document.getElementById('nextStep').textContent = labels[next];
+        document.getElementById('nextBtn').dataset.target = next;
+      } else {
+        document.getElementById('nextStep').textContent = 'All onboarding complete! Awaiting allocation.';
+        document.getElementById('nextBtn').style.display = 'none';
+      }
+    }
+
+    function renderColleges() {
+      const list = document.getElementById('collegeList');
+      const saved = (applicantData.collegeChoices || {}).ranks || {};
+      list.innerHTML = PARTNER_COLLEGES.map(c => `
+        <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom: 1px solid #f0f0f0;">
+          <input type="number" min="1" max="12" data-college="${c.slug}" value="${saved[c.slug] || ''}" placeholder="–" style="width:60px;">
+          <div><strong>${c.name}</strong><div style="font-size:12px; color:#888;">${c.country}</div></div>
+        </div>
+      `).join('');
+    }
+
+    function renderStatus() {
+      const ob = applicantData.onboarding || {};
+      const status = applicantData.status || 'registered';
+      const allocation = applicantData.allocation;
+      let html = `<p><strong>Current status:</strong> ${status.replace(/_/g,' ')}</p>`;
+      if (allocation) html += `<p><strong>Allocated to:</strong> ${allocation.college} (${allocation.status})</p>`;
+      html += `<h2 style="margin-top:16px;">Onboarding</h2><ul style="font-size:14px; line-height:1.8;">`;
+      ['photo','personal','academic','college','commonapp','interview'].forEach(s => {
+        html += `<li>${ob[s] ? '✅' : '○'} ${s}</li>`;
+      });
+      html += `</ul>`;
+      document.getElementById('statusBox').innerHTML = html;
+    }
+
+    function renderCommonAppReview(review) {
+      const wrap = document.getElementById('caReview');
+      wrap.innerHTML = `<div style="background:#fafafa; padding:16px; border-radius:8px; white-space:pre-wrap; font-size:14px; line-height:1.6;">${escapeHtml(review)}</div>`;
+    }
+
+    function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+    // ── Tab navigation ──
+    document.querySelectorAll('.sidebar a').forEach(a => a.addEventListener('click', (e) => {
+      const tab = a.getAttribute('data-tab');
+      if (!tab) return;
+      document.querySelectorAll('.sidebar a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + tab).classList.add('active');
+    }));
+    window.goToNextStep = function() {
+      const tab = document.getElementById('nextBtn').dataset.target;
+      if (tab) document.querySelector(`.sidebar a[data-tab="${tab}"]`)?.click();
+    };
+
+    // ── Auth ──
+    window.loginUser = async function() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      try { await signInWithEmailAndPassword(auth, email, password); }
+      catch (e) { document.getElementById('loginErr').textContent = e.message.replace('Firebase: ','').replace(/\(auth\/[^\)]+\)/,''); }
+    };
+    window.logoutUser = async () => { await signOut(auth); };
+    window.resetPassword = async function() {
+      const email = document.getElementById('loginEmail').value.trim();
+      if (!email) { alert('Enter your email above first'); return; }
+      try { await sendPasswordResetEmail(auth, email); alert('Password reset email sent.'); }
+      catch (e) { alert(e.message); }
+    };
+
+    // ── Photo ──
+    let pendingPhotoFile = null;
+    window.handlePhotoSelect = function(e) {
+      const f = e.target.files[0]; if (!f) return;
+      if (f.size > 5 * 1024 * 1024) { alert('Max 5MB'); return; }
+      pendingPhotoFile = f;
+      const r = new FileReader();
+      r.onload = ev => document.getElementById('photoPreview').innerHTML = `<img src="${ev.target.result}">`;
+      r.readAsDataURL(f);
+      document.getElementById('photoSaveBtn').disabled = false;
+    };
+    window.uploadPhoto = async function() {
+      if (!pendingPhotoFile) return;
+      const btn = document.getElementById('photoSaveBtn');
+      btn.disabled = true; btn.textContent = 'Uploading...';
+      const path = `applicants/${currentUser.uid}/photo.${pendingPhotoFile.name.split('.').pop()}`;
+      const sref = ref(storage, path);
+      await uploadBytes(sref, pendingPhotoFile);
+      const url = await getDownloadURL(sref);
+      await updateDoc(doc(db, "applicants", currentUser.uid), { photoURL: url, "onboarding.photo": true });
+      applicantData.photoURL = url;
+      applicantData.onboarding = { ...(applicantData.onboarding||{}), photo: true };
+      btn.textContent = 'Save photo'; btn.disabled = true;
+      document.getElementById('photoStatus').textContent = '✓ Photo saved';
+      updateProgress();
+    };
+
+    // ── Profile forms ──
+    window.savePersonal = async () => {
+      const data = {};
+      document.querySelectorAll('[data-personal]').forEach(el => data[el.getAttribute('data-personal')] = el.value);
+      const empty = Object.entries(data).filter(([k,v]) => k !== 'siblings' ? !v : v === '');
+      if (empty.length) { alert('All fields required: ' + empty.map(([k]) => k).join(', ')); return; }
+      await updateDoc(doc(db, "applicants", currentUser.uid), { personal: data, "onboarding.personal": true });
+      applicantData.personal = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), personal: true };
+      document.getElementById('personalStatus').textContent = '✓ Saved';
+      updateProgress();
+    };
+    window.saveAcademic = async () => {
+      const data = {};
+      document.querySelectorAll('[data-academic]').forEach(el => data[el.getAttribute('data-academic')] = el.value);
+      const required = ['school','grade10Board','grade10Score','predicted12Score','subjects','major','extracurriculars'];
+      if (required.some(r => !data[r])) { alert('Required fields missing'); return; }
+      await updateDoc(doc(db, "applicants", currentUser.uid), { academic: data, "onboarding.academic": true });
+      applicantData.academic = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), academic: true };
+      document.getElementById('academicStatus').textContent = '✓ Saved';
+      updateProgress();
+    };
+    window.saveColleges = async () => {
+      const ranks = {};
+      document.querySelectorAll('[data-college]').forEach(el => { if (el.value) ranks[el.getAttribute('data-college')] = Number(el.value); });
+      if (Object.keys(ranks).length < 3) { alert('Pick at least 3 colleges'); return; }
+      await updateDoc(doc(db, "applicants", currentUser.uid), { collegeChoices: { ranks, submittedAt: new Date().toISOString() }, "onboarding.college": true });
+      applicantData.collegeChoices = { ranks }; applicantData.onboarding = { ...(applicantData.onboarding||{}), college: true };
+      document.getElementById('collegeStatus').textContent = '✓ Submitted';
+      updateProgress();
+    };
+    window.saveInterview = async () => {
+      const data = {};
+      document.querySelectorAll('[data-interview]').forEach(el => data[el.getAttribute('data-interview')] = el.value);
+      if (!data.studentVideo || !data.familyVideo) { alert('Both videos required'); return; }
+      await updateDoc(doc(db, "applicants", currentUser.uid), { interview: data, "onboarding.interview": true });
+      applicantData.interview = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), interview: true };
+      document.getElementById('interviewStatus').textContent = '✓ Submitted';
+      updateProgress();
+    };
+
+    // ── CommonApp PDF ──
+    window.uploadCommonApp = async function(e) {
+      const f = e.target.files[0]; if (!f) return;
+      if (f.size > 10 * 1024 * 1024) { alert('Max 10MB'); return; }
+      const status = document.getElementById('caStatus');
+      status.textContent = 'Uploading PDF...';
+      const path = `applicants/${currentUser.uid}/commonapp.pdf`;
+      const sref = ref(storage, path);
+      await uploadBytes(sref, f);
+      const url = await getDownloadURL(sref);
+      status.textContent = 'Analyzing with AI...';
+      // Convert PDF to base64 and send to Gemini
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const b64 = reader.result.split(',')[1];
+        const review = await analyzePDFWithGemini(b64);
+        await updateDoc(doc(db, "applicants", currentUser.uid), {
+          commonApp: { url, review, uploadedAt: new Date().toISOString() },
+          "onboarding.commonapp": true
+        });
+        applicantData.commonApp = { url, review };
+        applicantData.onboarding = { ...(applicantData.onboarding||{}), commonapp: true };
+        renderCommonAppReview(review);
+        status.textContent = '✓ Reviewed';
+        updateProgress();
+      };
+      reader.readAsDataURL(f);
+    };
+
+    async function analyzePDFWithGemini(pdfB64) {
+      const prompt = `You are reviewing a student's CommonApp PDF for the Next Genius Scholarship. Check completeness across: (1) Personal info filled, (2) Activities section (10 activities ideal), (3) Honors section, (4) Essay drafted, (5) Course history, (6) Test scores entered if applicable, (7) Recommenders invited.
+
+For each, mark: ✅ Complete / ⚠️ Partial / ❌ Missing — with one specific suggestion if not complete.
+
+End with an Overall Summary (2-3 sentences) and the top 3 priorities to address before submission.
+
+Be specific, kind, and actionable.`;
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [
+            { inlineData: { mimeType: 'application/pdf', data: pdfB64 } },
+            { text: prompt }
+          ]}],
+          generationConfig: { temperature: 0.4, maxOutputTokens: 1500 }
+        })
+      });
+      const data = await resp.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI review failed. Please try again.';
+    }
+
+    // ── Settings ──
+    window.changeEmail = async () => {
+      const ne = document.getElementById('newEmail').value.trim();
+      const cp = document.getElementById('currentPasswordEmail').value;
+      if (!ne || !cp) { alert('Fill both fields'); return; }
+      try {
+        const cred = EmailAuthProvider.credential(currentUser.email, cp);
+        await reauthenticateWithCredential(currentUser, cred);
+        await updateEmail(currentUser, ne);
+        await updateDoc(doc(db, "applicants", currentUser.uid), { email: ne });
+        alert('Email updated. Please sign in again.');
+        await signOut(auth);
+      } catch (e) { alert(e.message); }
+    };
+    window.changePassword = async () => {
+      const cp = document.getElementById('currentPassword').value;
+      const np = document.getElementById('newPassword').value;
+      if (!cp || !np) { alert('Fill both fields'); return; }
+      if (np.length < 8) { alert('New password must be 8+ characters'); return; }
+      try {
+        const cred = EmailAuthProvider.credential(currentUser.email, cp);
+        await reauthenticateWithCredential(currentUser, cred);
+        await updatePassword(currentUser, np);
+        alert('Password updated.');
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+      } catch (e) { alert(e.message); }
+    };
+
+    // ── Exit ──
+    window.exitProcess = async () => {
+      if (document.getElementById('exitConfirm').value !== 'EXIT') { alert('Type EXIT to confirm'); return; }
+      if (!confirm('This is final. Delete everything?')) return;
+      try {
+        // best-effort: delete photo + commonapp from storage
+        try { await deleteObject(ref(storage, `applicants/${currentUser.uid}/photo.jpg`)); } catch(_) {}
+        try { await deleteObject(ref(storage, `applicants/${currentUser.uid}/photo.png`)); } catch(_) {}
+        try { await deleteObject(ref(storage, `applicants/${currentUser.uid}/commonapp.pdf`)); } catch(_) {}
+        await deleteDoc(doc(db, "applicants", currentUser.uid));
+        await deleteUser(currentUser);
+        alert('Your account and data have been deleted.');
+        window.location.href = 'index.html';
+      } catch (e) { alert('Error: ' + e.message + '. You may need to sign in again first.'); }
+    };
+
+    // ── Bot ──
+    let botHistory = [];
+    window.toggleBot = () => document.getElementById('botPanel').classList.toggle('open');
+    window.sendBot = async () => {
+      const input = document.getElementById('botInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      const msgs = document.getElementById('botMsgs');
+      msgs.insertAdjacentHTML('beforeend', `<div class="bot-msg user">${escapeHtml(text)}</div>`);
+      msgs.scrollTop = msgs.scrollHeight;
+      botHistory.push({ role: 'user', content: text });
+      const loadingId = 'l' + Date.now();
+      msgs.insertAdjacentHTML('beforeend', `<div class="bot-msg bot loading" id="${loadingId}">thinking...</div>`);
+      msgs.scrollTop = msgs.scrollHeight;
+      const SYSTEM = `You are the Next Genius assistant — a helpful, friendly bot for the Next Genius Scholarship Program (next-genius.com, est. 2014). You help students with the application process, onboarding (photo upload, personal profile, academic profile, college discovery, CommonApp, interview), the 12 partner colleges (American University of Paris, Centre, Capital, Cottey, Ithaca, IE University, Lynn, Masters' Union, Muhlenberg, Northwestern Qatar, Syracuse, University of Charleston), and scholarship details. Tone: warm, concise, encouraging. Keep replies under 150 words.`;
+      try {
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SYSTEM }] },
+            contents: botHistory.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
+            generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
+          })
+        });
+        const data = await resp.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '(no response)';
+        botHistory.push({ role: 'assistant', content: reply });
+        const lEl = document.getElementById(loadingId);
+        lEl.classList.remove('loading'); lEl.innerHTML = escapeHtml(reply);
+      } catch (e) {
+        const lEl = document.getElementById(loadingId);
+        lEl.innerHTML = 'Error: ' + e.message;
+      }
+      msgs.scrollTop = msgs.scrollHeight;
+    };
+  </script>
+</body>
+</html>
