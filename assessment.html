@@ -104,15 +104,13 @@
   <div class="container">
     <a href="index.html"><img class="logo" src="NG_Logo.avif" alt="Next Genius"></a>
 
-    <!-- Auth gate -->
-    <div id="authGate" style="display:none;">
+    <!-- No registration yet -->
+    <div id="noPendingGate" style="display:none;">
       <div class="card">
-        <h1>Sign in to start your assessment</h1>
-        <p class="subtitle">Use the email and password you set during registration.</p>
-        <div style="margin-bottom:14px;"><label style="display:block; font-size:13px; margin-bottom:6px;">Email</label><input type="email" id="loginEmail" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;"></div>
-        <div style="margin-bottom:14px;"><label style="display:block; font-size:13px; margin-bottom:6px;">Password</label><input type="password" id="loginPassword" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;"></div>
-        <button class="btn" onclick="loginUser()" style="width:100%;">Sign in</button>
-        <div id="loginErr" style="color:#d93025; font-size:13px; margin-top:10px;"></div>
+        <h1>Start with the registration form</h1>
+        <p class="subtitle">Please complete the registration first to take the assessment.</p>
+        <a href="apply.html" class="btn">Go to Registration</a>
+        <div style="margin-top:18px; font-size:13px; color:#888;">Already created an account? <a href="dashboard.html" style="color:#E8A020;">Sign in to your dashboard</a></div>
       </div>
     </div>
 
@@ -120,7 +118,7 @@
     <div id="stepIntro" style="display:none;">
       <div class="stepbar"><div class="active"></div><div></div><div></div></div>
       <h1>A short assessment before your dashboard</h1>
-      <p class="subtitle">Two quick steps:<br>1. Mark your interests across 31 activities (≈4 minutes)<br>2. Your personalised AI report</p>
+      <p class="subtitle">Mark your interests across 31 activities — takes about 4 minutes.</p>
       <div class="card">
         <h2 style="margin-top:0;">Why this matters</h2>
         <p style="font-size:14px; line-height:1.6; color:#444;">This isn't a test — there are no wrong answers. The results help us recommend the right college fit, the right academic path, and the right kind of support for you. Your honest answers give the most useful insights.</p>
@@ -152,14 +150,29 @@
 
       <div class="report-grid" id="scoreGrid"></div>
 
-      <div id="aiArea">
-        <div class="ai-loading" id="aiLoading">
-          <div class="spinner"></div>
-          <div>Generating your AI insights...</div>
+      <div id="aiArea"></div>
+
+      <div class="card" id="signupCard" style="margin-top:24px; border:2px solid #FFC72C;">
+        <h2 style="margin-top:0;">Save your report — create your account</h2>
+        <p style="font-size:14px; color:#444; line-height:1.5; margin-bottom:18px;">Create an account so your dashboard, profile, and college choices are saved for next time. Pick one option:</p>
+
+        <button id="googleSignupBtn" onclick="signupWithGoogle()" class="btn" style="width:100%; background:#fff; border:1px solid #ddd; display:flex; align-items:center; justify-content:center; gap:10px; padding:13px; margin-bottom:16px;">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09 0-.73.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+
+        <div style="text-align:center; font-size:12px; color:#888; margin:14px 0; position:relative;">
+          <span style="background:#fff; padding:0 12px; position:relative; z-index:1;">or</span>
+          <hr style="position:absolute; top:50%; left:0; right:0; border:none; border-top:1px solid #eee;">
         </div>
+
+        <div style="margin-bottom:12px;"><label style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">Set a password (8+ characters)</label><input type="password" id="signupPassword" style="width:100%; padding:11px 14px; border:1px solid #ddd; border-radius:8px; font-size:14px;" placeholder="At least 8 characters"></div>
+        <button class="btn" onclick="signupWithEmail()" style="width:100%;">Create Account with Email</button>
+        <div id="signupErr" style="color:#d93025; font-size:13px; margin-top:10px;"></div>
+        <div style="margin-top:18px; font-size:13px; color:#666; text-align:center;">Email: <strong id="signupEmail"></strong></div>
       </div>
 
-      <div class="actions" style="justify-content:flex-end; margin-top:24px;">
+      <div id="postSignup" style="display:none;" class="actions" style="justify-content:flex-end; margin-top:24px;">
         <a href="dashboard.html" class="btn">Continue to Dashboard →</a>
       </div>
     </div>
@@ -167,7 +180,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
     const firebaseConfig = {
       apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
@@ -216,33 +229,19 @@
       { label:"Sports & Fitness", cat:"EQ" }
     ];
 
-    let currentUser = null;
+    const provider = new GoogleAuthProvider();
     let interestAnswers = {};
+    let pendingReg = null;
+    let computedAssessment = null;
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('authGate').style.display = 'none';
-        // check if assessment already done
-        const ref = doc(db, "applicants", user.uid);
-        const snap = await getDoc(ref);
-        if (snap.exists() && snap.data().assessment) {
-          window.location.href = 'dashboard.html';
-          return;
-        }
-        renderInterests();
-        goStep('Intro');
-      } else {
-        document.getElementById('authGate').style.display = 'block';
-      }
-    });
-
-    window.loginUser = async function() {
-      const e = document.getElementById('loginEmail').value.trim();
-      const p = document.getElementById('loginPassword').value;
-      try { await signInWithEmailAndPassword(auth, e, p); }
-      catch (err) { document.getElementById('loginErr').textContent = err.message.replace('Firebase: ',''); }
-    };
+    // Read pending registration from sessionStorage
+    try { pendingReg = JSON.parse(sessionStorage.getItem('ng_pending') || 'null'); } catch(_) {}
+    if (!pendingReg) {
+      document.getElementById('noPendingGate').style.display = 'block';
+    } else {
+      renderInterests();
+      goStep('Intro');
+    }
 
     window.goStep = function(step) {
       ['Intro','Interests','Report'].forEach(s => {
@@ -295,22 +294,148 @@
       btn.disabled = true; btn.textContent = 'Calculating...';
 
       const scores = calculateScores();
-      const assessment = {
-        interests: interestAnswers, scores,
+      const insights = generateInsights(scores, pendingReg);
+      computedAssessment = {
+        interests: interestAnswers, scores, insights,
         submittedAt: new Date().toISOString()
       };
-      await updateDoc(doc(db, "applicants", currentUser.uid), { assessment });
+      sessionStorage.setItem('ng_assessment', JSON.stringify(computedAssessment));
 
       goStep('Report');
       renderScores(scores);
+      renderReport(scores, insights);
+      document.getElementById('signupEmail').textContent = pendingReg.email;
+    };
+
+    function generateInsights(scores, reg) {
+      const dom = scores.dominant;
+      const profiles = {
+        IQ: {
+          personalityShort: 'Analytical thinker',
+          strengthDesc: `Your interests cluster around problem-solving, logic, and systems. You tend to enjoy understanding how things work, breaking complex ideas into pieces, and finding patterns. This is the foundation of strong academic and research-oriented students.`,
+          academicOrientation: 'STEM-leaning',
+          careers: ['Software Engineer / AI Researcher', 'Data Scientist / Analyst', 'Engineer (Mechanical, Electrical, Aerospace)', 'Mathematician / Quantitative Analyst', 'Architect (Structural)', 'Medical Researcher'],
+          collegeFit: 'You will thrive in a research-active university with strong STEM faculty, lab access, and project-based courses. Mid-to-large universities (Centre, Syracuse, IE, Northwestern Qatar) typically have the resources you need. Smaller liberal arts colleges (Cottey, Muhlenberg) work too if you want close mentorship over scale.',
+          studentMessage: `You have a builder's instinct. The world has many surface-level thinkers — what makes you valuable is your willingness to go a layer deeper. As you choose colleges, look for ones where students get hands-on with real problems early, not just classroom theory. You don't need to know your exact career yet, but lean into rigor.`,
+          parentMessage: `Your child thinks deeply and may take longer to articulate emotions than ideas. Trust that. Push them toward unstructured project time over more tuitions. The colleges that suit them are the ones where professors are accessible and labs are open to undergraduates — not necessarily the highest-ranked names.`,
+          areasToDevelop: ['Communication and presentation skills', 'Collaborative / team projects (not just solo work)', 'Empathy-driven leadership']
+        },
+        EQ: {
+          personalityShort: 'People-oriented connector',
+          strengthDesc: `Your interests revolve around people, expression, and social engagement. You likely understand others quickly, communicate naturally, and are energised by groups. This is the foundation of strong leaders, communicators, and changemakers.`,
+          academicOrientation: 'Humanities, Social Sciences, Business',
+          careers: ['Public Policy / Social Impact', 'Business Strategy / Consulting', 'Journalism / Media / Communications', 'Psychology / Counselling', 'Education / Teaching', 'Hospitality / Event Management'],
+          collegeFit: 'You will thrive in a residential college with a strong campus community, clubs, and small discussion-based classes. Liberal arts colleges (Centre, Cottey, Muhlenberg, Capital, Lynn, Ithaca) are an excellent fit — you grow by being seen and known. Avoid impersonal mega-campuses unless you have a specific programme reason.',
+          studentMessage: `Your superpower is the ability to make people feel understood. That doesn't show up on a transcript, but admissions officers can spot it in essays and recommendations. Choose colleges where you'll be challenged academically AND where you can lead — student government, peer mentoring, journalism. Both matter.`,
+          parentMessage: `Your child reads people well, which means they'll thrive in a college community where they can be a leader, not just a number. Push them on academic depth (not just social) — strong people-skills paired with disciplined study habits is rare and powerful. Check in on confidence, not just grades.`,
+          areasToDevelop: ['Quantitative / analytical skills', 'Independent deep work (avoid being always-on socially)', 'Long-form writing and research']
+        },
+        DQ: {
+          personalityShort: 'Visual creative',
+          strengthDesc: `Your interests cluster around design, aesthetics, and creative expression. You likely see the world in terms of how things look and feel, and gravitate toward making, building, and crafting. This is the foundation of strong designers, filmmakers, and creative entrepreneurs.`,
+          academicOrientation: 'Creative, Design, Arts (or STEM with creative bent)',
+          careers: ['Product / UX Designer', 'Filmmaker / Animator', 'Architect / Interior Designer', 'Brand & Marketing Creative', 'Game Designer', 'Fashion / Industrial Designer'],
+          collegeFit: 'You need a college with strong creative facilities — studios, makerspaces, theatre, film labs. American University of Paris, IE University (Spain), and Ithaca College stand out among partner colleges for arts/media. Build a portfolio early — for creative-track students, the work matters more than the rank of the university.',
+          studentMessage: `What you make is how the world will know you. Start a portfolio now — even rough work, consistently shared, builds a story over four years that no GPA can match. Creative students often underestimate themselves academically. Don't. The best designers also read widely and think rigorously.`,
+          parentMessage: `Your child is wired to make things. The instinct to push them toward "safer" academic paths is understandable but often counterproductive — creative careers are real, growing, and well-paying. Support a portfolio. Encourage internships at studios or media houses early. Trust the path even if it looks less linear than a traditional STEM track.`,
+          areasToDevelop: ['Critical writing and analysis', 'Quantitative literacy (designers who code/analyze are unstoppable)', 'Showing work consistently in public']
+        }
+      };
+      const profile = profiles[dom];
+      const topInterests = scores.top.slice(0, 8);
+      return { ...profile, dominantCategory: dom, topInterests };
+    }
+
+    function renderReport(scores, ins) {
+      const wrap = document.getElementById('aiArea');
+      wrap.innerHTML = `
+        <div class="ai-section">
+          <h3>Personality Snapshot</h3>
+          <p style="font-size:16px; font-weight:500; color:#111; margin-bottom:6px;">${ins.personalityShort}</p>
+          <p style="font-size:13px; color:#888;">Academic orientation — ${ins.academicOrientation}</p>
+        </div>
+
+        <div class="ai-section">
+          <h3>Your Dominant Strength: ${ins.dominantCategory}</h3>
+          <p>${ins.strengthDesc}</p>
+        </div>
+
+        ${ins.topInterests.length ? `
+        <div class="ai-section">
+          <h3>What Lights You Up</h3>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+            ${ins.topInterests.map(t => `<span style="background:#fff7e0; border:1px solid #FFE08F; padding:6px 12px; border-radius:999px; font-size:13px;">${escapeHtml(t)}</span>`).join('')}
+          </div>
+        </div>` : ''}
+
+        <div class="ai-section">
+          <h3>Career Directions to Explore</h3>
+          <ul>${ins.careers.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
+        </div>
+
+        <div class="ai-section">
+          <h3>What Kind of College Suits You</h3>
+          <p>${ins.collegeFit}</p>
+        </div>
+
+        <div class="ai-section" style="background:#fffaf0; border-color:#FFE08F;">
+          <h3>For You${pendingReg.firstName ? ', ' + escapeHtml(pendingReg.firstName) : ''}</h3>
+          <p>${ins.studentMessage}</p>
+        </div>
+
+        <div class="ai-section">
+          <h3>For Parents</h3>
+          <p>${ins.parentMessage}</p>
+        </div>
+
+        <div class="ai-section">
+          <h3>Areas to Develop</h3>
+          <ul>${ins.areasToDevelop.map(a => `<li>${escapeHtml(a)}</li>`).join('')}</ul>
+        </div>
+      `;
+    }
+
+    // ── Signup ──
+    window.signupWithGoogle = async function() {
       try {
-        const aiReport = await generateAIReport(assessment);
-        await updateDoc(doc(db, "applicants", currentUser.uid), { "assessment.aiReport": aiReport });
-        renderAIReport(aiReport);
+        const cred = await signInWithPopup(auth, provider);
+        await finalizeSignup(cred.user);
+      } catch (e) { document.getElementById('signupErr').textContent = e.message.replace('Firebase: ',''); }
+    };
+    window.signupWithEmail = async function() {
+      const pw = document.getElementById('signupPassword').value;
+      if (pw.length < 8) { document.getElementById('signupErr').textContent = 'Password must be at least 8 characters'; return; }
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, pendingReg.email, pw);
+        await finalizeSignup(cred.user);
       } catch (e) {
-        document.getElementById('aiArea').innerHTML = `<div class="ai-section"><h3>AI report unavailable</h3><p>${e.message}. Your scores are saved — the team will review them shortly.</p></div>`;
+        if (e.code === 'auth/email-already-in-use') {
+          document.getElementById('signupErr').innerHTML = 'This email is already registered. <a href="dashboard.html" style="color:#E8A020;">Sign in →</a>';
+        } else {
+          document.getElementById('signupErr').textContent = e.message.replace('Firebase: ','');
+        }
       }
     };
+    async function finalizeSignup(user) {
+      const enriched = {
+        ...pendingReg,
+        uid: user.uid,
+        email: user.email || pendingReg.email,
+        firstName: pendingReg.firstName || (user.displayName || '').split(' ')[0] || '',
+        lastName: pendingReg.lastName || (user.displayName || '').split(' ').slice(1).join(' ') || '',
+        photoURL: user.photoURL || null,
+        createdAt: serverTimestamp(),
+        source: "next-genius.pages.dev",
+        status: "registered",
+        onboarding: { photo: !!user.photoURL, personal: false, academic: false, college: false, checklist: false, interview: false },
+        assessment: computedAssessment
+      };
+      await setDoc(doc(db, "applicants", user.uid), enriched);
+      sessionStorage.removeItem('ng_pending');
+      sessionStorage.removeItem('ng_assessment');
+      document.getElementById('signupCard').style.display = 'none';
+      window.location.href = 'dashboard.html';
+    }
 
     function renderScores(s) {
       const grid = document.getElementById('scoreGrid');
@@ -327,78 +452,6 @@
           ${c.bare ? '' : `<div class="bar"><div style="width:${c.value}%"></div></div>`}
         </div>
       `).join('');
-    }
-
-    async function generateAIReport(a) {
-      const s = a.scores;
-      const prompt = `You are a senior college admissions counsellor. Generate a personalised insight report based on the following assessment.
-
-INTEREST SCORES (% of total interest signal):
-- Analytical (IQ): ${s.IQ}%
-- Emotional/Social (EQ): ${s.EQ}%
-- Creative/Design (DQ): ${s.DQ}%
-- Dominant strength: ${s.dominant}
-- Top interests: ${s.top.slice(0, 8).join(', ') || 'none marked'}
-
-Return ONLY valid JSON, no markdown, no code fences:
-{
-  "personalityType": "Introvert / Extrovert / Ambivert",
-  "academicOrientation": "STEM / Business / Creative / Mixed",
-  "dominantStrengthExplanation": "2 warm sentences about the student's top strength",
-  "likelyCareers": ["career1", "career2", "career3", "career4"],
-  "collegeMatchHints": "1-2 sentences on the type of college environment that would suit them best (small liberal arts vs research university vs design-led etc.)",
-  "studentMessage": "A direct, encouraging 3-sentence message to the student summarising what stands out about them",
-  "parentMessage": "A direct, calm 3-sentence message to parents on how to best support this student through the admissions journey",
-  "topAreasToDevelop": ["area1", "area2"]
-}`;
-
-      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.6, maxOutputTokens: 1200, responseMimeType: 'application/json' }
-        })
-      });
-      const data = await resp.json();
-      const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-      try { return JSON.parse(txt); } catch (e) {
-        const m = txt.match(/\{[\s\S]*\}/);
-        return m ? JSON.parse(m[0]) : { error: 'parse failed', raw: txt };
-      }
-    }
-
-    function renderAIReport(r) {
-      if (r.error) {
-        document.getElementById('aiArea').innerHTML = `<div class="ai-section"><h3>AI report unavailable</h3><p>${r.error}</p></div>`;
-        return;
-      }
-      const wrap = document.getElementById('aiArea');
-      wrap.innerHTML = `
-        <div class="ai-section">
-          <h3>About You</h3>
-          <p><strong>Personality:</strong> ${escapeHtml(r.personalityType || '')}</p>
-          <p><strong>Academic orientation:</strong> ${escapeHtml(r.academicOrientation || '')}</p>
-          <p style="margin-top:10px;">${escapeHtml(r.dominantStrengthExplanation || '')}</p>
-        </div>
-        <div class="ai-section">
-          <h3>Career Directions to Explore</h3>
-          <ul>${(r.likelyCareers || []).map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
-        </div>
-        <div class="ai-section">
-          <h3>College Environment That Would Suit You</h3>
-          <p>${escapeHtml(r.collegeMatchHints || '')}</p>
-        </div>
-        <div class="ai-section" style="background:#fffaf0;">
-          <h3>For You, ${escapeHtml((r.studentName || '').toString())}</h3>
-          <p>${escapeHtml(r.studentMessage || '')}</p>
-        </div>
-        <div class="ai-section">
-          <h3>For Parents</h3>
-          <p>${escapeHtml(r.parentMessage || '')}</p>
-        </div>
-        ${(r.topAreasToDevelop || []).length ? `<div class="ai-section"><h3>Areas to Develop</h3><ul>${r.topAreasToDevelop.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul></div>` : ''}
-      `;
     }
 
     function escapeHtml(s) { return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }

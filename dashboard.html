@@ -137,6 +137,44 @@
     .checklist-item .label { font-size: 14px; line-height: 1.4; }
     .checklist-item.checked .label { color: #777; text-decoration: line-through; }
 
+    /* Status stepper */
+    .status-stepper { position: relative; padding: 8px 0; }
+    .step { display: grid; grid-template-columns: 36px 1fr; gap: 16px; position: relative; padding-bottom: 24px; }
+    .step:last-child { padding-bottom: 0; }
+    .step-marker {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px;
+      flex-shrink: 0; z-index: 1; position: relative;
+      background: #fff; border: 2px solid #ddd; color: #888;
+    }
+    .step.done .step-marker { background: #FFC72C; border-color: #FFC72C; color: #111; }
+    .step.current .step-marker { border-color: #111; color: #111; }
+    .step.locked .step-marker { background: #f5f5f5; border-color: #eee; color: #ccc; }
+    .step-line {
+      position: absolute; top: 36px; left: 16px; bottom: 0;
+      width: 2px; background: #eee; z-index: 0;
+    }
+    .step-line.done { background: #FFC72C; }
+    .step-content {
+      background: #fff; border: 1px solid #eee; border-radius: 12px;
+      padding: 14px 18px; margin-top: -2px;
+    }
+    .step.current .step-content { border-color: #111; }
+    .step.done .step-content { background: #fffaf0; border-color: #FFE08F; }
+    .step.locked .step-content { background: #fafafa; opacity: 0.7; }
+    .step-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 12px; }
+    .step-label { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; color: #111; }
+    .step-state {
+      font-size: 11px; padding: 3px 10px; border-radius: 999px;
+      font-weight: 500; letter-spacing: 0.3px;
+    }
+    .state-done { background: #FFC72C; color: #111; }
+    .state-current { background: #fff; color: #111; border: 1px solid #111; }
+    .state-locked { background: #f0f0f0; color: #999; }
+    .step-desc { font-size: 13px; color: #666; line-height: 1.45; }
+    .step-extra { font-size: 13px; color: #444; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0; }
+
     /* Inbox */
     .inbox-msg {
       padding: 12px 14px; border-radius: 8px; background: #fafafa;
@@ -421,8 +459,8 @@
         <!-- STATUS -->
         <section class="panel" id="panel-status">
           <h1>Status</h1>
-          <p class="subtitle">Where you are in the process.</p>
-          <div class="card" id="statusBox">Loading...</div>
+          <p class="subtitle">Your scholarship journey.</p>
+          <div id="statusBox"></div>
         </section>
 
         <!-- SETTINGS -->
@@ -791,15 +829,43 @@
 
     function renderStatus() {
       const ob = applicantData.onboarding || {};
-      const status = applicantData.status || 'registered';
-      const allocation = applicantData.allocation;
-      let html = `<p><strong>Current status:</strong> ${status.replace(/_/g,' ')}</p>`;
-      if (allocation) html += `<p><strong>Allocated to:</strong> ${allocation.college} (${allocation.status})</p>`;
-      html += `<h2 style="margin-top:16px;">Onboarding</h2><ul style="font-size:14px; line-height:1.8;">`;
-      ['photo','personal','academic','college','commonapp','interview'].forEach(s => {
-        html += `<li>${ob[s] ? '✅' : '○'} ${s}</li>`;
-      });
-      html += `</ul>`;
+      const stages = [
+        { id: 'registered', label: 'Registered', desc: 'Account created and form submitted', done: true },
+        { id: 'assessment', label: 'Interest Assessment', desc: 'Personality and strengths report', done: !!applicantData.assessment },
+        { id: 'photo', label: 'Profile Photo', desc: 'Required for your application', done: !!ob.photo },
+        { id: 'personal', label: 'Personal Profile', desc: 'Family, citizenship, languages', done: !!ob.personal },
+        { id: 'academic', label: 'Academic Profile', desc: 'Grades, scores, intended major', done: !!ob.academic },
+        { id: 'college', label: 'College Discovery', desc: 'Your ranked college choices', done: !!ob.college },
+        { id: 'checklist', label: 'Application Checklist', desc: '17-step submission tracker', done: !!ob.checklist },
+        { id: 'allocation', label: 'College Allocation', desc: 'Decision by Next Genius team', done: !!applicantData.allocation, locked: !ob.checklist },
+        { id: 'interview', label: 'Interview Videos', desc: 'Student + family video uploads', done: !!ob.interview, locked: !applicantData.allocation },
+        { id: 'decision', label: 'Final Decision', desc: 'Scholarship offer / outcome', done: !!applicantData.finalDecision, locked: !ob.interview }
+      ];
+      const html = `
+        <div class="status-stepper">
+          ${stages.map((s, i) => {
+            const state = s.done ? 'done' : s.locked ? 'locked' : 'current';
+            const stateLabel = s.done ? 'Complete' : s.locked ? 'Locked' : 'In progress';
+            return `
+              <div class="step ${state}">
+                <div class="step-marker">
+                  ${s.done ? '<svg width="14" height="14" viewBox="0 0 14 14"><path d="M11.5 4L5.5 10L2.5 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>' : `<span>${i+1}</span>`}
+                </div>
+                ${i < stages.length - 1 ? `<div class="step-line ${stages[i+1].done || s.done ? 'done' : ''}"></div>` : ''}
+                <div class="step-content">
+                  <div class="step-head">
+                    <div class="step-label">${s.label}</div>
+                    <div class="step-state state-${state}">${stateLabel}</div>
+                  </div>
+                  <div class="step-desc">${s.desc}</div>
+                  ${s.id === 'allocation' && applicantData.allocation ? `<div class="step-extra">Allocated to <strong>${applicantData.allocation.college}</strong> (${applicantData.allocation.status || 'pending acceptance'})</div>` : ''}
+                  ${s.id === 'assessment' && applicantData.assessment ? `<div class="step-extra">Dominant strength: <strong>${applicantData.assessment.scores?.dominant || ''}</strong></div>` : ''}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
       document.getElementById('statusBox').innerHTML = html;
     }
 
