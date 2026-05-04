@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home | Next Genius</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: #fff;
+      color: #333;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 48px;
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo { height: 72px; width: 72px; cursor: pointer; flex-shrink: 0; }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a {
+      font-size: 15px;
+      font-weight: 500;
+      color: #222;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #E8A020; }
+    .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .hamburger span { width: 24px; height: 2.5px; background: #333; border-radius: 2px; }
+
+    /* ── HERO ── */
+    .hero {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 48px;
+      padding: 60px 48px 80px;
+      max-width: 1260px;
+      margin: 0 auto;
+    }
+    .hero-text { flex: 1; max-width: 560px; }
+    .hero-video { flex: 1; max-width: 520px; }
+    .hero-video iframe {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border: none;
+      border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+
+    .hero-text h1 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #111;
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+    .hero-text .est {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #E8652E;
+      margin-bottom: 28px;
+    }
+    .hero-text p {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #444;
+      margin-bottom: 18px;
+    }
+    .hero-text .tagline {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 18px;
+      color: #222;
+      margin: 28px 0 28px;
+    }
+
+    .apply-btn {
+      display: inline-block;
+      font-family: 'Libre Baskerville', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #222;
+      background: linear-gradient(180deg, #F5C842 0%, #E8A020 100%);
+      border: 2px solid #D4941A;
+      border-radius: 8px;
+      padding: 14px 44px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s;
+      box-shadow: 0 3px 8px rgba(210, 150, 20, 0.25);
+    }
+    .apply-btn:hover {
+      background: linear-gradient(180deg, #F9D260 0%, #ECAA28 100%);
+      box-shadow: 0 5px 16px rgba(210, 150, 20, 0.35);
+      transform: translateY(-1px);
+    }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: #e0e0e0; margin: 0 48px; }
+
+    /* ── FORM SECTION ── */
+    .form-section {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 60px 48px 80px;
+    }
+    .form-section h2 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 26px;
+      color: #111;
+      margin-bottom: 6px;
+    }
+    .form-section .form-subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .form-section .form-required-note {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 32px;
+    }
+    .form-section .form-required-note span { color: #d93025; }
+
+    .field { margin-bottom: 24px; }
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    .field label .req { color: #d93025; margin-left: 2px; }
+    .field .hint {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="tel"],
+    .field select {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: 'Open Sans', sans-serif;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      color: #333;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .field input:focus, .field select:focus { border-color: #E8A020; }
+    .field.error input, .field.error select { border-color: #d93025; }
+    .field .error-msg { font-size: 12px; color: #d93025; margin-top: 4px; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* Checkboxes */
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .checkbox-group label {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 400; font-size: 14px; color: #444; cursor: pointer;
+      padding: 6px 8px; border-radius: 4px; transition: background 0.15s;
+    }
+    .checkbox-group label:hover { background: #f8f4e8; }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px; height: 18px; accent-color: #E8A020; cursor: pointer;
+    }
+
+    .form-actions { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+    .submit-btn {
+      font-family: 'Open Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      background: #E8A020;
+      border: none;
+      border-radius: 4px;
+      padding: 12px 36px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .submit-btn:hover { background: #D4941A; }
+    .clear-btn {
+      font-size: 14px; color: #E8A020; background: none; border: none;
+      cursor: pointer; font-weight: 500;
+    }
+    .clear-btn:hover { text-decoration: underline; }
+    .form-footer-note { font-size: 12px; color: #999; margin-top: 12px; }
+
+    /* Success */
+    .success-msg {
+      text-align: center; padding: 60px 24px;
+    }
+    .success-msg .check {
+      width: 64px; height: 64px; border-radius: 50%; background: #E8A020;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; font-size: 28px; color: #fff;
+    }
+    .success-msg h3 { font-family: 'Libre Baskerville', serif; font-size: 22px; color: #111; margin-bottom: 10px; }
+    .success-msg p { font-size: 14px; color: #666; line-height: 1.6; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: #f5f5f5;
+      padding: 32px 48px;
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+      border-top: 1px solid #e0e0e0;
+    }
+    .footer a {
+      font-size: 14px;
+      color: #444;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer a:hover { color: #E8A020; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      .navbar { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex; flex-direction: column; position: absolute;
+        top: 100%; left: 0; right: 0; background: #fff; padding: 16px 20px;
+        border-bottom: 1px solid #eee; gap: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      }
+      .hamburger { display: flex; }
+      .hero { flex-direction: column; padding: 32px 20px 48px; gap: 32px; }
+      .hero-text { max-width: 100%; }
+      .hero-video { max-width: 100%; }
+      .hero-text h1 { font-size: 28px; }
+      .form-section { padding: 40px 20px 60px; }
+      .field-row { grid-template-columns: 1fr; }
+      .footer { padding: 24px 20px; gap: 24px; }
+      .divider { margin: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAVBAR ═══ -->
+  <nav class="navbar">
+    <svg class="nav-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="96" fill="#F5C842" stroke="#E8A020" stroke-width="3"/>
+      <text x="100" y="88" text-anchor="middle" font-family="'Libre Baskerville', serif" font-size="42" font-weight="700" fill="#222">NEXT</text>
+      <text x="100" y="138" text-anchor="middle" font-family="'Libre Baskerville', serif" font-size="38" font-weight="700" fill="#222">GEN<tspan font-size="34" font-style="italic">i</tspan>US</text>
+    </svg>
+
+    <div class="nav-links" id="navLinks">
+      <a href="#home">Home</a>
+      <a href="#about">About Us</a>
+      <a href="#scholars">Scholars</a>
+      <a href="#precollege">Pre-College Scholarships</a>
+    </div>
+
+    <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO SECTION ═══ -->
+  <section class="hero" id="home">
+    <div class="hero-text">
+      <h1>The Next Genius<br>Scholarship Program</h1>
+      <div class="est">Est. 2014</div>
+
+      <p>Climate change. Rise of Robotic Automation &amp; Artificial Intelligence. Unclear Digital Privacy. Resource Limitations. Deglobalization. Job shortages. Human society seems to be at a crossroads. Clearly, novel problems need novel solutions. A global education makes more sense today than ever before.</p>
+
+      <p>At Next Genius, we award full and partial tuition scholarships to select high-performing, middle-income high school students from South Asia to attend leading global colleges. Today, we foster a community of 351 scholar changemakers.</p>
+
+      <div class="tagline">Are you the Next Genius?</div>
+
+      <a href="#apply" class="apply-btn" onclick="document.getElementById('formSection').scrollIntoView({behavior:'smooth'})">Apply Now</a>
+    </div>
+
+    <div class="hero-video">
+      <iframe
+        src="https://www.youtube.com/embed/U3yudKOxcI8"
+        title="Learn About The Next Genius Scholarship Program"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ APPLICATION FORM ═══ -->
+  <section class="form-section" id="formSection">
+    <div id="formContent">
+      <h2>Next Genius Pre-College Scholarship Registration</h2>
+      <p class="form-subtitle">This registration form is for grade 8 - 12 students applying for Next Genius Pre-College Scholarships.</p>
+      <p class="form-required-note"><span>*</span> Indicates required question</p>
+
+      <!-- Email -->
+      <div class="field" id="f-email">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="Your email">
+      </div>
+
+      <!-- Name row -->
+      <div class="field-row">
+        <div class="field" id="f-firstName">
+          <label>Student First Name <span class="req">*</span></label>
+          <input type="text" id="firstName" placeholder="Your answer">
+        </div>
+        <div class="field" id="f-lastName">
+          <label>Last Name / Surname <span class="req">*</span></label>
+          <input type="text" id="lastName" placeholder="Your answer">
+        </div>
+      </div>
+
+      <!-- Grade -->
+      <div class="field" id="f-grade">
+        <label>Grade <span class="req">*</span></label>
+        <p class="hint">Select which grade you'll be in on July 1, 2026.</p>
+        <select id="grade">
+          <option value="">Choose</option>
+          <option>8th</option>
+          <option>9th</option>
+          <option>10th</option>
+          <option>11th</option>
+          <option>12th</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <!-- School -->
+      <div class="field" id="f-school">
+        <label>School <span class="req">*</span></label>
+        <p class="hint">Enter full school name properly. Do not enter short form/abbreviations.</p>
+        <input type="text" id="school" placeholder="Your answer">
+      </div>
+
+      <!-- City -->
+      <div class="field" id="f-city">
+        <label>Which city is your school located in? <span class="req">*</span></label>
+        <input type="text" id="city" placeholder="Your answer">
+      </div>
+
+      <!-- Phone row -->
+      <div class="field-row">
+        <div class="field" id="f-primary">
+          <label>Primary Mobile Number <span class="req">*</span></label>
+          <p class="hint">For India, enter 10 digits. Outside India, include country code.</p>
+          <input type="tel" id="primaryMobile" placeholder="Your answer">
+        </div>
+        <div class="field" id="f-alternate">
+          <label>Alternate Mobile Number <span class="req">*</span></label>
+          <input type="tel" id="alternateMobile" placeholder="Your answer">
+        </div>
+      </div>
+
+      <!-- Secondary email -->
+      <div class="field">
+        <label>Secondary Email</label>
+        <input type="email" id="secondaryEmail" placeholder="Your answer">
+      </div>
+
+      <!-- Programs checkboxes -->
+      <div class="field" id="f-programs">
+        <label>Which of these programs are you interested in? <span class="req">*</span></label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" value="Summer Program in the Singapore"> Summer Program in the Singapore</label>
+          <label><input type="checkbox" value="Summer Program in the UK"> Summer Program in the UK</label>
+          <label><input type="checkbox" value="Summer Program in the Europe"> Summer Program in the Europe</label>
+          <label><input type="checkbox" value="Summer Program in the US"> Summer Program in the US</label>
+          <label><input type="checkbox" value="Online Bootcamp on Future Skills"> Online Bootcamp on Future Skills</label>
+          <label><input type="checkbox" value="Online Research Program"> Online Research Program</label>
+          <label><input type="checkbox" value="All of these"> All of these</label>
+        </div>
+      </div>
+
+      <!-- How did you hear -->
+      <div class="field" id="f-hear">
+        <label>How did you hear about this opportunity? <span class="req">*</span></label>
+        <select id="hearAbout">
+          <option value="">Choose</option>
+          <option>School Counselor / Principal / Teacher</option>
+          <option>Private Counselor</option>
+          <option>Direct Email / WhatsApp message from Next Genius</option>
+          <option>Through a friend</option>
+          <option>Through a Next Genius Webinar</option>
+          <option>Skillzo</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <!-- Detail -->
+      <div class="field" id="f-hearDetail">
+        <label>How did you hear about this opportunity? Share the name of the counselor or organization here. <span class="req">*</span></label>
+        <input type="text" id="hearDetail" placeholder="Your answer">
+      </div>
+
+      <p class="form-footer-note" style="font-style:italic; margin-bottom:8px;">A copy of your responses will be emailed to the address you provided.</p>
+
+      <div class="form-actions">
+        <button class="submit-btn" onclick="submitForm()">Submit</button>
+        <button class="clear-btn" onclick="clearForm()">Clear form</button>
+      </div>
+
+      <p class="form-footer-note">Never submit passwords through this form.</p>
+    </div>
+
+    <!-- Success state -->
+    <div id="successMsg" class="success-msg" style="display:none;">
+      <div class="check">&#10003;</div>
+      <h3>Registration Submitted!</h3>
+      <p id="successText"></p>
+      <button class="clear-btn" style="margin-top:20px;font-size:15px;" onclick="clearForm()">Submit another response</button>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer">
+    <a href="#">Terms &amp; Conditions</a>
+    <a href="https://www.instagram.com/nextgenius_india/" target="_blank" rel="noopener">Instagram</a>
+    <a href="mailto:nextgeniusindia@gmail.com">nextgeniusindia@gmail.com</a>
+    <a href="#precollege">Summer Scholarships</a>
+  </footer>
+
+  <script>
+    function submitForm() {
+      // Clear old errors
+      document.querySelectorAll('.field').forEach(f => {
+        f.classList.remove('error');
+        const em = f.querySelector('.error-msg');
+        if (em) em.remove();
+      });
+
+      let valid = true;
+      const required = [
+        ['f-email', 'email'],
+        ['f-firstName', 'firstName'],
+        ['f-lastName', 'lastName'],
+        ['f-grade', 'grade'],
+        ['f-school', 'school'],
+        ['f-city', 'city'],
+        ['f-primary', 'primaryMobile'],
+        ['f-alternate', 'alternateMobile'],
+        ['f-hear', 'hearAbout'],
+        ['f-hearDetail', 'hearDetail']
+      ];
+
+      required.forEach(([fId, inputId]) => {
+        const val = document.getElementById(inputId).value.trim();
+        if (!val) {
+          markError(fId, 'This is a required question');
+          valid = false;
+        }
+      });
+
+      // Email validation
+      const email = document.getElementById('email').value.trim();
+      if (email && !email.includes('@')) {
+        markError('f-email', 'Please enter a valid email');
+        valid = false;
+      }
+
+      // Checkbox validation
+      const checked = document.querySelectorAll('#f-programs input[type="checkbox"]:checked');
+      if (checked.length === 0) {
+        markError('f-programs', 'Select at least one program');
+        valid = false;
+      }
+
+      if (!valid) {
+        const firstErr = document.querySelector('.field.error');
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // Show success
+      const name = document.getElementById('firstName').value.trim();
+      document.getElementById('successText').textContent =
+        'Thank you, ' + name + '! Your application has been received. The Next Genius team will review your registration and reach out soon.';
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+      document.getElementById('successMsg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function markError(fieldId, msg) {
+      const field = document.getElementById(fieldId);
+      field.classList.add('error');
+      const div = document.createElement('div');
+      div.className = 'error-msg';
+      div.textContent = msg;
+      field.appendChild(div);
+    }
+
+    function clearForm() {
+      document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach(i => i.value = '');
+      document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+      document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      document.querySelectorAll('.field').forEach(f => {
+        f.classList.remove('error');
+        const em = f.querySelector('.error-msg');
+        if (em) em.remove();
+      });
+      document.getElementById('formContent').style.display = 'block';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
