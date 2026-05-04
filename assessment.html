@@ -225,8 +225,7 @@
       { label:"Robotics", cat:"IQ" },
       { label:"Rubik's Cube", cat:"IQ" },
       { label:"Sculpture / Pottery", cat:"DQ" },
-      { label:"Travelling", cat:"EQ" },
-      { label:"Sports & Fitness", cat:"EQ" }
+      { label:"Travelling", cat:"EQ" }
     ];
 
     const provider = new GoogleAuthProvider();
@@ -271,9 +270,12 @@
       const IQ = Math.round((raw.IQ / total) * 100);
       const EQ = Math.round((raw.EQ / total) * 100);
       const DQ = Math.round((raw.DQ / total) * 100);
+      const logicPct = IQ;
+      const peoplePct = EQ + DQ;
       const dominant = raw.IQ >= raw.EQ && raw.IQ >= raw.DQ ? 'IQ' : raw.EQ >= raw.DQ ? 'EQ' : 'DQ';
-      const top = INTERESTS.filter(i => interestAnswers[i.label] === 'interested').map(i => i.label);
-      return { IQ, EQ, DQ, dominant, top };
+      const topInterests = INTERESTS.filter(i => interestAnswers[i.label] === 'interested').map(i => i.label);
+      // alias `top` for backward compatibility with renderer
+      return { raw: { ...raw, PQ: 0 }, IQ, EQ, DQ, AQ: 0, logicPct, peoplePct, dominant, topInterests, top: topInterests };
     }
 
     window.submitAssessment = async function() {
