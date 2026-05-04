@@ -234,15 +234,6 @@
     let pendingReg = null;
     let computedAssessment = null;
 
-    // Read pending registration from sessionStorage
-    try { pendingReg = JSON.parse(sessionStorage.getItem('ng_pending') || 'null'); } catch(_) {}
-    if (!pendingReg) {
-      document.getElementById('noPendingGate').style.display = 'block';
-    } else {
-      renderInterests();
-      goStep('Intro');
-    }
-
     window.goStep = function(step) {
       ['Intro','Interests','Report'].forEach(s => {
         document.getElementById('step' + s).style.display = (s === step) ? 'block' : 'none';
@@ -455,6 +446,15 @@
     }
 
     function escapeHtml(s) { return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+    // Bootstrap (run after all functions are defined)
+    try { pendingReg = JSON.parse(sessionStorage.getItem('ng_pending') || 'null'); } catch(_) {}
+    if (!pendingReg) {
+      document.getElementById('noPendingGate').style.display = 'block';
+    } else {
+      renderInterests();
+      goStep('Intro');
+    }
   </script>
 </body>
 </html>
