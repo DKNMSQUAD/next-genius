@@ -555,6 +555,14 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
+        // Bounce to assessment if not yet completed
+        try {
+          const snap = await getDoc(doc(db, "applicants", user.uid));
+          if (!snap.exists() || !snap.data().assessment) {
+            window.location.href = 'assessment.html';
+            return;
+          }
+        } catch (e) { /* allow through if check fails */ }
         document.getElementById('authGate').style.display = 'none';
         document.getElementById('dashboardWrap').style.display = 'block';
         document.getElementById('userEmail').textContent = user.email;

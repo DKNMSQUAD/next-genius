@@ -210,7 +210,7 @@
       btn.disabled = true; btn.textContent = 'Submitting...';
       try { await window.__saveApplicant(payload); }
       catch (err) { console.error(err); alert('Submission failed. Please try again.'); btn.disabled = false; btn.textContent = 'Submit'; return; }
-      document.getElementById('successText').innerHTML = `Thank you, ${payload.firstName}!<br><br>We just sent a password setup link to <strong>${payload.email}</strong>. Set your password, then sign in to your dashboard to upload your photo, complete your profile, and take the Critical Thinking Test.<br><br><a href="dashboard.html" style="display:inline-block;background:#FFC72C;color:#111;padding:12px 32px;border-radius:999px;font-weight:600;text-decoration:none;font-family:Poppins,sans-serif;">Go to Dashboard</a>`;
+      document.getElementById('successText').innerHTML = `Thank you, ${payload.firstName}!<br><br>We just sent a password setup link to <strong>${payload.email}</strong>. Set your password, then sign in to take a short assessment that personalises your dashboard.<br><br><a href="assessment.html" style="display:inline-block;background:#FFC72C;color:#111;padding:12px 32px;border-radius:999px;font-weight:600;text-decoration:none;font-family:Poppins,sans-serif;">Continue to Assessment</a>`;
       document.getElementById('formContent').style.display = 'none';
       document.getElementById('successMsg').style.display = 'block';
       try { sessionStorage.setItem('ng_email', payload.email); } catch(e) {}

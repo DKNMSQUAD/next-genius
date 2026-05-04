@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assessment | Next Genius</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #fafafa; color: #111; -webkit-font-smoothing: antialiased;
+      min-height: 100vh; padding: 32px 20px;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    .logo { width: 80px; height: 80px; margin-bottom: 20px; }
+    h1 { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+    h2 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; margin: 28px 0 14px; }
+    .subtitle { font-size: 15px; color: #555; margin-bottom: 24px; line-height: 1.5; }
+
+    .card {
+      background: #fff; border: 1px solid #eee; border-radius: 12px;
+      padding: 24px; margin-bottom: 16px;
+    }
+
+    .stepbar {
+      display: flex; gap: 6px; margin-bottom: 32px;
+    }
+    .stepbar div {
+      flex: 1; height: 4px; background: #f0f0f0; border-radius: 2px;
+    }
+    .stepbar div.done { background: #FFC72C; }
+    .stepbar div.active { background: #FFC72C; }
+
+    .interest-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 12px;
+      align-items: center; padding: 12px 14px; border-bottom: 1px solid #f0f0f0;
+    }
+    .interest-row:last-child { border-bottom: none; }
+    .interest-row .label { font-size: 14px; }
+    .pill-group { display: flex; gap: 6px; }
+    .pill {
+      font-size: 12px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+      border: 1px solid #ddd; background: #fff; font-family: inherit;
+      transition: all 0.12s;
+    }
+    .pill:hover { border-color: #FFC72C; }
+    .pill.selected { background: #FFC72C; border-color: #FFC72C; color: #111; font-weight: 600; }
+
+    .parent-q { padding: 18px 0; border-bottom: 1px solid #f0f0f0; }
+    .parent-q:last-child { border-bottom: none; }
+    .parent-q .qtext { font-weight: 600; font-size: 15px; margin-bottom: 12px; }
+    .parent-q .opts { display: flex; flex-direction: column; gap: 8px; }
+    .parent-q .opts label {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
+      cursor: pointer; font-size: 14px;
+      transition: all 0.12s;
+    }
+    .parent-q .opts label:hover { border-color: #FFC72C; }
+    .parent-q .opts label.selected { background: #fff7e0; border-color: #FFC72C; }
+    .parent-q .opts input { accent-color: #FFC72C; }
+
+    .btn {
+      font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 500; color: #111;
+      background: #FFC72C; border: none; border-radius: 999px;
+      padding: 13px 40px; cursor: pointer;
+    }
+    .btn:hover:not(:disabled) { background: #F0B71F; }
+    .btn:disabled { opacity: 0.5; cursor: wait; }
+    .btn-secondary { background: #fff; border: 1px solid #ddd; }
+    .btn-secondary:hover:not(:disabled) { background: #f5f5f5; }
+
+    .actions { display: flex; justify-content: space-between; margin-top: 20px; gap: 12px; }
+
+    /* Report */
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .score-card {
+      background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 18px;
+    }
+    .score-card .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 6px; font-weight: 600; }
+    .score-card .value { font-family: 'Poppins', sans-serif; font-size: 32px; font-weight: 700; color: #111; }
+    .score-card .bar { height: 6px; background: #f0f0f0; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+    .score-card .bar div { height: 100%; background: #FFC72C; transition: width 0.6s; }
+    .ai-section {
+      background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    }
+    .ai-section h3 { font-family: 'Poppins', sans-serif; font-size: 15px; margin-bottom: 8px; color: #111; font-weight: 600; }
+    .ai-section p, .ai-section li { font-size: 14px; line-height: 1.6; color: #444; }
+    .ai-section ul { margin-left: 20px; margin-top: 8px; }
+    .ai-loading { padding: 40px 24px; text-align: center; color: #888; font-size: 14px; }
+    .ai-loading .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid #f0f0f0; border-top-color: #FFC72C; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .report-grid { grid-template-columns: 1fr; }
+      .interest-row { grid-template-columns: 1fr; }
+      .pill-group { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html"><img class="logo" src="NG_Logo.avif" alt="Next Genius"></a>
+
+    <!-- Auth gate -->
+    <div id="authGate" style="display:none;">
+      <div class="card">
+        <h1>Sign in to start your assessment</h1>
+        <p class="subtitle">Use the email and password you set during registration.</p>
+        <div style="margin-bottom:14px;"><label style="display:block; font-size:13px; margin-bottom:6px;">Email</label><input type="email" id="loginEmail" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;"></div>
+        <div style="margin-bottom:14px;"><label style="display:block; font-size:13px; margin-bottom:6px;">Password</label><input type="password" id="loginPassword" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;"></div>
+        <button class="btn" onclick="loginUser()" style="width:100%;">Sign in</button>
+        <div id="loginErr" style="color:#d93025; font-size:13px; margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Intro -->
+    <div id="stepIntro" style="display:none;">
+      <div class="stepbar"><div class="active"></div><div></div><div></div></div>
+      <h1>A short assessment before your dashboard</h1>
+      <p class="subtitle">Two quick steps:<br>1. Mark your interests across 31 activities (≈4 minutes)<br>2. Your personalised AI report</p>
+      <div class="card">
+        <h2 style="margin-top:0;">Why this matters</h2>
+        <p style="font-size:14px; line-height:1.6; color:#444;">This isn't a test — there are no wrong answers. The results help us recommend the right college fit, the right academic path, and the right kind of support for you. Your honest answers give the most useful insights.</p>
+      </div>
+      <div class="actions" style="justify-content:flex-end;">
+        <button class="btn" onclick="goStep('Interests')">Begin</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Interests -->
+    <div id="stepInterests" style="display:none;">
+      <div class="stepbar"><div class="done"></div><div class="active"></div><div></div></div>
+      <h1>What interests you?</h1>
+      <p class="subtitle">For each activity, tap how you feel about it.</p>
+      <div class="card">
+        <div id="interestList"></div>
+      </div>
+      <div class="actions">
+        <button class="btn-secondary btn" onclick="goStep('Intro')">Back</button>
+        <button class="btn" onclick="submitAssessment()" id="submitBtn">Submit & Generate Report</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Report -->
+    <div id="stepReport" style="display:none;">
+      <div class="stepbar"><div class="done"></div><div class="done"></div><div class="active"></div></div>
+      <h1>Your Personalised Report</h1>
+      <p class="subtitle">Saved to your profile. You can revisit anytime from the dashboard.</p>
+
+      <div class="report-grid" id="scoreGrid"></div>
+
+      <div id="aiArea">
+        <div class="ai-loading" id="aiLoading">
+          <div class="spinner"></div>
+          <div>Generating your AI insights...</div>
+        </div>
+      </div>
+
+      <div class="actions" style="justify-content:flex-end; margin-top:24px;">
+        <a href="dashboard.html" class="btn">Continue to Dashboard →</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
+      authDomain: "next-genius-auto.firebaseapp.com",
+      projectId: "next-genius-auto",
+      storageBucket: "next-genius-auto.firebasestorage.app",
+      messagingSenderId: "557092273631",
+      appId: "1:557092273631:web:192264bb43324a69a4186a"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const GEMINI_KEY = "AIzaSyBV7nAq1Xh4jVRiB7tBDVjum899BapAYjM";
+
+    const INTERESTS = [
+      { label:"Acting, Theatre, Public Speaking", cat:"EQ" },
+      { label:"Aeromodelling", cat:"IQ" },
+      { label:"Art, Painting", cat:"DQ" },
+      { label:"Astronomy", cat:"IQ" },
+      { label:"Cartoons, Comics, Anime", cat:"DQ" },
+      { label:"Chess", cat:"IQ" },
+      { label:"Coding, AI", cat:"IQ" },
+      { label:"Community Service", cat:"EQ" },
+      { label:"Dance, DJ", cat:"EQ" },
+      { label:"Doodling, Calligraphy", cat:"DQ" },
+      { label:"Fashion, Makeup", cat:"DQ" },
+      { label:"Film Making, Video Editing", cat:"DQ" },
+      { label:"Films / TV Shows", cat:"DQ" },
+      { label:"Food, Cooking or Eating Out", cat:"EQ" },
+      { label:"Gaming & Animation", cat:"DQ" },
+      { label:"Gardening", cat:"EQ" },
+      { label:"Interior & Home Decor", cat:"DQ" },
+      { label:"Lego, Gadgets", cat:"IQ" },
+      { label:"Making New Friends, Hanging Out", cat:"EQ" },
+      { label:"Mathematics", cat:"IQ" },
+      { label:"Music — Playing, Singing, Listening", cat:"EQ" },
+      { label:"Origami", cat:"IQ" },
+      { label:"Pet Care", cat:"EQ" },
+      { label:"Photography", cat:"DQ" },
+      { label:"Puzzles, Quizzing", cat:"IQ" },
+      { label:"Reading, Writing", cat:"EQ" },
+      { label:"Robotics", cat:"IQ" },
+      { label:"Rubik's Cube", cat:"IQ" },
+      { label:"Sculpture / Pottery", cat:"DQ" },
+      { label:"Travelling", cat:"EQ" },
+      { label:"Sports & Fitness", cat:"EQ" }
+    ];
+
+    let currentUser = null;
+    let interestAnswers = {};
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('authGate').style.display = 'none';
+        // check if assessment already done
+        const ref = doc(db, "applicants", user.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists() && snap.data().assessment) {
+          window.location.href = 'dashboard.html';
+          return;
+        }
+        renderInterests();
+        goStep('Intro');
+      } else {
+        document.getElementById('authGate').style.display = 'block';
+      }
+    });
+
+    window.loginUser = async function() {
+      const e = document.getElementById('loginEmail').value.trim();
+      const p = document.getElementById('loginPassword').value;
+      try { await signInWithEmailAndPassword(auth, e, p); }
+      catch (err) { document.getElementById('loginErr').textContent = err.message.replace('Firebase: ',''); }
+    };
+
+    window.goStep = function(step) {
+      ['Intro','Interests','Report'].forEach(s => {
+        document.getElementById('step' + s).style.display = (s === step) ? 'block' : 'none';
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    function renderInterests() {
+      const wrap = document.getElementById('interestList');
+      wrap.innerHTML = INTERESTS.map(i => `
+        <div class="interest-row">
+          <div class="label">${i.label}</div>
+          <div class="pill-group" data-interest="${i.label}">
+            <button class="pill" onclick="setInterest('${i.label.replace(/'/g,"\\'")}', 'interested', this)">Interested</button>
+            <button class="pill" onclick="setInterest('${i.label.replace(/'/g,"\\'")}', 'maybe', this)">Maybe</button>
+            <button class="pill" onclick="setInterest('${i.label.replace(/'/g,"\\'")}', 'not', this)">Not really</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    window.setInterest = function(label, value, btn) {
+      interestAnswers[label] = value;
+      btn.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+
+    function calculateScores() {
+      const raw = { IQ: 0, EQ: 0, DQ: 0 };
+      INTERESTS.forEach(i => {
+        const v = interestAnswers[i.label];
+        const pts = v === 'interested' ? 2 : v === 'maybe' ? 1 : 0;
+        raw[i.cat] += pts;
+      });
+      const total = raw.IQ + raw.EQ + raw.DQ || 1;
+      const IQ = Math.round((raw.IQ / total) * 100);
+      const EQ = Math.round((raw.EQ / total) * 100);
+      const DQ = Math.round((raw.DQ / total) * 100);
+      const dominant = raw.IQ >= raw.EQ && raw.IQ >= raw.DQ ? 'IQ' : raw.EQ >= raw.DQ ? 'EQ' : 'DQ';
+      const top = INTERESTS.filter(i => interestAnswers[i.label] === 'interested').map(i => i.label);
+      return { IQ, EQ, DQ, dominant, top };
+    }
+
+    window.submitAssessment = async function() {
+      const answered = INTERESTS.filter(i => interestAnswers[i.label]).length;
+      if (answered < INTERESTS.length) {
+        if (!confirm(`${INTERESTS.length - answered} interest(s) unanswered. Submit anyway?`)) return;
+      }
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true; btn.textContent = 'Calculating...';
+
+      const scores = calculateScores();
+      const assessment = {
+        interests: interestAnswers, scores,
+        submittedAt: new Date().toISOString()
+      };
+      await updateDoc(doc(db, "applicants", currentUser.uid), { assessment });
+
+      goStep('Report');
+      renderScores(scores);
+      try {
+        const aiReport = await generateAIReport(assessment);
+        await updateDoc(doc(db, "applicants", currentUser.uid), { "assessment.aiReport": aiReport });
+        renderAIReport(aiReport);
+      } catch (e) {
+        document.getElementById('aiArea').innerHTML = `<div class="ai-section"><h3>AI report unavailable</h3><p>${e.message}. Your scores are saved — the team will review them shortly.</p></div>`;
+      }
+    };
+
+    function renderScores(s) {
+      const grid = document.getElementById('scoreGrid');
+      const cards = [
+        { label: 'Analytical (IQ)', value: s.IQ },
+        { label: 'Emotional / Social (EQ)', value: s.EQ },
+        { label: 'Creative / Design (DQ)', value: s.DQ },
+        { label: 'Dominant Strength', value: s.dominant, bare: true }
+      ];
+      grid.innerHTML = cards.map(c => `
+        <div class="score-card">
+          <div class="label">${c.label}</div>
+          <div class="value">${c.bare ? c.value : c.value + '%'}</div>
+          ${c.bare ? '' : `<div class="bar"><div style="width:${c.value}%"></div></div>`}
+        </div>
+      `).join('');
+    }
+
+    async function generateAIReport(a) {
+      const s = a.scores;
+      const prompt = `You are a senior college admissions counsellor. Generate a personalised insight report based on the following assessment.
+
+INTEREST SCORES (% of total interest signal):
+- Analytical (IQ): ${s.IQ}%
+- Emotional/Social (EQ): ${s.EQ}%
+- Creative/Design (DQ): ${s.DQ}%
+- Dominant strength: ${s.dominant}
+- Top interests: ${s.top.slice(0, 8).join(', ') || 'none marked'}
+
+Return ONLY valid JSON, no markdown, no code fences:
+{
+  "personalityType": "Introvert / Extrovert / Ambivert",
+  "academicOrientation": "STEM / Business / Creative / Mixed",
+  "dominantStrengthExplanation": "2 warm sentences about the student's top strength",
+  "likelyCareers": ["career1", "career2", "career3", "career4"],
+  "collegeMatchHints": "1-2 sentences on the type of college environment that would suit them best (small liberal arts vs research university vs design-led etc.)",
+  "studentMessage": "A direct, encouraging 3-sentence message to the student summarising what stands out about them",
+  "parentMessage": "A direct, calm 3-sentence message to parents on how to best support this student through the admissions journey",
+  "topAreasToDevelop": ["area1", "area2"]
+}`;
+
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.6, maxOutputTokens: 1200, responseMimeType: 'application/json' }
+        })
+      });
+      const data = await resp.json();
+      const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+      try { return JSON.parse(txt); } catch (e) {
+        const m = txt.match(/\{[\s\S]*\}/);
+        return m ? JSON.parse(m[0]) : { error: 'parse failed', raw: txt };
+      }
+    }
+
+    function renderAIReport(r) {
+      if (r.error) {
+        document.getElementById('aiArea').innerHTML = `<div class="ai-section"><h3>AI report unavailable</h3><p>${r.error}</p></div>`;
+        return;
+      }
+      const wrap = document.getElementById('aiArea');
+      wrap.innerHTML = `
+        <div class="ai-section">
+          <h3>About You</h3>
+          <p><strong>Personality:</strong> ${escapeHtml(r.personalityType || '')}</p>
+          <p><strong>Academic orientation:</strong> ${escapeHtml(r.academicOrientation || '')}</p>
+          <p style="margin-top:10px;">${escapeHtml(r.dominantStrengthExplanation || '')}</p>
+        </div>
+        <div class="ai-section">
+          <h3>Career Directions to Explore</h3>
+          <ul>${(r.likelyCareers || []).map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
+        </div>
+        <div class="ai-section">
+          <h3>College Environment That Would Suit You</h3>
+          <p>${escapeHtml(r.collegeMatchHints || '')}</p>
+        </div>
+        <div class="ai-section" style="background:#fffaf0;">
+          <h3>For You, ${escapeHtml((r.studentName || '').toString())}</h3>
+          <p>${escapeHtml(r.studentMessage || '')}</p>
+        </div>
+        <div class="ai-section">
+          <h3>For Parents</h3>
+          <p>${escapeHtml(r.parentMessage || '')}</p>
+        </div>
+        ${(r.topAreasToDevelop || []).length ? `<div class="ai-section"><h3>Areas to Develop</h3><ul>${r.topAreasToDevelop.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul></div>` : ''}
+      `;
+    }
+
+    function escapeHtml(s) { return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+  </script>
+</body>
+</html>
