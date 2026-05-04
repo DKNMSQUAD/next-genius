@@ -26,14 +26,20 @@
 
     .field { margin-bottom: 18px; }
     .field label { display: block; font-size: 14px; font-weight: 500; color: #111; margin-bottom: 6px; }
-    .field input {
+    .field input, .field select {
       width: 100%; padding: 11px 14px; font-size: 15px;
       font-family: inherit; border: 1px solid #ddd; border-radius: 8px;
       background: #fff; color: #111; outline: none;
       transition: border-color 0.15s;
+      appearance: none; -webkit-appearance: none;
     }
-    .field input:focus { border-color: #FFC72C; }
-    .field.error input { border-color: #d93025; }
+    .field select {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23666' d='M6 8L0 0h12z'/></svg>");
+      background-repeat: no-repeat; background-position: right 14px center;
+      padding-right: 38px;
+    }
+    .field input:focus, .field select:focus { border-color: #FFC72C; }
+    .field.error input, .field.error select { border-color: #d93025; }
     .field .error-msg { font-size: 12px; color: #d93025; margin-top: 4px; }
 
     .submit-btn {
@@ -74,7 +80,12 @@
       </div>
       <div class="field" id="f-city">
         <label>City</label>
-        <input type="text" id="city" autocomplete="address-level2">
+        <select id="city">
+          <option value="">Select your city</option>
+          <option>Agra</option><option>Ahmedabad</option><option>Ajmer</option><option>Aligarh</option><option>Allahabad (Prayagraj)</option><option>Amravati</option><option>Amritsar</option><option>Asansol</option><option>Aurangabad</option><option>Bangalore (Bengaluru)</option><option>Bareilly</option><option>Belgaum</option><option>Bhavnagar</option><option>Bhilai</option><option>Bhopal</option><option>Bhubaneswar</option><option>Bikaner</option><option>Bilaspur</option><option>Chandigarh</option><option>Chennai</option><option>Coimbatore</option><option>Cuttack</option><option>Dehradun</option><option>Delhi</option><option>Dhanbad</option><option>Durgapur</option><option>Erode</option><option>Faridabad</option><option>Firozabad</option><option>Ghaziabad</option><option>Goa (Panaji)</option><option>Gorakhpur</option><option>Gulbarga</option><option>Guntur</option><option>Gurgaon (Gurugram)</option><option>Guwahati</option><option>Gwalior</option><option>Howrah</option><option>Hubli–Dharwad</option><option>Hyderabad</option><option>Indore</option><option>Jabalpur</option><option>Jaipur</option><option>Jalandhar</option><option>Jammu</option><option>Jamnagar</option><option>Jamshedpur</option><option>Jhansi</option><option>Jodhpur</option><option>Kakinada</option><option>Kalyan-Dombivli</option><option>Kanpur</option><option>Kochi (Cochin)</option><option>Kolhapur</option><option>Kolkata</option><option>Kollam</option><option>Kota</option><option>Kozhikode (Calicut)</option><option>Lucknow</option><option>Ludhiana</option><option>Madurai</option><option>Malegaon</option><option>Mangalore</option><option>Mathura</option><option>Meerut</option><option>Moradabad</option><option>Mumbai</option><option>Mysore (Mysuru)</option><option>Nagpur</option><option>Nanded</option><option>Nashik</option><option>Navi Mumbai</option><option>Nellore</option><option>Noida</option><option>Patna</option><option>Pondicherry (Puducherry)</option><option>Pune</option><option>Raipur</option><option>Rajahmundry</option><option>Rajkot</option><option>Ranchi</option><option>Rourkela</option><option>Saharanpur</option><option>Salem</option><option>Sangli</option><option>Shimla</option><option>Siliguri</option><option>Solapur</option><option>Srinagar</option><option>Surat</option><option>Thane</option><option>Thiruvananthapuram (Trivandrum)</option><option>Thrissur</option><option>Tiruchirappalli (Trichy)</option><option>Tirunelveli</option><option>Tirupati</option><option>Tiruppur</option><option>Udaipur</option><option>Ujjain</option><option>Vadodara</option><option>Varanasi</option><option>Vasai-Virar</option><option>Vijayawada</option><option>Visakhapatnam (Vizag)</option><option>Warangal</option>
+          <option value="International">International</option>
+          <option value="Other">Other</option>
+        </select>
       </div>
       <div class="field" id="f-school">
         <label>School</label>
