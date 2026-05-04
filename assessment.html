@@ -142,15 +142,11 @@
       </div>
     </div>
 
-    <!-- STEP 3: Report -->
+    <!-- STEP 3: Signup -->
     <div id="stepReport" style="display:none;">
       <div class="stepbar"><div class="done"></div><div class="done"></div><div class="active"></div></div>
-      <h1>Your Personalised Report</h1>
-      <p class="subtitle">Saved to your profile. You can revisit anytime from the dashboard.</p>
-
-      <div class="report-grid" id="scoreGrid"></div>
-
-      <div id="aiArea"></div>
+      <h1>One last step</h1>
+      <p class="subtitle">Create your account to save your progress and continue to your dashboard.</p>
 
       <div class="card" id="signupCard" style="margin-top:24px; border:2px solid #FFC72C;">
         <h2 style="margin-top:0;">Save your report — create your account</h2>
@@ -294,9 +290,17 @@
       };
       sessionStorage.setItem('ng_assessment', JSON.stringify(computedAssessment));
 
+      // Push assessment to backend Sheet (no auth needed; backend keyed by email)
+      const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
+      fetch(SHEET_WEBHOOK_URL + "?type=assessment", {
+        method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          email: pendingReg.email, firstName: pendingReg.firstName, lastName: pendingReg.lastName,
+          submittedAt: computedAssessment.submittedAt, scores, insights
+        })
+      }).catch(()=>{});
+
       goStep('Report');
-      renderScores(scores);
-      renderReport(scores, insights);
       document.getElementById('signupEmail').textContent = pendingReg.email;
     };
 
