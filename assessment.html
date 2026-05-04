@@ -39,6 +39,7 @@
     }
     .interest-row:last-child { border-bottom: none; }
     .interest-row .label { font-size: 14px; }
+    .interest-row.error { background: #fef2f2; border-radius: 8px; padding-left: 14px; padding-right: 14px; margin: 0 -14px; border: 1px solid #fcc; }
     .pill-group { display: flex; gap: 6px; }
     .pill {
       font-size: 12px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
@@ -253,6 +254,7 @@
       interestAnswers[label] = value;
       btn.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
       btn.classList.add('selected');
+      btn.closest('.interest-row')?.classList.remove('error');
     };
 
     function calculateScores() {
@@ -275,9 +277,18 @@
     }
 
     window.submitAssessment = async function() {
-      const answered = INTERESTS.filter(i => interestAnswers[i.label]).length;
-      if (answered < INTERESTS.length) {
-        if (!confirm(`${INTERESTS.length - answered} interest(s) unanswered. Submit anyway?`)) return;
+      const unanswered = INTERESTS.filter(i => !interestAnswers[i.label]);
+      if (unanswered.length > 0) {
+        // Highlight unanswered rows + scroll to first
+        document.querySelectorAll('.interest-row').forEach(r => r.classList.remove('error'));
+        unanswered.forEach(i => {
+          const el = document.querySelector(`.pill-group[data-interest="${CSS.escape(i.label)}"]`);
+          if (el) el.closest('.interest-row').classList.add('error');
+        });
+        const firstErr = document.querySelector('.interest-row.error');
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        alert(`Please answer all ${INTERESTS.length} interests. ${unanswered.length} still need a response.`);
+        return;
       }
       const btn = document.getElementById('submitBtn');
       btn.disabled = true; btn.textContent = 'Calculating...';
