@@ -33,9 +33,12 @@
     }
     .sidebar a:hover { background: #fafafa; }
     .sidebar a.active { color: #111; border-left-color: #FFC72C; background: #fffaf0; }
-    .sidebar a.locked { opacity: 0.4; cursor: not-allowed; }
+    .sidebar a.locked { color: #bbb; cursor: not-allowed; }
+    .sidebar a.locked:hover { background: transparent; }
     .sidebar a .icon { width: 18px; text-align: center; font-size: 14px; }
-    .sidebar a .check { margin-left: auto; color: #4caf50; font-size: 14px; }
+    .sidebar a .check { margin-left: auto; color: #4caf50; font-size: 14px; display: none; }
+    .sidebar a .lock { margin-left: auto; color: #bbb; font-size: 12px; display: none; }
+    .sidebar a.locked .lock { display: inline; }
 
     .main { padding: 32px 40px; max-width: 920px; }
     .panel { display: none; }
@@ -82,6 +85,70 @@
     .btn-secondary:hover:not(:disabled) { background: #f5f5f5; }
     .btn-danger { background: #fff; border: 1px solid #d93025; color: #d93025; }
     .btn-danger:hover:not(:disabled) { background: #fee; }
+
+    /* College discovery */
+    .college-pool {
+      min-height: 240px;
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 12px; border-radius: 10px; background: #fafafa;
+      border: 2px dashed transparent;
+    }
+    .chosen-zone { background: #fffaf0; border-color: #FFE08F; }
+    .college-pool.dragover { border-color: #FFC72C; background: #fff7e0; }
+    .empty-msg { color: #aaa; text-align: center; font-size: 13px; padding: 40px 0; }
+    .college-card {
+      display: flex; align-items: center; gap: 12px;
+      background: #fff; border: 1px solid #eee; border-radius: 10px;
+      padding: 10px 12px; cursor: grab;
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .college-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .college-card.dragging { opacity: 0.4; cursor: grabbing; }
+    .college-card .logo {
+      width: 40px; height: 40px; border-radius: 8px;
+      object-fit: contain; background: #f5f5f5; padding: 4px; flex-shrink: 0;
+    }
+    .college-card .info { flex: 1; min-width: 0; }
+    .college-card .info .nm { font-weight: 600; font-size: 14px; color: #111; }
+    .college-card .info .cn { font-size: 12px; color: #888; }
+    .college-card .rank-badge {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #FFC72C; color: #111; font-weight: 700; font-size: 13px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .college-card .grip { color: #ccc; font-size: 16px; cursor: grab; }
+
+    /* Checklist */
+    .checklist-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 14px; border-radius: 10px; cursor: pointer;
+      transition: background 0.12s;
+      border: 1px solid #f0f0f0; margin-bottom: 8px;
+    }
+    .checklist-item:hover { background: #fafafa; }
+    .checklist-item.checked { background: #fff7e0; border-color: #FFE08F; }
+    .checklist-item input[type="checkbox"] {
+      width: 22px; height: 22px; accent-color: #FFC72C; cursor: pointer; flex-shrink: 0;
+    }
+    .checklist-item .label { font-size: 14px; line-height: 1.4; }
+    .checklist-item.checked .label { color: #777; text-decoration: line-through; }
+
+    /* Inbox */
+    .inbox-msg {
+      padding: 12px 14px; border-radius: 8px; background: #fafafa;
+      margin-bottom: 8px; cursor: pointer; transition: background 0.12s;
+      border-left: 3px solid transparent;
+    }
+    .inbox-msg.unread { background: #fff7e0; border-left-color: #FFC72C; }
+    .inbox-msg .msg-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .inbox-msg .msg-subject { font-weight: 600; font-size: 14px; }
+    .inbox-msg .msg-date { font-size: 12px; color: #888; }
+    .inbox-msg .msg-body { font-size: 13px; color: #555; line-height: 1.5; }
+    .inbox-empty { color: #999; font-size: 13px; padding: 20px 0; text-align: center; }
+
+    @media (max-width: 760px) {
+      .college-grid { grid-template-columns: 1fr !important; }
+    }
 
     /* Photo upload */
     .photo-upload {
@@ -176,12 +243,12 @@
     <div class="layout">
       <nav class="sidebar" id="sidebar">
         <a data-tab="home" class="active"><span class="icon">⌂</span> Home</a>
-        <a data-tab="photo"><span class="icon">⊙</span> Photo <span class="check" data-check="photo">✓</span></a>
-        <a data-tab="personal"><span class="icon">☰</span> Personal Profile <span class="check" data-check="personal">✓</span></a>
-        <a data-tab="academic"><span class="icon">⬢</span> Academic Profile <span class="check" data-check="academic">✓</span></a>
-        <a data-tab="college"><span class="icon">⛬</span> College Discovery <span class="check" data-check="college">✓</span></a>
-        <a data-tab="commonapp"><span class="icon">📄</span> CommonApp Review <span class="check" data-check="commonapp">✓</span></a>
-        <a data-tab="interview"><span class="icon">▶</span> Interview <span class="check" data-check="interview">✓</span></a>
+        <a data-tab="photo" data-requires=""><span class="icon">⊙</span> Photo <span class="check" data-check="photo">✓</span><span class="lock" data-lock="photo">🔒</span></a>
+        <a data-tab="personal" data-requires="photo"><span class="icon">☰</span> Personal Profile <span class="check" data-check="personal">✓</span><span class="lock" data-lock="personal">🔒</span></a>
+        <a data-tab="academic" data-requires="personal"><span class="icon">⬢</span> Academic Profile <span class="check" data-check="academic">✓</span><span class="lock" data-lock="academic">🔒</span></a>
+        <a data-tab="college" data-requires="academic"><span class="icon">⛬</span> College Discovery <span class="check" data-check="college">✓</span><span class="lock" data-lock="college">🔒</span></a>
+        <a data-tab="checklist" data-requires="college"><span class="icon">✓</span> Application Checklist <span class="check" data-check="checklist">✓</span><span class="lock" data-lock="checklist">🔒</span></a>
+        <a data-tab="interview" data-requires="checklist"><span class="icon">▶</span> Interview <span class="check" data-check="interview">✓</span><span class="lock" data-lock="interview">🔒</span></a>
         <a data-tab="status"><span class="icon">◷</span> Status</a>
         <a data-tab="settings"><span class="icon">⚙</span> Settings</a>
         <a data-tab="exit" style="margin-top:auto; color:#d93025;"><span class="icon">✕</span> Exit Process</a>
@@ -193,22 +260,33 @@
         <section class="panel active" id="panel-home">
           <h1>Welcome <span id="welcomeName"></span></h1>
           <p class="subtitle">Your scholarship journey at a glance</p>
+
           <div class="status-banner">
-            <h3>Onboarding progress</h3>
+            <h3 style="display:flex; justify-content:space-between; align-items:center;">
+              <span>Onboarding progress</span>
+              <span style="font-weight:400; font-size:13px; color:#666;" id="progressText">0 of 7 steps complete</span>
+            </h3>
             <div class="progress" id="progressBar">
               <div data-step="photo"></div>
               <div data-step="personal"></div>
               <div data-step="academic"></div>
               <div data-step="college"></div>
-              <div data-step="commonapp"></div>
+              <div data-step="checklist"></div>
               <div data-step="interview"></div>
+              <div data-step="allocated"></div>
             </div>
-            <div class="progress-text" id="progressText">0 of 6 steps complete</div>
           </div>
-          <div class="card">
-            <h2>What's next</h2>
-            <p id="nextStep">Upload your photo to get started.</p>
+
+          <div class="card" id="nextStepCard">
+            <h2 style="display:flex; align-items:center; gap:10px;"><span style="background:#FFC72C; color:#111; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:600;">→</span> What's next</h2>
+            <p id="nextStep" style="font-size:15px;">Upload your photo to begin.</p>
             <button class="btn" id="nextBtn" onclick="goToNextStep()">Continue</button>
+          </div>
+
+          <div class="card">
+            <h2 style="display:flex; align-items:center; gap:10px;"><span>📥</span> Inbox <span id="unreadBadge" style="background:#d93025; color:#fff; font-size:11px; padding:2px 8px; border-radius:999px; display:none; font-weight:600;"></span></h2>
+            <p style="color:#888; font-size:13px; margin-top:-4px;">Messages and notifications from the Next Genius team</p>
+            <div id="inboxList" style="margin-top:16px;"></div>
           </div>
         </section>
 
@@ -290,24 +368,35 @@
         <!-- COLLEGE -->
         <section class="panel" id="panel-college">
           <h1>College Discovery</h1>
-          <p class="subtitle">Rank your top choices among Next Genius partner colleges.</p>
-          <div class="card">
-            <p>Drag to reorder, or assign a rank (1 = top choice). Submit when you're ready.</p>
-            <div id="collegeList"></div>
-            <button class="btn" onclick="saveColleges()" style="margin-top:16px;">Submit College Choices</button>
+          <p class="subtitle">Drag colleges into your "Choices" list, then drag to reorder by preference.</p>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;" class="college-grid">
+            <div class="card">
+              <h2 style="margin-bottom:4px;">Available Partners</h2>
+              <p style="font-size:13px; color:#888; margin-bottom:14px;">Drag a college to add it to your choices →</p>
+              <div id="collegeAvailable" class="college-pool"></div>
+            </div>
+            <div class="card">
+              <h2 style="margin-bottom:4px;">Your Choices <span id="chosenCount" style="font-weight:400; font-size:13px; color:#666;">(0)</span></h2>
+              <p style="font-size:13px; color:#888; margin-bottom:14px;">Drag to reorder — top of list = first choice. Pick at least 3.</p>
+              <div id="collegeChosen" class="college-pool chosen-zone"><div class="empty-msg">Drop colleges here</div></div>
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn" onclick="saveColleges()">Submit College Choices</button>
             <span id="collegeStatus" style="margin-left:16px; font-size:13px;"></span>
           </div>
         </section>
 
-        <!-- COMMONAPP -->
-        <section class="panel" id="panel-commonapp">
-          <h1>CommonApp Review</h1>
-          <p class="subtitle">Upload your CommonApp PDF — AI checks completeness and suggests fixes.</p>
+        <!-- CHECKLIST -->
+        <section class="panel" id="panel-checklist">
+          <h1>Application Checklist</h1>
+          <p class="subtitle">Tick each item as you complete it. Saves automatically.</p>
           <div class="card">
-            <input type="file" id="caFile" accept="application/pdf" style="display:none;" onchange="uploadCommonApp(event)">
-            <button class="btn" onclick="document.getElementById('caFile').click()">Upload PDF</button>
-            <span id="caStatus" style="margin-left:16px; font-size:13px;"></span>
-            <div id="caReview" style="margin-top:20px;"></div>
+            <div id="checklistItems"></div>
+            <div style="margin-top:20px; padding-top:16px; border-top:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-size:14px; color:#666;"><span id="checklistDone">0</span> of <span id="checklistTotal">17</span> items complete</span>
+              <span id="checklistStatus" style="font-size:13px; color:#4caf50;"></span>
+            </div>
           </div>
         </section>
 
@@ -421,18 +510,38 @@
     const GEMINI_KEY = "AIzaSyBV7nAq1Xh4jVRiB7tBDVjum899BapAYjM";
 
     const PARTNER_COLLEGES = [
-      { slug: "aup", name: "American University of Paris", country: "France" },
-      { slug: "centre", name: "Centre College", country: "USA (Kentucky)" },
-      { slug: "capital", name: "Capital University", country: "USA (Ohio)" },
-      { slug: "cottey", name: "Cottey College", country: "USA (Missouri)" },
-      { slug: "ithaca", name: "Ithaca College", country: "USA (New York)" },
-      { slug: "ie", name: "IE University", country: "Spain" },
-      { slug: "lynn", name: "Lynn University", country: "USA (Florida)" },
-      { slug: "masters-union", name: "Masters' Union", country: "India" },
-      { slug: "muhlenberg", name: "Muhlenberg College", country: "USA (Pennsylvania)" },
-      { slug: "nuq", name: "Northwestern University in Qatar", country: "Qatar" },
-      { slug: "syracuse", name: "Syracuse University", country: "USA (New York)" },
-      { slug: "charleston", name: "University of Charleston", country: "USA (West Virginia)" }
+      { slug: "aup", name: "American University of Paris", country: "France", domain: "aup.edu" },
+      { slug: "centre", name: "Centre College", country: "USA (Kentucky)", domain: "centre.edu" },
+      { slug: "capital", name: "Capital University", country: "USA (Ohio)", domain: "capital.edu" },
+      { slug: "cottey", name: "Cottey College", country: "USA (Missouri)", domain: "cottey.edu" },
+      { slug: "ithaca", name: "Ithaca College", country: "USA (New York)", domain: "ithaca.edu" },
+      { slug: "ie", name: "IE University", country: "Spain", domain: "ie.edu" },
+      { slug: "lynn", name: "Lynn University", country: "USA (Florida)", domain: "lynn.edu" },
+      { slug: "masters-union", name: "Masters' Union", country: "India", domain: "mastersunion.org" },
+      { slug: "muhlenberg", name: "Muhlenberg College", country: "USA (Pennsylvania)", domain: "muhlenberg.edu" },
+      { slug: "nuq", name: "Northwestern University in Qatar", country: "Qatar", domain: "qatar.northwestern.edu" },
+      { slug: "syracuse", name: "Syracuse University", country: "USA (New York)", domain: "syracuse.edu" },
+      { slug: "charleston", name: "University of Charleston", country: "USA (West Virginia)", domain: "ucwv.edu" }
+    ];
+
+    const CHECKLIST_ITEMS = [
+      { id: 'collegeListFinalized', label: 'College List Finalized' },
+      { id: 'eaEdStrategy', label: 'EA / ED / rEA / Oxbridge Strategy' },
+      { id: 'appAccountCreated', label: 'Application Account created & form filled (e.g. CommonApp, UCAS)' },
+      { id: 'collegeSupplements', label: 'Completely Filled All College Specific Supplements' },
+      { id: 'counselorReco', label: 'Counselor Reco Letter / Transcripts uploaded' },
+      { id: 'teacherRecos', label: '2–3 School Teacher Reco Letters' },
+      { id: 'externalRecos', label: '2–3 External (Non-School) Reco Letters' },
+      { id: 'resumePdf', label: 'Resume PDF' },
+      { id: 'essaysApproved', label: 'All Essays approved by NM' },
+      { id: 'scholarshipFinAid', label: 'Scholarship / Financial Aid' },
+      { id: 'proofOfFunds', label: 'Proof of Funds' },
+      { id: 'emailedAdmissions', label: 'Emailed Admissions' },
+      { id: 'followCollegeSocial', label: 'Follow college on Social Media' },
+      { id: 'portfolio', label: 'Portfolio (Optional)' },
+      { id: 'finalReviewSquad', label: 'Final review with NM Squad' },
+      { id: 'finalReviewNM', label: 'Final review with NM' },
+      { id: 'submitted', label: 'Submitted!' }
     ];
 
     let currentUser = null;
@@ -447,7 +556,7 @@
         document.getElementById('settingsEmail').textContent = user.email;
         await loadApplicantData();
         renderColleges();
-        updateProgress();
+        updateProgress(); applyLocks();
       } else {
         currentUser = null;
         document.getElementById('authGate').style.display = 'block';
@@ -477,15 +586,15 @@
         document.getElementById('photoPreview').innerHTML = `<img src="${applicantData.photoURL}">`;
       }
       // commonApp review
-      if (applicantData.commonApp && applicantData.commonApp.review) {
-        renderCommonAppReview(applicantData.commonApp.review);
-      }
+      renderChecklist();
+      renderInbox();
       renderStatus();
+      applyLocks();
     }
 
     function updateProgress() {
       const ob = applicantData.onboarding || {};
-      const steps = ['photo','personal','academic','college','commonapp','interview'];
+      const steps = ['photo','personal','academic','college','checklist','interview'];
       let done = 0;
       steps.forEach(s => {
         const bar = document.querySelector(`#progressBar div[data-step="${s}"]`);
@@ -493,28 +602,178 @@
         if (ob[s]) { if (bar) bar.classList.add('done'); if (check) check.style.display = 'inline'; done++; }
         else { if (bar) bar.classList.remove('done'); if (check) check.style.display = 'none'; }
       });
-      document.getElementById('progressText').textContent = `${done} of ${steps.length} steps complete`;
-      // next step prompt
+      // allocated extra step
+      const allocBar = document.querySelector('#progressBar div[data-step="allocated"]');
+      if (applicantData.allocation && allocBar) { allocBar.classList.add('done'); done++; }
+      document.getElementById('progressText').textContent = `${done} of 7 steps complete`;
       const next = steps.find(s => !ob[s]);
+      const nextBtn = document.getElementById('nextBtn');
       if (next) {
-        const labels = { photo: 'Upload your photo', personal: 'Fill the personal profile', academic: 'Fill the academic profile', college: 'Pick your college choices', commonapp: 'Upload your CommonApp PDF', interview: 'Submit your interview videos' };
+        const labels = { photo: 'Upload your photo', personal: 'Fill the personal profile', academic: 'Fill the academic profile', college: 'Pick your college choices', checklist: 'Work through your application checklist', interview: 'Submit your interview videos' };
         document.getElementById('nextStep').textContent = labels[next];
-        document.getElementById('nextBtn').dataset.target = next;
+        nextBtn.dataset.target = next;
+        nextBtn.style.display = 'inline-block';
       } else {
-        document.getElementById('nextStep').textContent = 'All onboarding complete! Awaiting allocation.';
-        document.getElementById('nextBtn').style.display = 'none';
+        document.getElementById('nextStep').textContent = applicantData.allocation ? 'You have been allocated. Check your status.' : 'Onboarding complete. Awaiting college allocation.';
+        nextBtn.style.display = 'none';
       }
     }
 
+    function logoFor(c) {
+      return `https://logo.clearbit.com/${c.domain}`;
+    }
+    function collegeCardHtml(c, withRank, rankNum) {
+      return `<div class="college-card" draggable="true" data-college="${c.slug}">
+        <span class="grip">⋮⋮</span>
+        ${withRank ? `<div class="rank-badge">${rankNum}</div>` : ''}
+        <img class="logo" src="${logoFor(c)}" alt="" onerror="this.style.background='#FFC72C'; this.replaceWith(Object.assign(document.createElement('div'),{className:'logo',innerText:'${c.name.split(' ').map(w=>w[0]).slice(0,2).join('')}',style:'display:flex;align-items:center;justify-content:center;background:#FFC72C;color:#111;font-weight:600;font-size:13px;'}))">
+        <div class="info"><div class="nm">${c.name}</div><div class="cn">${c.country}</div></div>
+      </div>`;
+    }
     function renderColleges() {
-      const list = document.getElementById('collegeList');
-      const saved = (applicantData.collegeChoices || {}).ranks || {};
-      list.innerHTML = PARTNER_COLLEGES.map(c => `
-        <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom: 1px solid #f0f0f0;">
-          <input type="number" min="1" max="12" data-college="${c.slug}" value="${saved[c.slug] || ''}" placeholder="–" style="width:60px;">
-          <div><strong>${c.name}</strong><div style="font-size:12px; color:#888;">${c.country}</div></div>
-        </div>
+      const saved = applicantData.collegeChoices?.order || [];
+      const chosenSlugs = new Set(saved);
+      const available = PARTNER_COLLEGES.filter(c => !chosenSlugs.has(c.slug));
+      const chosen = saved.map(slug => PARTNER_COLLEGES.find(c => c.slug === slug)).filter(Boolean);
+
+      const av = document.getElementById('collegeAvailable');
+      const ch = document.getElementById('collegeChosen');
+      av.innerHTML = available.length ? available.map(c => collegeCardHtml(c, false)).join('') : '<div class="empty-msg">All colleges added to your choices</div>';
+      ch.innerHTML = chosen.length ? chosen.map((c, i) => collegeCardHtml(c, true, i+1)).join('') : '<div class="empty-msg">Drop colleges here</div>';
+      document.getElementById('chosenCount').textContent = `(${chosen.length})`;
+      attachDragHandlers();
+    }
+    function attachDragHandlers() {
+      let dragSlug = null;
+      let dragOriginPool = null;
+      document.querySelectorAll('.college-card').forEach(el => {
+        el.addEventListener('dragstart', (e) => {
+          dragSlug = el.dataset.college;
+          dragOriginPool = el.closest('.college-pool').id;
+          el.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        el.addEventListener('dragend', () => el.classList.remove('dragging'));
+      });
+      ['collegeAvailable','collegeChosen'].forEach(poolId => {
+        const pool = document.getElementById(poolId);
+        pool.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          pool.classList.add('dragover');
+          // figure out drop position relative to existing cards
+          const after = [...pool.querySelectorAll('.college-card:not(.dragging)')].find(c => {
+            const r = c.getBoundingClientRect();
+            return e.clientY < r.top + r.height / 2;
+          });
+          const dragging = document.querySelector('.college-card.dragging');
+          if (!dragging) return;
+          if (after) pool.insertBefore(dragging, after);
+          else pool.appendChild(dragging);
+        });
+        pool.addEventListener('dragleave', () => pool.classList.remove('dragover'));
+        pool.addEventListener('drop', (e) => {
+          e.preventDefault();
+          pool.classList.remove('dragover');
+          // remove "Drop here" empty msgs since something is dropped
+          pool.querySelectorAll('.empty-msg').forEach(m => m.remove());
+          const empty = document.getElementById('collegeAvailable').querySelectorAll('.college-card').length;
+          if (empty === 0) document.getElementById('collegeAvailable').innerHTML = '<div class="empty-msg">All colleges added to your choices</div>';
+          // re-rank chosen
+          updateRankBadges();
+        });
+      });
+    }
+    function updateRankBadges() {
+      const ch = document.getElementById('collegeChosen');
+      ch.querySelectorAll('.college-card').forEach((card, i) => {
+        let badge = card.querySelector('.rank-badge');
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.className = 'rank-badge';
+          card.insertBefore(badge, card.querySelector('.logo'));
+        }
+        badge.textContent = i + 1;
+      });
+      // remove rank badges from available pool
+      document.getElementById('collegeAvailable').querySelectorAll('.rank-badge').forEach(b => b.remove());
+      const count = ch.querySelectorAll('.college-card').length;
+      document.getElementById('chosenCount').textContent = `(${count})`;
+    }
+
+    function renderChecklist() {
+      const wrap = document.getElementById('checklistItems');
+      const saved = applicantData.checklist || {};
+      wrap.innerHTML = CHECKLIST_ITEMS.map(item => `
+        <label class="checklist-item ${saved[item.id] ? 'checked' : ''}" data-checklist="${item.id}">
+          <input type="checkbox" ${saved[item.id] ? 'checked' : ''} onchange="toggleChecklistItem('${item.id}', this.checked)">
+          <span class="label">${item.label}</span>
+        </label>
       `).join('');
+      updateChecklistCount();
+    }
+    window.toggleChecklistItem = async function(id, checked) {
+      const data = { ...(applicantData.checklist || {}), [id]: checked };
+      applicantData.checklist = data;
+      const allDone = CHECKLIST_ITEMS.every(i => data[i.id]);
+      await updateDoc(doc(db, "applicants", currentUser.uid), { checklist: data, "onboarding.checklist": allDone });
+      applicantData.onboarding = { ...(applicantData.onboarding||{}), checklist: allDone };
+      const el = document.querySelector(`[data-checklist="${id}"]`);
+      el?.classList.toggle('checked', checked);
+      document.getElementById('checklistStatus').textContent = '✓ Saved';
+      setTimeout(() => document.getElementById('checklistStatus').textContent = '', 1200);
+      updateChecklistCount();
+      updateProgress(); applyLocks();
+      applyLocks();
+    };
+    function updateChecklistCount() {
+      const data = applicantData.checklist || {};
+      const done = CHECKLIST_ITEMS.filter(i => data[i.id]).length;
+      document.getElementById('checklistDone').textContent = done;
+      document.getElementById('checklistTotal').textContent = CHECKLIST_ITEMS.length;
+    }
+
+    function renderInbox() {
+      const wrap = document.getElementById('inboxList');
+      const msgs = applicantData.notifications || [];
+      if (!msgs.length) {
+        wrap.innerHTML = '<div class="inbox-empty">No messages yet. Notifications from the Next Genius team will appear here.</div>';
+        document.getElementById('unreadBadge').style.display = 'none';
+        return;
+      }
+      const unread = msgs.filter(m => !m.read).length;
+      const badge = document.getElementById('unreadBadge');
+      if (unread > 0) { badge.textContent = unread; badge.style.display = 'inline-block'; } else { badge.style.display = 'none'; }
+      wrap.innerHTML = msgs.slice().reverse().map((m, i) => `
+        <div class="inbox-msg ${m.read ? '' : 'unread'}" onclick="markRead(${msgs.length - 1 - i})">
+          <div class="msg-head"><span class="msg-subject">${escapeHtml(m.subject || '(no subject)')}</span><span class="msg-date">${m.date ? new Date(m.date).toLocaleDateString() : ''}</span></div>
+          <div class="msg-body">${escapeHtml(m.body || '')}</div>
+        </div>`).join('');
+    }
+    window.markRead = async function(idx) {
+      const msgs = applicantData.notifications || [];
+      if (msgs[idx] && !msgs[idx].read) {
+        msgs[idx].read = true;
+        await updateDoc(doc(db, "applicants", currentUser.uid), { notifications: msgs });
+        renderInbox();
+      }
+    };
+
+    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
+    function syncAdmin() {
+      try {
+        const payload = { uid: currentUser.uid, email: currentUser.email, firstName: applicantData.firstName, lastName: applicantData.lastName, status: applicantData.status, onboarding: applicantData.onboarding, allocation: applicantData.allocation, exitedAt: applicantData.exitedAt };
+        fetch(SHEET_WEBHOOK_URL + "?type=admin", { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) }).catch(()=>{});
+      } catch(_) {}
+    }
+
+    function applyLocks() {
+      syncAdmin();
+      const ob = applicantData.onboarding || {};
+      document.querySelectorAll('.sidebar a[data-requires]').forEach(a => {
+        const req = a.getAttribute('data-requires');
+        if (!req) { a.classList.remove('locked'); return; }
+        a.classList.toggle('locked', !ob[req]);
+      });
     }
 
     function renderStatus() {
@@ -531,17 +790,18 @@
       document.getElementById('statusBox').innerHTML = html;
     }
 
-    function renderCommonAppReview(review) {
-      const wrap = document.getElementById('caReview');
-      wrap.innerHTML = `<div style="background:#fafafa; padding:16px; border-radius:8px; white-space:pre-wrap; font-size:14px; line-height:1.6;">${escapeHtml(review)}</div>`;
-    }
-
-    function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+    function escapeHtml(s) { return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 
     // ── Tab navigation ──
     document.querySelectorAll('.sidebar a').forEach(a => a.addEventListener('click', (e) => {
       const tab = a.getAttribute('data-tab');
       if (!tab) return;
+      if (a.classList.contains('locked')) {
+        const req = a.getAttribute('data-requires');
+        const reqLabel = { photo: 'Photo', personal: 'Personal Profile', academic: 'Academic Profile', college: 'College Discovery', checklist: 'Application Checklist' }[req];
+        alert(`Complete ${reqLabel || 'the previous step'} to unlock this section.`);
+        return;
+      }
       document.querySelectorAll('.sidebar a').forEach(x => x.classList.remove('active'));
       a.classList.add('active');
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -588,7 +848,7 @@
         applicantData.photoURL = result.secure_url;
         applicantData.onboarding = { ...(applicantData.onboarding||{}), photo: true };
         document.getElementById('photoStatus').textContent = '✓ Photo saved';
-        updateProgress();
+        updateProgress(); applyLocks();
       } catch (e) {
         document.getElementById('photoStatus').textContent = '✗ ' + e.message;
       } finally {
@@ -605,7 +865,7 @@
       await updateDoc(doc(db, "applicants", currentUser.uid), { personal: data, "onboarding.personal": true });
       applicantData.personal = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), personal: true };
       document.getElementById('personalStatus').textContent = '✓ Saved';
-      updateProgress();
+      updateProgress(); applyLocks();
     };
     window.saveAcademic = async () => {
       const data = {};
@@ -615,16 +875,15 @@
       await updateDoc(doc(db, "applicants", currentUser.uid), { academic: data, "onboarding.academic": true });
       applicantData.academic = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), academic: true };
       document.getElementById('academicStatus').textContent = '✓ Saved';
-      updateProgress();
+      updateProgress(); applyLocks();
     };
     window.saveColleges = async () => {
-      const ranks = {};
-      document.querySelectorAll('[data-college]').forEach(el => { if (el.value) ranks[el.getAttribute('data-college')] = Number(el.value); });
-      if (Object.keys(ranks).length < 3) { alert('Pick at least 3 colleges'); return; }
-      await updateDoc(doc(db, "applicants", currentUser.uid), { collegeChoices: { ranks, submittedAt: new Date().toISOString() }, "onboarding.college": true });
-      applicantData.collegeChoices = { ranks }; applicantData.onboarding = { ...(applicantData.onboarding||{}), college: true };
+      const order = [...document.querySelectorAll('#collegeChosen .college-card')].map(el => el.dataset.college);
+      if (order.length < 3) { alert('Pick at least 3 colleges'); return; }
+      await updateDoc(doc(db, "applicants", currentUser.uid), { collegeChoices: { order, submittedAt: new Date().toISOString() }, "onboarding.college": true });
+      applicantData.collegeChoices = { order }; applicantData.onboarding = { ...(applicantData.onboarding||{}), college: true };
       document.getElementById('collegeStatus').textContent = '✓ Submitted';
-      updateProgress();
+      updateProgress(); applyLocks();
     };
     window.saveInterview = async () => {
       const data = {};
@@ -633,61 +892,8 @@
       await updateDoc(doc(db, "applicants", currentUser.uid), { interview: data, "onboarding.interview": true });
       applicantData.interview = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), interview: true };
       document.getElementById('interviewStatus').textContent = '✓ Submitted';
-      updateProgress();
+      updateProgress(); applyLocks();
     };
-
-    // ── CommonApp PDF ──
-    window.uploadCommonApp = async function(e) {
-      const f = e.target.files[0]; if (!f) return;
-      if (f.size > 10 * 1024 * 1024) { alert('Max 10MB'); return; }
-      const status = document.getElementById('caStatus');
-      status.textContent = 'Uploading PDF...';
-      try {
-        const result = await cloudinaryUpload(f, 'raw', `next-genius/${currentUser.uid}`);
-        const url = result.secure_url;
-        status.textContent = 'Analyzing with AI...';
-        const reader = new FileReader();
-        reader.onload = async () => {
-          const b64 = reader.result.split(',')[1];
-          const review = await analyzePDFWithGemini(b64);
-          await updateDoc(doc(db, "applicants", currentUser.uid), {
-            commonApp: { url, publicId: result.public_id, review, uploadedAt: new Date().toISOString() },
-            "onboarding.commonapp": true
-          });
-          applicantData.commonApp = { url, review };
-          applicantData.onboarding = { ...(applicantData.onboarding||{}), commonapp: true };
-          renderCommonAppReview(review);
-          status.textContent = '✓ Reviewed';
-          updateProgress();
-        };
-        reader.readAsDataURL(f);
-      } catch (err) {
-        status.textContent = '✗ ' + err.message;
-      }
-    };
-
-    async function analyzePDFWithGemini(pdfB64) {
-      const prompt = `You are reviewing a student's CommonApp PDF for the Next Genius Scholarship. Check completeness across: (1) Personal info filled, (2) Activities section (10 activities ideal), (3) Honors section, (4) Essay drafted, (5) Course history, (6) Test scores entered if applicable, (7) Recommenders invited.
-
-For each, mark: ✅ Complete / ⚠️ Partial / ❌ Missing — with one specific suggestion if not complete.
-
-End with an Overall Summary (2-3 sentences) and the top 3 priorities to address before submission.
-
-Be specific, kind, and actionable.`;
-      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [
-            { inlineData: { mimeType: 'application/pdf', data: pdfB64 } },
-            { text: prompt }
-          ]}],
-          generationConfig: { temperature: 0.4, maxOutputTokens: 1500 }
-        })
-      });
-      const data = await resp.json();
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI review failed. Please try again.';
-    }
 
     // ── Settings ──
     window.changeEmail = async () => {
