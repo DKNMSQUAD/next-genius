@@ -236,7 +236,7 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxWHFlinU63u2pe6_9YzURPUasMfQNd8XCbP8deHcce8gii-KJP4LsOsytd87HX1JuMmw/exec";
+    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
 
     window.__saveApplicant = async function(payload) {
       const enriched = { ...payload, createdAt: serverTimestamp(), source: "next-genius.pages.dev", status: "registered" };
