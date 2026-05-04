@@ -261,9 +261,9 @@
   <!-- ═══ NAVBAR ═══ -->
   <nav class="navbar">
     <svg class="nav-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="100" cy="100" r="96" fill="#F5C842" stroke="#E8A020" stroke-width="3"/>
-      <text x="100" y="88" text-anchor="middle" font-family="'Libre Baskerville', serif" font-size="42" font-weight="700" fill="#222">NEXT</text>
-      <text x="100" y="138" text-anchor="middle" font-family="'Libre Baskerville', serif" font-size="38" font-weight="700" fill="#222">GEN<tspan font-size="34" font-style="italic">i</tspan>US</text>
+      <circle cx="100" cy="100" r="97" fill="#F5C842"/>
+      <text x="100" y="90" text-anchor="middle" font-family="'Libre Baskerville',Georgia,serif" font-size="50" font-weight="700" fill="#1a1a1a" letter-spacing="2">NEXT</text>
+      <text x="100" y="145" text-anchor="middle" font-family="'Libre Baskerville',Georgia,serif" font-size="44" font-weight="700" fill="#1a1a1a" letter-spacing="1">GEN<tspan font-style="italic" font-size="40">i</tspan>US</text>
     </svg>
 
     <div class="nav-links" id="navLinks">
@@ -290,13 +290,13 @@
 
       <div class="tagline">Are you the Next Genius?</div>
 
-      <a href="#apply" class="apply-btn" onclick="document.getElementById('formSection').scrollIntoView({behavior:'smooth'})">Apply Now</a>
+      <a href="#apply" class="apply-btn" onclick="event.preventDefault(); var fs=document.getElementById('formSection'); fs.style.display='block'; setTimeout(function(){fs.scrollIntoView({behavior:'smooth'})},100);">Apply Now</a>
     </div>
 
     <div class="hero-video">
       <iframe
-        src="https://www.youtube.com/embed/U3yudKOxcI8"
-        title="Learn About The Next Genius Scholarship Program"
+        src="https://www.youtube.com/embed/kpsfS_d3JYg"
+        title="How to Get Full Scholarship in The Next Genius Scholarship Program"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
       </iframe>
@@ -306,7 +306,7 @@
   <div class="divider"></div>
 
   <!-- ═══ APPLICATION FORM ═══ -->
-  <section class="form-section" id="formSection">
+  <section class="form-section" id="formSection" style="display:none;">
     <div id="formContent">
       <h2>Next Genius Pre-College Scholarship Registration</h2>
       <p class="form-subtitle">This registration form is for grade 8 - 12 students applying for Next Genius Pre-College Scholarships.</p>
