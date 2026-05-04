@@ -223,8 +223,32 @@
     <a href="#">Summer Scholarships</a>
   </footer>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
+      authDomain: "next-genius-auto.firebaseapp.com",
+      projectId: "next-genius-auto",
+      storageBucket: "next-genius-auto.firebasestorage.app",
+      messagingSenderId: "557092273631",
+      appId: "1:557092273631:web:192264bb43324a69a4186a"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxWHFlinU63u2pe6_9YzURPUasMfQNd8XCbP8deHcce8gii-KJP4LsOsytd87HX1JuMmw/exec";
+
+    window.__saveApplicant = async function(payload) {
+      const enriched = { ...payload, createdAt: serverTimestamp(), source: "next-genius.pages.dev", status: "registered" };
+      const tasks = [ addDoc(collection(db, "applicants"), enriched).catch(e => ({ error: "firestore", detail: String(e) })) ];
+      if (SHEET_WEBHOOK_URL && !SHEET_WEBHOOK_URL.startsWith("__")) {
+        tasks.push(fetch(SHEET_WEBHOOK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ ...payload, createdAt: new Date().toISOString() }) }).catch(e => ({ error: "sheet", detail: String(e) })));
+      }
+      return Promise.all(tasks);
+    };
+  </script>
   <script>
-    function submitForm() {
+    async function submitForm() {
       document.querySelectorAll('.field').forEach(f => { f.classList.remove('error'); const em = f.querySelector('.error-msg'); if (em) em.remove(); });
       let valid = true;
       [['f-email','email'],['f-firstName','firstName'],['f-lastName','lastName'],['f-grade','grade'],['f-school','school'],['f-city','city'],['f-primary','primaryMobile'],['f-alternate','alternateMobile'],['f-hear','hearAbout'],['f-hearDetail','hearDetail']].forEach(([fId, inputId]) => {
@@ -234,7 +258,26 @@
       if (email && !email.includes('@')) { markError('f-email', 'Please enter a valid email'); valid = false; }
       if (document.querySelectorAll('#f-programs input[type="checkbox"]:checked').length === 0) { markError('f-programs', 'Select at least one program'); valid = false; }
       if (!valid) { document.querySelector('.field.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
-      document.getElementById('successText').textContent = 'Thank you, ' + document.getElementById('firstName').value.trim() + '! Your application has been received. The Next Genius team will review your registration and reach out soon.';
+      const programs = Array.from(document.querySelectorAll('#f-programs input[type="checkbox"]:checked')).map(c => c.value);
+      const payload = {
+        email: document.getElementById('email').value.trim(),
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        grade: document.getElementById('grade').value,
+        school: document.getElementById('school').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        primaryMobile: document.getElementById('primaryMobile').value.trim(),
+        alternateMobile: document.getElementById('alternateMobile').value.trim(),
+        secondaryEmail: document.getElementById('secondaryEmail').value.trim(),
+        programs: programs,
+        hearAbout: document.getElementById('hearAbout').value,
+        hearDetail: document.getElementById('hearDetail').value.trim()
+      };
+      const btn = document.querySelector('.submit-btn');
+      btn.disabled = true; btn.textContent = 'Submitting...';
+      try { await window.__saveApplicant(payload); }
+      catch (err) { console.error(err); alert('Submission error. Please try again.'); btn.disabled = false; btn.textContent = 'Submit'; return; }
+      document.getElementById('successText').textContent = 'Thank you, ' + payload.firstName + '! Your application has been received. The Next Genius team will review your registration and reach out soon.';
       document.getElementById('formContent').style.display = 'none';
       document.getElementById('successMsg').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
