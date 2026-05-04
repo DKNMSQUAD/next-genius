@@ -23,26 +23,50 @@
     .topbar .user button { background: none; border: 1px solid #ddd; padding: 6px 14px; border-radius: 6px; font-family: inherit; cursor: pointer; font-size: 13px; }
     .topbar .user button:hover { background: #f5f5f5; }
 
-    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 73px); }
-    .sidebar { background: #fff; border-right: 1px solid #eee; padding: 24px 0; }
+    .layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 73px); }
+    .sidebar {
+      background: #fff; border-right: 1px solid #eee;
+      padding: 16px 0; display: flex; flex-direction: column;
+    }
+    .sidebar .section-label {
+      font-size: 11px; font-weight: 600; color: #999;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 14px 24px 6px;
+    }
     .sidebar a {
       display: flex; align-items: center; gap: 12px;
-      padding: 12px 24px; font-size: 14px; font-weight: 500; color: #444;
-      text-decoration: none; border-left: 3px solid transparent;
-      cursor: pointer;
+      margin: 1px 12px; padding: 10px 14px;
+      font-size: 14px; font-weight: 500; color: #444;
+      text-decoration: none; border-radius: 8px;
+      cursor: pointer; transition: background 0.12s, color 0.12s;
     }
-    .sidebar a:hover { background: #fafafa; }
-    .sidebar a.active { color: #111; border-left-color: #FFC72C; background: #fffaf0; }
+    .sidebar a:hover { background: #f7f7f7; color: #111; }
+    .sidebar a.active {
+      color: #111; background: #fff7e0;
+      box-shadow: inset 3px 0 0 #FFC72C;
+    }
+    .sidebar a.active .ico { color: #E8A020; }
     .sidebar a.locked { color: #bbb; cursor: not-allowed; }
-    .sidebar a.locked:hover { background: transparent; }
-    .sidebar a .icon { width: 18px; text-align: center; font-size: 14px; }
-    .sidebar a .check { margin-left: auto; color: #4caf50; font-size: 14px; display: none; }
-    .sidebar a .lock {
-      margin-left: auto; color: #999; font-size: 11px; display: none;
-      letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500;
-      background: #f0f0f0; padding: 2px 8px; border-radius: 4px;
+    .sidebar a.locked:hover { background: transparent; color: #bbb; }
+    .sidebar a.locked .ico { color: #ccc; }
+    .sidebar a .ico {
+      width: 18px; height: 18px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center; color: #888;
     }
-    .sidebar a.locked .lock { display: inline; }
+    .sidebar a .ico svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .sidebar a .label { flex: 1; }
+    .sidebar a .check {
+      color: #4caf50; display: none; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%; background: #e8f5e9;
+    }
+    .sidebar a .check svg { width: 12px; height: 12px; stroke: #4caf50; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .sidebar a .lock-ico { color: #ccc; display: none; }
+    .sidebar a .lock-ico svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .sidebar a.locked .lock-ico { display: inline-flex; }
+    .sidebar a.exit { color: #d93025; }
+    .sidebar a.exit:hover { background: #fef2f2; color: #d93025; }
+    .sidebar-spacer { flex: 1; }
+    .sidebar hr { border: none; border-top: 1px solid #f0f0f0; margin: 12px 24px; }
 
     .main { padding: 32px 40px; max-width: 920px; }
     .panel { display: none; }
@@ -285,16 +309,73 @@
 
     <div class="layout">
       <nav class="sidebar" id="sidebar">
-        <a data-tab="home" class="active"><span class="icon">⌂</span> Home</a>
-        <a data-tab="photo" data-requires=""><span class="icon">⊙</span> Photo <span class="check" data-check="photo">✓</span><span class="lock" data-lock="photo">Locked</span></a>
-        <a data-tab="personal" data-requires="photo"><span class="icon">☰</span> Personal Profile <span class="check" data-check="personal">✓</span><span class="lock" data-lock="personal">Locked</span></a>
-        <a data-tab="academic" data-requires="personal"><span class="icon">⬢</span> Academic Profile <span class="check" data-check="academic">✓</span><span class="lock" data-lock="academic">Locked</span></a>
-        <a data-tab="college" data-requires="academic"><span class="icon">⛬</span> College Discovery <span class="check" data-check="college">✓</span><span class="lock" data-lock="college">Locked</span></a>
-        <a data-tab="checklist"><span class="icon">✓</span> Application Checklist <span class="check" data-check="checklist">✓</span></a>
-        <a data-tab="interview" data-requires="checklist"><span class="icon">▶</span> Interview <span class="check" data-check="interview">✓</span><span class="lock" data-lock="interview">Locked</span></a>
-        <a data-tab="status"><span class="icon">◷</span> Status</a>
-        <a data-tab="settings"><span class="icon">⚙</span> Settings</a>
-        <a data-tab="exit" style="margin-top:auto; color:#d93025;"><span class="icon">✕</span> Exit Process</a>
+        <a data-tab="home" class="active">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 12L12 4L21 12"/><path d="M5 10V20H19V10"/></svg></span>
+          <span class="label">Home</span>
+        </a>
+
+        <div class="section-label">Onboarding</div>
+
+        <a data-tab="photo" data-requires="">
+          <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="11" r="3.5"/><path d="M6 19c1.5-2.5 3.5-3.5 6-3.5s4.5 1 6 3.5"/></svg></span>
+          <span class="label">Photo</span>
+          <span class="check" data-check="photo"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="photo"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+        </a>
+
+        <a data-tab="personal" data-requires="photo">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8z"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span>
+          <span class="label">Personal Profile</span>
+          <span class="check" data-check="personal"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="personal"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+        </a>
+
+        <a data-tab="academic" data-requires="personal">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 4l10 5-10 5L2 9l10-5z"/><path d="M6 11v5c0 2 3 3 6 3s6-1 6-3v-5"/></svg></span>
+          <span class="label">Academic Profile</span>
+          <span class="check" data-check="academic"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="academic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+        </a>
+
+        <a data-tab="college" data-requires="academic">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg></span>
+          <span class="label">College Discovery</span>
+          <span class="check" data-check="college"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="college"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+        </a>
+
+        <a data-tab="checklist">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg></span>
+          <span class="label">Application Checklist</span>
+          <span class="check" data-check="checklist"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+        </a>
+
+        <a data-tab="interview" data-requires="checklist">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M17 10l4-2v8l-4-2z"/></svg></span>
+          <span class="label">Interview</span>
+          <span class="check" data-check="interview"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="interview"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+        </a>
+
+        <div class="section-label">Account</div>
+
+        <a data-tab="status">
+          <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+          <span class="label">Status</span>
+        </a>
+
+        <a data-tab="settings">
+          <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 01-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 01-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 012.8-2.8l.1.1a1.7 1.7 0 001.8.3h0a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 012.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8v0a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg></span>
+          <span class="label">Settings</span>
+        </a>
+
+        <div class="sidebar-spacer"></div>
+        <hr>
+
+        <a data-tab="exit" class="exit">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
+          <span class="label">Exit Process</span>
+        </a>
       </nav>
 
       <main class="main">
@@ -650,7 +731,7 @@
       steps.forEach(s => {
         const bar = document.querySelector(`#progressBar div[data-step="${s}"]`);
         const check = document.querySelector(`.sidebar a[data-tab="${s}"] [data-check="${s}"]`);
-        if (ob[s]) { if (bar) bar.classList.add('done'); if (check) check.style.display = 'inline'; done++; }
+        if (ob[s]) { if (bar) bar.classList.add('done'); if (check) check.style.display = 'inline-flex'; done++; }
         else { if (bar) bar.classList.remove('done'); if (check) check.style.display = 'none'; }
       });
       // allocated extra step
