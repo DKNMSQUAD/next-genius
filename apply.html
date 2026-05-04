@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apply | Next Genius</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Open Sans', sans-serif; background: #fff; color: #333; }
+
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 48px; background: #fff; border-bottom: 1px solid #eee;
+    }
+    .nav-logo { height: 72px; width: 72px; cursor: pointer; flex-shrink: 0; }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a { font-size: 15px; font-weight: 500; color: #222; text-decoration: none; }
+    .nav-links a:hover { color: #E8A020; }
+    .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .hamburger span { width: 24px; height: 2.5px; background: #333; border-radius: 2px; }
+
+    .form-section { max-width: 720px; margin: 0 auto; padding: 48px 48px 80px; }
+    .form-section h2 {
+      font-family: 'Libre Baskerville', serif; font-size: 26px; color: #111; margin-bottom: 6px;
+    }
+    .form-subtitle { font-size: 14px; color: #666; margin-bottom: 8px; }
+    .form-required-note { font-size: 13px; color: #999; margin-bottom: 32px; }
+    .form-required-note span { color: #d93025; }
+
+    .field { margin-bottom: 24px; }
+    .field label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 6px; }
+    .field label .req { color: #d93025; margin-left: 2px; }
+    .field .hint { font-size: 12px; color: #888; margin-bottom: 6px; }
+    .field input[type="text"], .field input[type="email"], .field input[type="tel"], .field select {
+      width: 100%; padding: 10px 14px; font-size: 14px; font-family: 'Open Sans', sans-serif;
+      border: 1px solid #ccc; border-radius: 4px; background: #fff; color: #333; outline: none;
+    }
+    .field input:focus, .field select:focus { border-color: #E8A020; }
+    .field.error input, .field.error select { border-color: #d93025; }
+    .field .error-msg { font-size: 12px; color: #d93025; margin-top: 4px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .checkbox-group label {
+      display: flex; align-items: center; gap: 10px; font-weight: 400; font-size: 14px;
+      color: #444; cursor: pointer; padding: 6px 8px; border-radius: 4px;
+    }
+    .checkbox-group label:hover { background: #f8f4e8; }
+    .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; accent-color: #E8A020; cursor: pointer; }
+
+    .form-actions { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+    .submit-btn {
+      font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; color: #fff;
+      background: #E8A020; border: none; border-radius: 4px; padding: 12px 36px; cursor: pointer;
+    }
+    .submit-btn:hover { background: #D4941A; }
+    .clear-btn { font-size: 14px; color: #E8A020; background: none; border: none; cursor: pointer; font-weight: 500; }
+    .clear-btn:hover { text-decoration: underline; }
+    .form-footer-note { font-size: 12px; color: #999; margin-top: 12px; }
+
+    .success-msg { text-align: center; padding: 60px 24px; }
+    .success-msg .check {
+      width: 64px; height: 64px; border-radius: 50%; background: #E8A020;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; font-size: 28px; color: #fff;
+    }
+    .success-msg h3 { font-family: 'Libre Baskerville', serif; font-size: 22px; color: #111; margin-bottom: 10px; }
+    .success-msg p { font-size: 14px; color: #666; line-height: 1.6; }
+
+    .footer {
+      background: #f5f5f5; padding: 32px 48px; display: flex; justify-content: center;
+      gap: 48px; flex-wrap: wrap; border-top: 1px solid #e0e0e0;
+    }
+    .footer a { font-size: 14px; color: #444; text-decoration: none; }
+    .footer a:hover { color: #E8A020; }
+
+    @media (max-width: 860px) {
+      .navbar { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0;
+        background: #fff; padding: 16px 20px; border-bottom: 1px solid #eee; gap: 16px;
+      }
+      .hamburger { display: flex; }
+      .form-section { padding: 32px 20px 60px; }
+      .field-row { grid-template-columns: 1fr; }
+      .footer { padding: 24px 20px; gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html"><img class="nav-logo" src="NG_Logo.avif" alt="Next Genius Logo"></a>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="#">About Us</a>
+      <a href="#">Scholars</a>
+      <a href="#">Pre-College Scholarships</a>
+    </div>
+    <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <section class="form-section">
+    <div id="formContent">
+      <h2>Next Genius Pre-College Scholarship Registration</h2>
+      <p class="form-subtitle">This registration form is for grade 8 - 12 students applying for Next Genius Pre-College Scholarships.</p>
+      <p class="form-required-note"><span>*</span> Indicates required question</p>
+
+      <div class="field" id="f-email">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="Your email">
+      </div>
+
+      <div class="field-row">
+        <div class="field" id="f-firstName">
+          <label>Student First Name <span class="req">*</span></label>
+          <input type="text" id="firstName" placeholder="Your answer">
+        </div>
+        <div class="field" id="f-lastName">
+          <label>Last Name / Surname <span class="req">*</span></label>
+          <input type="text" id="lastName" placeholder="Your answer">
+        </div>
+      </div>
+
+      <div class="field" id="f-grade">
+        <label>Grade <span class="req">*</span></label>
+        <p class="hint">Select which grade you'll be in on July 1, 2026.</p>
+        <select id="grade">
+          <option value="">Choose</option>
+          <option>8th</option><option>9th</option><option>10th</option>
+          <option>11th</option><option>12th</option><option>Other</option>
+        </select>
+      </div>
+
+      <div class="field" id="f-school">
+        <label>School <span class="req">*</span></label>
+        <p class="hint">Enter full school name properly. Do not enter short form/abbreviations.</p>
+        <input type="text" id="school" placeholder="Your answer">
+      </div>
+
+      <div class="field" id="f-city">
+        <label>Which city is your school located in? <span class="req">*</span></label>
+        <input type="text" id="city" placeholder="Your answer">
+      </div>
+
+      <div class="field-row">
+        <div class="field" id="f-primary">
+          <label>Primary Mobile Number <span class="req">*</span></label>
+          <p class="hint">For India, enter 10 digits. Outside India, include country code.</p>
+          <input type="tel" id="primaryMobile" placeholder="Your answer">
+        </div>
+        <div class="field" id="f-alternate">
+          <label>Alternate Mobile Number <span class="req">*</span></label>
+          <input type="tel" id="alternateMobile" placeholder="Your answer">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Secondary Email</label>
+        <input type="email" id="secondaryEmail" placeholder="Your answer">
+      </div>
+
+      <div class="field" id="f-programs">
+        <label>Which of these programs are you interested in? <span class="req">*</span></label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" value="Summer Program in the Singapore"> Summer Program in the Singapore</label>
+          <label><input type="checkbox" value="Summer Program in the UK"> Summer Program in the UK</label>
+          <label><input type="checkbox" value="Summer Program in the Europe"> Summer Program in the Europe</label>
+          <label><input type="checkbox" value="Summer Program in the US"> Summer Program in the US</label>
+          <label><input type="checkbox" value="Online Bootcamp on Future Skills"> Online Bootcamp on Future Skills</label>
+          <label><input type="checkbox" value="Online Research Program"> Online Research Program</label>
+          <label><input type="checkbox" value="All of these"> All of these</label>
+        </div>
+      </div>
+
+      <div class="field" id="f-hear">
+        <label>How did you hear about this opportunity? <span class="req">*</span></label>
+        <select id="hearAbout">
+          <option value="">Choose</option>
+          <option>School Counselor / Principal / Teacher</option>
+          <option>Private Counselor</option>
+          <option>Direct Email / WhatsApp message from Next Genius</option>
+          <option>Through a friend</option>
+          <option>Through a Next Genius Webinar</option>
+          <option>Skillzo</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="field" id="f-hearDetail">
+        <label>How did you hear about this opportunity? Share the name of the counselor or organization here. <span class="req">*</span></label>
+        <input type="text" id="hearDetail" placeholder="Your answer">
+      </div>
+
+      <p class="form-footer-note" style="font-style:italic; margin-bottom:8px;">A copy of your responses will be emailed to the address you provided.</p>
+
+      <div class="form-actions">
+        <button class="submit-btn" onclick="submitForm()">Submit</button>
+        <button class="clear-btn" onclick="clearForm()">Clear form</button>
+      </div>
+
+      <p class="form-footer-note">Never submit passwords through this form.</p>
+    </div>
+
+    <div id="successMsg" class="success-msg" style="display:none;">
+      <div class="check">&#10003;</div>
+      <h3>Registration Submitted!</h3>
+      <p id="successText"></p>
+      <br>
+      <a href="index.html" style="color:#E8A020; font-weight:600;">Back to Home</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <a href="#">Terms &amp; Conditions</a>
+    <a href="https://www.instagram.com/nextgenius_india/" target="_blank" rel="noopener">Instagram</a>
+    <a href="mailto:nextgeniusindia@gmail.com">nextgeniusindia@gmail.com</a>
+    <a href="#">Summer Scholarships</a>
+  </footer>
+
+  <script>
+    function submitForm() {
+      document.querySelectorAll('.field').forEach(f => { f.classList.remove('error'); const em = f.querySelector('.error-msg'); if (em) em.remove(); });
+      let valid = true;
+      [['f-email','email'],['f-firstName','firstName'],['f-lastName','lastName'],['f-grade','grade'],['f-school','school'],['f-city','city'],['f-primary','primaryMobile'],['f-alternate','alternateMobile'],['f-hear','hearAbout'],['f-hearDetail','hearDetail']].forEach(([fId, inputId]) => {
+        if (!document.getElementById(inputId).value.trim()) { markError(fId, 'This is a required question'); valid = false; }
+      });
+      const email = document.getElementById('email').value.trim();
+      if (email && !email.includes('@')) { markError('f-email', 'Please enter a valid email'); valid = false; }
+      if (document.querySelectorAll('#f-programs input[type="checkbox"]:checked').length === 0) { markError('f-programs', 'Select at least one program'); valid = false; }
+      if (!valid) { document.querySelector('.field.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+      document.getElementById('successText').textContent = 'Thank you, ' + document.getElementById('firstName').value.trim() + '! Your application has been received. The Next Genius team will review your registration and reach out soon.';
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function markError(fieldId, msg) { const f = document.getElementById(fieldId); f.classList.add('error'); const d = document.createElement('div'); d.className = 'error-msg'; d.textContent = msg; f.appendChild(d); }
+    function clearForm() {
+      document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach(i => i.value = '');
+      document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+      document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      document.querySelectorAll('.field').forEach(f => { f.classList.remove('error'); const em = f.querySelector('.error-msg'); if (em) em.remove(); });
+      document.getElementById('formContent').style.display = 'block';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

@@ -286,148 +286,18 @@
 
       <div class="tagline">Are you the Next Genius?</div>
 
-      <a href="#apply" class="apply-btn" onclick="event.preventDefault(); var fs=document.getElementById('formSection'); fs.style.display='block'; setTimeout(function(){fs.scrollIntoView({behavior:'smooth'})},100);">Apply Now</a>
+      <a href="apply.html" class="apply-btn">Apply Now</a>
     </div>
 
     <div class="hero-video">
       <iframe
-        src="https://www.youtube.com/embed/kpsfS_d3JYg?start=13"
+        src="https://www.youtube.com/embed/kpsfS_d3JYg?start=13&autoplay=1&mute=1"
         title="How to Get Full Scholarship in The Next Genius Scholarship Program"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
       </iframe>
     </div>
   </section>
-
-  <div class="divider"></div>
-
-  <!-- ═══ APPLICATION FORM ═══ -->
-  <section class="form-section" id="formSection" style="display:none;">
-    <div id="formContent">
-      <h2>Next Genius Pre-College Scholarship Registration</h2>
-      <p class="form-subtitle">This registration form is for grade 8 - 12 students applying for Next Genius Pre-College Scholarships.</p>
-      <p class="form-required-note"><span>*</span> Indicates required question</p>
-
-      <!-- Email -->
-      <div class="field" id="f-email">
-        <label>Email <span class="req">*</span></label>
-        <input type="email" id="email" placeholder="Your email">
-      </div>
-
-      <!-- Name row -->
-      <div class="field-row">
-        <div class="field" id="f-firstName">
-          <label>Student First Name <span class="req">*</span></label>
-          <input type="text" id="firstName" placeholder="Your answer">
-        </div>
-        <div class="field" id="f-lastName">
-          <label>Last Name / Surname <span class="req">*</span></label>
-          <input type="text" id="lastName" placeholder="Your answer">
-        </div>
-      </div>
-
-      <!-- Grade -->
-      <div class="field" id="f-grade">
-        <label>Grade <span class="req">*</span></label>
-        <p class="hint">Select which grade you'll be in on July 1, 2026.</p>
-        <select id="grade">
-          <option value="">Choose</option>
-          <option>8th</option>
-          <option>9th</option>
-          <option>10th</option>
-          <option>11th</option>
-          <option>12th</option>
-          <option>Other</option>
-        </select>
-      </div>
-
-      <!-- School -->
-      <div class="field" id="f-school">
-        <label>School <span class="req">*</span></label>
-        <p class="hint">Enter full school name properly. Do not enter short form/abbreviations.</p>
-        <input type="text" id="school" placeholder="Your answer">
-      </div>
-
-      <!-- City -->
-      <div class="field" id="f-city">
-        <label>Which city is your school located in? <span class="req">*</span></label>
-        <input type="text" id="city" placeholder="Your answer">
-      </div>
-
-      <!-- Phone row -->
-      <div class="field-row">
-        <div class="field" id="f-primary">
-          <label>Primary Mobile Number <span class="req">*</span></label>
-          <p class="hint">For India, enter 10 digits. Outside India, include country code.</p>
-          <input type="tel" id="primaryMobile" placeholder="Your answer">
-        </div>
-        <div class="field" id="f-alternate">
-          <label>Alternate Mobile Number <span class="req">*</span></label>
-          <input type="tel" id="alternateMobile" placeholder="Your answer">
-        </div>
-      </div>
-
-      <!-- Secondary email -->
-      <div class="field">
-        <label>Secondary Email</label>
-        <input type="email" id="secondaryEmail" placeholder="Your answer">
-      </div>
-
-      <!-- Programs checkboxes -->
-      <div class="field" id="f-programs">
-        <label>Which of these programs are you interested in? <span class="req">*</span></label>
-        <div class="checkbox-group">
-          <label><input type="checkbox" value="Summer Program in the Singapore"> Summer Program in the Singapore</label>
-          <label><input type="checkbox" value="Summer Program in the UK"> Summer Program in the UK</label>
-          <label><input type="checkbox" value="Summer Program in the Europe"> Summer Program in the Europe</label>
-          <label><input type="checkbox" value="Summer Program in the US"> Summer Program in the US</label>
-          <label><input type="checkbox" value="Online Bootcamp on Future Skills"> Online Bootcamp on Future Skills</label>
-          <label><input type="checkbox" value="Online Research Program"> Online Research Program</label>
-          <label><input type="checkbox" value="All of these"> All of these</label>
-        </div>
-      </div>
-
-      <!-- How did you hear -->
-      <div class="field" id="f-hear">
-        <label>How did you hear about this opportunity? <span class="req">*</span></label>
-        <select id="hearAbout">
-          <option value="">Choose</option>
-          <option>School Counselor / Principal / Teacher</option>
-          <option>Private Counselor</option>
-          <option>Direct Email / WhatsApp message from Next Genius</option>
-          <option>Through a friend</option>
-          <option>Through a Next Genius Webinar</option>
-          <option>Skillzo</option>
-          <option>Other</option>
-        </select>
-      </div>
-
-      <!-- Detail -->
-      <div class="field" id="f-hearDetail">
-        <label>How did you hear about this opportunity? Share the name of the counselor or organization here. <span class="req">*</span></label>
-        <input type="text" id="hearDetail" placeholder="Your answer">
-      </div>
-
-      <p class="form-footer-note" style="font-style:italic; margin-bottom:8px;">A copy of your responses will be emailed to the address you provided.</p>
-
-      <div class="form-actions">
-        <button class="submit-btn" onclick="submitForm()">Submit</button>
-        <button class="clear-btn" onclick="clearForm()">Clear form</button>
-      </div>
-
-      <p class="form-footer-note">Never submit passwords through this form.</p>
-    </div>
-
-    <!-- Success state -->
-    <div id="successMsg" class="success-msg" style="display:none;">
-      <div class="check">&#10003;</div>
-      <h3>Registration Submitted!</h3>
-      <p id="successText"></p>
-      <button class="clear-btn" style="margin-top:20px;font-size:15px;" onclick="clearForm()">Submit another response</button>
-    </div>
-  </section>
-
-  <div class="divider"></div>
 
   <!-- ═══ FOOTER ═══ -->
   <footer class="footer">
@@ -437,87 +307,5 @@
     <a href="#precollege">Summer Scholarships</a>
   </footer>
 
-  <script>
-    function submitForm() {
-      // Clear old errors
-      document.querySelectorAll('.field').forEach(f => {
-        f.classList.remove('error');
-        const em = f.querySelector('.error-msg');
-        if (em) em.remove();
-      });
-
-      let valid = true;
-      const required = [
-        ['f-email', 'email'],
-        ['f-firstName', 'firstName'],
-        ['f-lastName', 'lastName'],
-        ['f-grade', 'grade'],
-        ['f-school', 'school'],
-        ['f-city', 'city'],
-        ['f-primary', 'primaryMobile'],
-        ['f-alternate', 'alternateMobile'],
-        ['f-hear', 'hearAbout'],
-        ['f-hearDetail', 'hearDetail']
-      ];
-
-      required.forEach(([fId, inputId]) => {
-        const val = document.getElementById(inputId).value.trim();
-        if (!val) {
-          markError(fId, 'This is a required question');
-          valid = false;
-        }
-      });
-
-      // Email validation
-      const email = document.getElementById('email').value.trim();
-      if (email && !email.includes('@')) {
-        markError('f-email', 'Please enter a valid email');
-        valid = false;
-      }
-
-      // Checkbox validation
-      const checked = document.querySelectorAll('#f-programs input[type="checkbox"]:checked');
-      if (checked.length === 0) {
-        markError('f-programs', 'Select at least one program');
-        valid = false;
-      }
-
-      if (!valid) {
-        const firstErr = document.querySelector('.field.error');
-        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-      }
-
-      // Show success
-      const name = document.getElementById('firstName').value.trim();
-      document.getElementById('successText').textContent =
-        'Thank you, ' + name + '! Your application has been received. The Next Genius team will review your registration and reach out soon.';
-      document.getElementById('formContent').style.display = 'none';
-      document.getElementById('successMsg').style.display = 'block';
-      document.getElementById('successMsg').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    function markError(fieldId, msg) {
-      const field = document.getElementById(fieldId);
-      field.classList.add('error');
-      const div = document.createElement('div');
-      div.className = 'error-msg';
-      div.textContent = msg;
-      field.appendChild(div);
-    }
-
-    function clearForm() {
-      document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach(i => i.value = '');
-      document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-      document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-      document.querySelectorAll('.field').forEach(f => {
-        f.classList.remove('error');
-        const em = f.querySelector('.error-msg');
-        if (em) em.remove();
-      });
-      document.getElementById('formContent').style.display = 'block';
-      document.getElementById('successMsg').style.display = 'none';
-    }
-  </script>
 </body>
 </html>
