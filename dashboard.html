@@ -1399,14 +1399,30 @@
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: SYSTEM }] },
             contents: botHistory.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
-            generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
+            generationConfig: { temperature: 0.7, maxOutputTokens: 600 },
+            safetySettings: [
+              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' }
+            ]
           })
         });
         const data = await resp.json();
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '(no response)';
+        let reply;
+        if (data.error) reply = '⚠ ' + (data.error.message || 'API error');
+        else if (data.promptFeedback?.blockReason) reply = '⚠ Blocked: ' + data.promptFeedback.blockReason;
+        else {
+          const cand = data.candidates?.[0];
+          reply = cand?.content?.parts?.map(p => p.text).filter(Boolean).join('\n')
+            || (cand?.finishReason === 'MAX_TOKENS' ? 'Reply was too long. Please ask a simpler question.' : '')
+            || (cand?.finishReason === 'SAFETY' ? 'Blocked by safety filter — please rephrase.' : '')
+            || 'Could you please ask a more specific question?';
+        }
         botHistory.push({ role: 'assistant', content: reply });
         const lEl = document.getElementById(loadingId);
-        lEl.classList.remove('loading'); lEl.innerHTML = escapeHtml(reply);
+        lEl.classList.remove('loading');
+        lEl.innerHTML = escapeHtml(reply).replace(/\n/g,'<br>');
       } catch (e) {
         const lEl = document.getElementById(loadingId);
         lEl.innerHTML = 'Error: ' + e.message;
