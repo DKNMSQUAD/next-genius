@@ -100,17 +100,79 @@
     .field input:focus, .field textarea:focus, .field select:focus { border-color: #FFC72C; }
     .field textarea { min-height: 100px; resize: vertical; }
 
-    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: flex-start; justify-content: center; padding: 24px; overflow-y: auto; }
     .modal-bg.open { display: flex; }
-    .modal { background: #fff; border-radius: 14px; max-width: 720px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .modal-head { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
-    .modal-head h2 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; }
-    .modal-head button { background: none; border: none; font-size: 22px; cursor: pointer; color: #9ca3af; }
-    .modal-body { padding: 22px 24px; }
+    .modal { background: #fff; border-radius: 14px; max-width: 880px; width: 100%; margin: auto 0; box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden; }
+    .modal-head { padding: 14px 22px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+    .modal-head h2 { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: #6b7280; letter-spacing: 0.3px; }
+    .modal-head button { background: none; border: none; font-size: 22px; cursor: pointer; color: #9ca3af; padding: 0; line-height: 1; }
+    .modal-head button:hover { color: #111; }
+    .modal-body { padding: 0; }
 
-    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
-    .detail-item .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; font-weight: 600; margin-bottom: 2px; }
-    .detail-item .val { font-size: 14px; color: #111; word-break: break-word; }
+    .detail-hero {
+      display: flex; gap: 20px; padding: 24px 28px; align-items: center;
+      background: linear-gradient(180deg, #fffaf0 0%, #fff 100%);
+      border-bottom: 1px solid #f0e6d0;
+    }
+    .detail-hero .pic { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; background: #f3f4f6; flex-shrink: 0; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .detail-hero .pic-fallback { display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; color: #92400e; font-size: 28px; }
+    .detail-hero .meta { flex: 1; min-width: 0; }
+    .detail-hero .name { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 700; color: #111; line-height: 1.2; }
+    .detail-hero .meta .email { font-size: 14px; color: #4b5563; margin-top: 2px; }
+    .detail-hero .meta .sub { font-size: 13px; color: #6b7280; margin-top: 6px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .detail-hero .meta .sub span:not(:first-child)::before { content: '·'; margin-right: 10px; color: #d1d5db; }
+
+    .detail-section { padding: 22px 28px; border-bottom: 1px solid #f3f4f6; }
+    .detail-section:last-child { border-bottom: none; }
+    .detail-section h3 { font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #6b7280; margin-bottom: 14px; }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; }
+    .detail-item .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af; font-weight: 600; margin-bottom: 3px; }
+    .detail-item .val { font-size: 14px; color: #111; word-break: break-word; line-height: 1.5; }
+    .detail-item .val.empty { color: #d1d5db; font-style: italic; font-size: 13px; }
+
+    .step-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .step-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+      background: #f3f4f6; color: #9ca3af; border: 1px solid #e5e7eb;
+    }
+    .step-chip.done { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+    .step-chip svg { width: 12px; height: 12px; }
+
+    .score-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .score-cards .sc {
+      background: #fafafa; border: 1px solid #f0f0f0; border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .score-cards .sc .l { font-size: 11px; color: #6b7280; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; }
+    .score-cards .sc .v { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; color: #111; margin: 4px 0 6px; }
+    .score-cards .sc .b { height: 4px; background: #f0f0f0; border-radius: 2px; overflow: hidden; }
+    .score-cards .sc .b > div { height: 100%; background: #FFC72C; }
+
+    .interest-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .interest-chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: #fff7e0; color: #92400e; border: 1px solid #FFE08F; }
+
+    .ranked-list { display: flex; flex-direction: column; gap: 6px; }
+    .ranked-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 8px; }
+    .ranked-item.allocated { background: #fff7e0; border-color: #FFE08F; }
+    .ranked-item .rank { width: 22px; height: 22px; border-radius: 50%; background: #FFC72C; color: #111; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0; }
+    .ranked-item .nm { flex: 1; font-size: 13px; font-weight: 500; }
+    .ranked-item .country { font-size: 12px; color: #6b7280; }
+
+    .alloc-banner {
+      background: linear-gradient(135deg, #fffaf0 0%, #fff7e0 100%);
+      border: 1px solid #FFE08F; border-radius: 12px; padding: 16px 18px;
+    }
+    .alloc-banner .l { font-size: 11px; color: #92400e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .alloc-banner .v { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: #111; margin-top: 4px; }
+    .alloc-banner .s { font-size: 12px; color: #6b7280; margin-top: 4px; }
+
+    @media (max-width: 720px) {
+      .detail-hero { flex-direction: column; text-align: center; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .score-cards { grid-template-columns: 1fr; }
+    }
 
     .login-card {
       max-width: 380px; margin: 80px auto; background: #fff; border-radius: 14px;
@@ -557,72 +619,142 @@
     window.openDetail = function(uid) {
       const a = applicants.find(x => x.uid === uid);
       if (!a) return;
-      document.getElementById('detailName').textContent = (a.firstName || '') + ' ' + (a.lastName || '');
+      document.getElementById('detailName').textContent = 'Applicant Profile';
       const ob = a.onboarding || {};
       const inv = a.inventory?.scores || {};
       const personal = a.personal || {};
       const academic = a.academic || {};
+      const stage = stageOf(a);
+      const initials = ((a.firstName||'')[0] || '') + ((a.lastName||'')[0] || '');
+
+      const stages = [
+        ['Photo', !!ob.photo],
+        ['Personal', !!ob.personal],
+        ['Academic', !!ob.academic],
+        ['Inventory', !!ob.inventory],
+        ['College Choices', !!ob.college],
+        ['Allocation', !!a.allocation],
+        ['Interview', !!ob.interview],
+        ['Group Interview', !!ob.groupInterview]
+      ];
+
+      const choicesOrder = a.collegeChoices?.order || [];
+      const choices = choicesOrder.map((slug, i) => {
+        const c = PARTNER_COLLEGES.find(x => x.slug === slug);
+        return c ? { rank: i + 1, ...c } : null;
+      }).filter(Boolean);
+
+      const checkSvg = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg>';
+      const dotSvg = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3"/></svg>';
+
       document.getElementById('detailBody').innerHTML = `
-        ${a.photoURL ? `<div style="text-align:center; margin-bottom:18px;"><img src="${a.photoURL}" style="width:120px; height:120px; border-radius:60px; object-fit:cover;"></div>` : ''}
-        <div class="detail-grid">
-          <div class="detail-item"><div class="lbl">Email</div><div class="val">${escapeHtml(a.email)}</div></div>
-          <div class="detail-item"><div class="lbl">WhatsApp</div><div class="val">${escapeHtml(a.whatsapp || '—')}</div></div>
-          <div class="detail-item"><div class="lbl">City</div><div class="val">${escapeHtml(a.city || '—')}</div></div>
-          <div class="detail-item"><div class="lbl">School</div><div class="val">${escapeHtml(a.school || '—')}</div></div>
-          <div class="detail-item"><div class="lbl">Status</div><div class="val">${stageOf(a)}</div></div>
-          <div class="detail-item"><div class="lbl">Registered</div><div class="val">${dateShort(a.createdAt)}</div></div>
+        <div class="detail-hero">
+          ${a.photoURL ? `<img class="pic" src="${a.photoURL}" alt="">` : `<div class="pic pic-fallback">${escapeHtml(initials.toUpperCase()) || '?'}</div>`}
+          <div class="meta">
+            <div class="name">${escapeHtml((a.firstName || '') + ' ' + (a.lastName || ''))}</div>
+            <div class="email">${escapeHtml(a.email || '')}</div>
+            <div class="sub">
+              <span class="pill pill-${stage === 'registered' ? 'registered' : stage === 'allocated' || stage === 'interview' || stage === 'decision' ? 'allocated' : stage === 'exited' ? 'exited' : 'active'}">${stage}</span>
+              <span>${escapeHtml(a.city || '—')}</span>
+              <span>${escapeHtml(a.school || '—')}</span>
+              <span>Registered ${dateShort(a.createdAt)}</span>
+            </div>
+          </div>
         </div>
 
-        <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Onboarding</h3>
-        <div class="detail-grid">
-          <div class="detail-item"><div class="lbl">Photo</div><div class="val">${ob.photo ? '✓' : '—'}</div></div>
-          <div class="detail-item"><div class="lbl">Personal</div><div class="val">${ob.personal ? '✓' : '—'}</div></div>
-          <div class="detail-item"><div class="lbl">Academic</div><div class="val">${ob.academic ? '✓' : '—'}</div></div>
-          <div class="detail-item"><div class="lbl">Inventory</div><div class="val">${ob.inventory ? '✓' : '—'}</div></div>
-          <div class="detail-item"><div class="lbl">College Choices</div><div class="val">${ob.college ? '✓' : '—'}</div></div>
-          <div class="detail-item"><div class="lbl">Allocation</div><div class="val">${a.allocation ? a.allocation.college : '—'}</div></div>
-          <div class="detail-item"><div class="lbl">Interview Videos</div><div class="val">${ob.interview ? '✓' : '—'}</div></div>
-          <div class="detail-item"><div class="lbl">Group Interview</div><div class="val">${ob.groupInterview ? '✓' : '—'}</div></div>
+        <div class="detail-section">
+          <h3>Onboarding</h3>
+          <div class="step-chips">
+            ${stages.map(([label, done]) => `<span class="step-chip ${done?'done':''}">${done ? checkSvg : dotSvg}${label}</span>`).join('')}
+          </div>
+        </div>
+
+        ${a.allocation ? `
+        <div class="detail-section">
+          <h3>Allocation</h3>
+          <div class="alloc-banner">
+            <div class="l">Allocated to</div>
+            <div class="v">${escapeHtml(a.allocation.college)}</div>
+            <div class="s">Status: ${escapeHtml(a.allocation.status || 'pending')}${a.allocation.allocatedBy ? ' · by ' + escapeHtml(a.allocation.allocatedBy) : ''}</div>
+            ${a.allocation.notes ? `<div style="margin-top:8px; font-size:13px; color:#444;">Note: ${escapeHtml(a.allocation.notes)}</div>` : ''}
+          </div>
+        </div>` : ''}
+
+        <div class="detail-section">
+          <h3>Contact</h3>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="lbl">Email</div><div class="val">${escapeHtml(a.email || '')}</div></div>
+            <div class="detail-item"><div class="lbl">WhatsApp</div><div class="val ${a.whatsapp?'':'empty'}">${escapeHtml(a.whatsapp || 'not provided')}</div></div>
+            <div class="detail-item"><div class="lbl">City</div><div class="val">${escapeHtml(a.city || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">School</div><div class="val">${escapeHtml(a.school || '—')}</div></div>
+          </div>
         </div>
 
         ${inv.dominant ? `
-          <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Interest Inventory</h3>
-          <div class="detail-grid">
-            <div class="detail-item"><div class="lbl">Dominant</div><div class="val">${inv.dominant}</div></div>
-            <div class="detail-item"><div class="lbl">IQ / EQ / DQ</div><div class="val">${inv.IQ}% · ${inv.EQ}% · ${inv.DQ}%</div></div>
-            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Top Interests</div><div class="val">${(inv.topInterests || []).join(', ') || '—'}</div></div>
-          </div>` : ''}
+        <div class="detail-section">
+          <h3>Interest Inventory</h3>
+          <div class="score-cards">
+            <div class="sc"><div class="l">Analytical (IQ)</div><div class="v">${inv.IQ}%</div><div class="b"><div style="width:${inv.IQ}%"></div></div></div>
+            <div class="sc"><div class="l">Emotional (EQ)</div><div class="v">${inv.EQ}%</div><div class="b"><div style="width:${inv.EQ}%"></div></div></div>
+            <div class="sc"><div class="l">Creative (DQ)</div><div class="v">${inv.DQ}%</div><div class="b"><div style="width:${inv.DQ}%"></div></div></div>
+          </div>
+          <div style="font-size:12px; color:#6b7280; margin-bottom:10px;"><strong style="color:#111;">${inv.dominant}</strong> is the dominant strength${inv.topInterests?.length ? ' · ' + inv.topInterests.length + ' top interests' : ''}.</div>
+          ${(inv.topInterests || []).length ? `<div class="interest-chips">${inv.topInterests.map(t => `<span class="interest-chip">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+        </div>` : ''}
 
         ${personal.dob ? `
-          <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Personal Profile</h3>
+        <div class="detail-section">
+          <h3>Personal Profile</h3>
           <div class="detail-grid">
-            <div class="detail-item"><div class="lbl">DOB</div><div class="val">${escapeHtml(personal.dob)}</div></div>
+            <div class="detail-item"><div class="lbl">Date of Birth</div><div class="val">${escapeHtml(personal.dob)}</div></div>
             <div class="detail-item"><div class="lbl">Gender</div><div class="val">${escapeHtml(personal.gender || '—')}</div></div>
             <div class="detail-item"><div class="lbl">Citizenship</div><div class="val">${escapeHtml(personal.citizenship || '—')}</div></div>
             <div class="detail-item"><div class="lbl">Family Income</div><div class="val">${escapeHtml(personal.familyIncome || '—')}</div></div>
-            <div class="detail-item"><div class="lbl">Father</div><div class="val">${escapeHtml(personal.fatherName || '—')} (${escapeHtml(personal.fatherOccupation || '—')})</div></div>
-            <div class="detail-item"><div class="lbl">Mother</div><div class="val">${escapeHtml(personal.motherName || '—')} (${escapeHtml(personal.motherOccupation || '—')})</div></div>
+            <div class="detail-item"><div class="lbl">Father</div><div class="val">${escapeHtml(personal.fatherName || '—')}<div style="font-size:12px; color:#6b7280;">${escapeHtml(personal.fatherOccupation || '')}</div></div></div>
+            <div class="detail-item"><div class="lbl">Mother</div><div class="val">${escapeHtml(personal.motherName || '—')}<div style="font-size:12px; color:#6b7280;">${escapeHtml(personal.motherOccupation || '')}</div></div></div>
+            <div class="detail-item"><div class="lbl">Siblings</div><div class="val">${escapeHtml(personal.siblings || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">Languages</div><div class="val">${escapeHtml(personal.languages || '—')}</div></div>
             <div class="detail-item"><div class="lbl">Heard From</div><div class="val">${escapeHtml(personal.hearAbout || '—')}</div></div>
             <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Address</div><div class="val">${escapeHtml(personal.address || '—')}</div></div>
-            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Other Colleges</div><div class="val">${escapeHtml(personal.otherColleges || '—')}</div></div>
-          </div>` : ''}
+            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Other Colleges Applying To</div><div class="val ${personal.otherColleges?'':'empty'}">${escapeHtml(personal.otherColleges || 'not provided')}</div></div>
+          </div>
+        </div>` : ''}
 
         ${academic.school ? `
-          <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Academic Profile</h3>
+        <div class="detail-section">
+          <h3>Academic Profile</h3>
           <div class="detail-grid">
-            <div class="detail-item"><div class="lbl">Grade 10</div><div class="val">${escapeHtml(academic.grade10Board)} — ${escapeHtml(academic.grade10Score)}</div></div>
-            <div class="detail-item"><div class="lbl">Grade 11</div><div class="val">${escapeHtml(academic.grade11Board || '')} — ${escapeHtml(academic.grade11Score || '')}</div></div>
-            <div class="detail-item"><div class="lbl">Predicted 12</div><div class="val">${escapeHtml(academic.predicted12Score)}</div></div>
-            <div class="detail-item"><div class="lbl">Major</div><div class="val">${escapeHtml(academic.major)}</div></div>
-            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Subjects</div><div class="val">${escapeHtml(academic.subjects)}</div></div>
-            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Extracurriculars</div><div class="val">${escapeHtml(academic.extracurriculars || '—')}</div></div>
-          </div>` : ''}
+            <div class="detail-item"><div class="lbl">School</div><div class="val">${escapeHtml(academic.school)}</div></div>
+            <div class="detail-item"><div class="lbl">Intended Major</div><div class="val">${escapeHtml(academic.major || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">Grade 10</div><div class="val">${escapeHtml(academic.grade10Board || '—')} · ${escapeHtml(academic.grade10Score || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">Grade 11</div><div class="val">${escapeHtml(academic.grade11Board || '—')} · ${escapeHtml(academic.grade11Score || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">Predicted Grade 12</div><div class="val">${escapeHtml(academic.predicted12Score || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">Scores</div><div class="val">${[academic.sat && 'SAT ' + academic.sat, academic.act && 'ACT ' + academic.act, academic.english && 'TOEFL/IELTS ' + academic.english].filter(Boolean).join(' · ') || '—'}</div></div>
+            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Subjects</div><div class="val">${escapeHtml(academic.subjects || '—')}</div></div>
+            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Extracurriculars</div><div class="val ${academic.extracurriculars?'':'empty'}">${escapeHtml(academic.extracurriculars || '—')}</div></div>
+          </div>
+        </div>` : ''}
 
-        <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Actions</h3>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn btn-sm btn-secondary" onclick="sendToSingle('${a.email}')">Send Message</button>
-          <button class="btn btn-sm btn-secondary" onclick="resetForUser('${a.email}', '${(a.firstName||'').replace(/'/g,'')}')">Send Password Reset</button>
-          ${!a.allocation ? `<button class="btn btn-sm" onclick="quickAllocate('${a.uid}')">Allocate to college...</button>` : ''}
+        ${choices.length ? `
+        <div class="detail-section">
+          <h3>College Choices (Ranked)</h3>
+          <div class="ranked-list">
+            ${choices.map(c => `<div class="ranked-item ${a.allocation?.slug === c.slug ? 'allocated' : ''}">
+              <div class="rank">${c.rank}</div>
+              <div class="nm">${escapeHtml(c.name)}</div>
+              <div class="country">${escapeHtml(c.country)}</div>
+              ${a.allocation?.slug === c.slug ? '<span class="pill pill-done">Allocated</span>' : ''}
+            </div>`).join('')}
+          </div>
+        </div>` : ''}
+
+        <div class="detail-section">
+          <h3>Actions</h3>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-secondary" onclick="sendToSingle('${a.email}')">Send Message</button>
+            <button class="btn btn-sm btn-secondary" onclick="resetForUser('${a.email}', '${(a.firstName||'').replace(/'/g,'')}')">Send Password Reset</button>
+            ${!a.allocation ? `<button class="btn btn-sm" onclick="quickAllocate('${a.uid}')">Allocate to college</button>` : `<button class="btn btn-sm btn-secondary" onclick="quickAllocate('${a.uid}')">Re-allocate</button>`}
+          </div>
         </div>`;
       document.getElementById('detailModal').classList.add('open');
     };
