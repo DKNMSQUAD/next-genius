@@ -126,7 +126,7 @@
         }
       }
     };
-    const ADMIN_EMAILS = ['dknmsquad@gmail.com'];
+    const ADMIN_EMAILS = ['dknmsquad@gmail.com', 'mandhana.neeraj@gmail.com'];
     async function finalizeSignup(user) {
       if (ADMIN_EMAILS.includes((user.email || '').toLowerCase())) {
         document.getElementById('signupErr').textContent = 'This is an admin account, not for student registration. Please use a different email.';
