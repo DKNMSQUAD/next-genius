@@ -568,16 +568,49 @@
       toast('Reset email sent.');
     };
 
-    window.quickAllocate = async function(uid) {
-      const slug = prompt('Allocate to which partner college slug?\n\n' + PARTNER_COLLEGES.map(c => c.slug + ' = ' + c.name).join('\n'));
-      if (!slug) return;
-      const college = PARTNER_COLLEGES.find(c => c.slug === slug.trim());
-      if (!college) { alert('Unknown slug'); return; }
-      await updateDoc(doc(db, "applicants", uid), { allocation: { college: college.name, slug: college.slug, status: 'pending_acceptance', allocatedAt: new Date().toISOString() }, status: 'allocated' });
+    window.quickAllocate = function(uid) {
       const a = applicants.find(x => x.uid === uid);
-      if (a) { a.allocation = { college: college.name, slug: college.slug, status: 'pending_acceptance' }; a.status = 'allocated'; }
+      if (!a) return;
+      const order = a.collegeChoices?.order || [];
+      const choices = order.map((slug, i) => {
+        const c = PARTNER_COLLEGES.find(x => x.slug === slug);
+        return c ? { rank: i + 1, ...c } : null;
+      }).filter(Boolean);
+
+      const html = `
+        <h3 style="margin:0 0 10px; font-family:'Poppins',sans-serif; font-size:14px;">Student's ranked choices</h3>
+        ${choices.length ? choices.map(c => `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; background:#fff7e0; border:1px solid #FFE08F; border-radius:8px; margin-bottom:6px;"><div style="width:24px; height:24px; border-radius:50%; background:#FFC72C; color:#111; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">${c.rank}</div><div style="flex:1;"><strong style="font-size:14px;">${c.name}</strong><div style="font-size:12px; color:#6b7280;">${c.country}</div></div></div>`).join('') : '<p style="color:#6b7280; font-size:13px;">No college choices submitted yet.</p>'}
+
+        <h3 style="margin:18px 0 10px; font-family:'Poppins',sans-serif; font-size:14px;">Allocate to</h3>
+        <select id="allocCollege" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; margin-bottom:10px;">
+          <option value="">Select a college</option>
+          ${PARTNER_COLLEGES.map(c => `<option value="${c.slug}">${c.name} (${c.country})</option>`).join('')}
+        </select>
+        <textarea id="allocNotes" placeholder="Internal notes for this allocation (optional)" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; min-height:60px; font-family:inherit;"></textarea>
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button class="btn" onclick="confirmAllocate('${uid}')">Allocate &amp; notify student</button>
+          <button class="btn btn-secondary" onclick="closeDetail()">Cancel</button>
+        </div>`;
+
+      document.getElementById('detailName').textContent = 'Allocate — ' + (a.firstName || '') + ' ' + (a.lastName || '');
+      document.getElementById('detailBody').innerHTML = html;
+      document.getElementById('detailModal').classList.add('open');
+    };
+
+    window.confirmAllocate = async function(uid) {
+      const slug = document.getElementById('allocCollege').value;
+      if (!slug) { alert('Pick a college'); return; }
+      const notes = document.getElementById('allocNotes').value.trim();
+      const college = PARTNER_COLLEGES.find(c => c.slug === slug);
+      const a = applicants.find(x => x.uid === uid);
+      const allocation = { college: college.name, slug: college.slug, status: 'pending_acceptance', allocatedAt: new Date().toISOString(), allocatedBy: currentUser.email, notes };
+      await updateDoc(doc(db, "applicants", uid), { allocation, status: 'allocated', notifications: arrayUnion({ subject: 'You have been allocated to ' + college.name, body: 'Congratulations! After review, the Next Genius team has allocated you to ' + college.name + '. Please open your dashboard to accept this allocation and continue with the Interview stage.', date: new Date().toISOString(), read: false, from: currentUser.email }) });
+      // Send email
+      const emailUrl = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName || '') + '&subject=' + encodeURIComponent('You have been allocated to ' + college.name) + '&body=' + encodeURIComponent('Congratulations! Our team has reviewed your profile and allocated you to ' + college.name + '. Open your dashboard to accept and move to the next stage.');
+      fetch(emailUrl, { mode: 'no-cors' }).catch(()=>{});
+      if (a) { a.allocation = allocation; a.status = 'allocated'; }
       toast('Allocated to ' + college.name);
-      closeDetail(); renderApplicants(); renderOverview();
+      closeDetail(); renderApplicants(); renderOverview(); renderColleges();
     };
 
     function renderCohorts() {
@@ -591,30 +624,96 @@
         groups[key].students.push(a);
       });
       const ordered = Object.values(groups).sort((a, b) => b.key.localeCompare(a.key));
+      const monthName = (k) => { const [y,m] = k.split('-'); return new Date(y, parseInt(m)-1).toLocaleDateString('en-IN', { month:'long', year:'numeric' }); };
       document.getElementById('cohortList').innerHTML = ordered.length === 0 ? '<div class="empty">No cohorts yet.</div>' : ordered.map(g => `
-        <div class="card">
-          <h2>${g.key}</h2>
-          <p style="font-size:13px; color:#6b7280;">${g.students.length} student${g.students.length === 1 ? '' : 's'} · ${g.students.filter(s => s.allocation).length} allocated · ${g.students.filter(s => s.exitedAt).length} exited</p>
+        <div class="card" style="cursor:pointer; transition:transform 0.1s, box-shadow 0.1s;" onclick="filterByCohort('${g.key}')" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)'" onmouseout="this.style.boxShadow=''">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 style="margin-bottom:4px;">${monthName(g.key)}</h2>
+              <p style="font-size:13px; color:#6b7280;">${g.students.length} registered · ${g.students.filter(s => s.allocation).length} allocated · ${g.students.filter(s => s.onboarding?.interview).length} interviews · ${g.students.filter(s => s.exitedAt).length} exited</p>
+            </div>
+            <div style="font-size:12px; color:#6b7280;">View students →</div>
+          </div>
         </div>`).join('');
     }
+    window.filterByCohort = function(key) {
+      const [y, m] = key.split('-');
+      const start = new Date(y, parseInt(m)-1, 1).getTime() / 1000;
+      const end = new Date(y, parseInt(m), 1).getTime() / 1000;
+      // Switch to applicants tab and filter
+      document.querySelector('.sidebar a[data-tab="applicants"]').click();
+      document.getElementById('searchBox').value = '';
+      document.getElementById('filterStage').value = '';
+      const tbody = document.querySelector('#applicantsTable tbody');
+      const list = applicants.filter(a => {
+        const ts = a.createdAt?.seconds || 0;
+        return ts >= start && ts < end;
+      });
+      tbody.innerHTML = list.map(a => {
+        const stage = stageOf(a);
+        return `<tr onclick="openDetail('${a.uid}')">
+          <td><strong>${escapeHtml(a.firstName || '')} ${escapeHtml(a.lastName || '')}</strong></td>
+          <td>${escapeHtml(a.email || '')}</td>
+          <td>${escapeHtml(a.city || '—')}</td>
+          <td style="max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(a.school || '—')}</td>
+          <td><span class="pill pill-${stage === 'registered' ? 'registered' : stage === 'allocated' || stage === 'interview' || stage === 'decision' ? 'allocated' : stage === 'exited' ? 'exited' : 'active'}">${stage}</span></td>
+          <td>${progressBar(a)}</td>
+          <td style="color:#6b7280;">${dateShort(a.createdAt)}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('applicantsEmpty').style.display = list.length ? 'none' : 'block';
+      document.getElementById('applicantCount').textContent = list.length + ' in ' + key;
+    };
 
     function renderColleges() {
       document.getElementById('collegesList').innerHTML = PARTNER_COLLEGES.map(c => {
-        const allocated = applicants.filter(a => a.allocation?.slug === c.slug).length;
-        const chosen = applicants.filter(a => (a.collegeChoices?.order || []).includes(c.slug)).length;
-        return `<div class="card" style="display:flex; gap:18px; align-items:center;">
+        const allocatedList = applicants.filter(a => a.allocation?.slug === c.slug);
+        const chosenList = applicants.filter(a => (a.collegeChoices?.order || []).includes(c.slug));
+        const accepted = allocatedList.filter(a => a.allocation?.status === 'accepted').length;
+        return `<div class="card" style="display:flex; gap:18px; align-items:center; cursor:pointer;" onclick="openCollege('${c.slug}')" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)'" onmouseout="this.style.boxShadow=''">
           <div style="width:48px; height:48px; border-radius:10px; background:#fff7e0; display:flex; align-items:center; justify-content:center; font-family:'Poppins',sans-serif; font-weight:700; color:#92400e; font-size:14px; flex-shrink:0;">${c.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</div>
           <div style="flex:1;">
             <div style="font-weight:600; font-size:15px;">${c.name}</div>
             <div style="font-size:13px; color:#6b7280;">${c.country}</div>
           </div>
           <div style="text-align:right; font-size:12px; color:#6b7280;">
-            <div><strong style="color:#111;">${chosen}</strong> chose this</div>
-            <div><strong style="color:#10b981;">${allocated}</strong> allocated</div>
+            <div><strong style="color:#111;">${chosenList.length}</strong> chose this</div>
+            <div><strong style="color:#FFC72C;">${allocatedList.length}</strong> allocated · <strong style="color:#10b981;">${accepted}</strong> accepted</div>
           </div>
         </div>`;
       }).join('');
     }
+
+    window.openCollege = function(slug) {
+      const c = PARTNER_COLLEGES.find(x => x.slug === slug);
+      const allocatedList = applicants.filter(a => a.allocation?.slug === slug);
+      const chosenList = applicants.filter(a => (a.collegeChoices?.order || []).includes(slug));
+      const studentRow = (a, extra) => `<tr onclick="closeDetail(); setTimeout(()=>openDetail('${a.uid}'), 50);" style="cursor:pointer;">
+        <td><strong>${escapeHtml(a.firstName||'')} ${escapeHtml(a.lastName||'')}</strong></td>
+        <td>${escapeHtml(a.email||'')}</td>
+        <td style="color:#6b7280;">${extra || ''}</td>
+      </tr>`;
+      document.getElementById('detailName').textContent = c.name;
+      document.getElementById('detailBody').innerHTML = `
+        <div style="display:flex; gap:14px; margin-bottom:18px;">
+          <div class="kpi" style="flex:1;"><div class="label">Chose This</div><div class="value">${chosenList.length}</div></div>
+          <div class="kpi" style="flex:1;"><div class="label">Allocated</div><div class="value">${allocatedList.length}</div></div>
+          <div class="kpi" style="flex:1;"><div class="label">Accepted</div><div class="value">${allocatedList.filter(a => a.allocation?.status === 'accepted').length}</div></div>
+        </div>
+
+        <h3 style="margin:0 0 10px; font-family:'Poppins',sans-serif; font-size:14px;">Allocated students (${allocatedList.length})</h3>
+        ${allocatedList.length ? `<div style="background:#fafafa; border-radius:8px; overflow:hidden; margin-bottom:20px;"><table style="width:100%; font-size:13px;">${allocatedList.map(a => studentRow(a, a.allocation.status || 'pending')).join('')}</table></div>` : '<p style="color:#6b7280; font-size:13px; margin-bottom:18px;">No allocations yet.</p>'}
+
+        <h3 style="margin:0 0 10px; font-family:'Poppins',sans-serif; font-size:14px;">Students who chose this college (${chosenList.length})</h3>
+        ${chosenList.length ? `<div style="background:#fafafa; border-radius:8px; overflow:hidden;"><table style="width:100%; font-size:13px;">${chosenList.map(a => {
+          const order = a.collegeChoices?.order || [];
+          const rank = order.indexOf(slug) + 1;
+          const allocated = a.allocation?.slug === slug ? '✓ Allocated here' : a.allocation ? 'Allocated to ' + a.allocation.college : '';
+          return studentRow(a, 'Choice #' + rank + (allocated ? ' · ' + allocated : ''));
+        }).join('')}</table></div>` : '<p style="color:#6b7280; font-size:13px;">No students have chosen this college yet.</p>'}
+      `;
+      document.getElementById('detailModal').classList.add('open');
+    };
 
     document.getElementById('msgRecipient').addEventListener('change', () => {
       const v = document.getElementById('msgRecipient').value;
