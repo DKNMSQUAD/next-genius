@@ -879,6 +879,7 @@
       const wrap = document.getElementById('allocationContent');
       if (!wrap) return;
       const alloc = applicantData.allocation;
+      const req = applicantData.reallocationRequest;
       if (!alloc) {
         wrap.innerHTML = `<div class="card">
           <p style="font-size:14px; color:#666; line-height:1.6;">Your college choices have been submitted. The Next Genius team is reviewing your profile and matching you with the most suitable partner college based on your preferences, scores, profile fit, and college capacity.</p>
@@ -888,6 +889,8 @@
       }
       const isAccepted = alloc.status === 'accepted';
       const isDeclined = alloc.status === 'declined';
+      const reqPending = req && req.status === 'pending';
+      const reqDeclined = req && req.status === 'declined';
       wrap.innerHTML = `
         <div class="card" style="border:2px solid #FFC72C; background:#fff7e0;">
           <div style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#92400e; font-weight:600; margin-bottom:8px;">You have been allocated to</div>
@@ -901,9 +904,41 @@
             </div>
             <p style="font-size:13px; color:#666; margin-top:14px;">Acceptance unlocks the Interview Videos stage. If you decline, the team will reach out to discuss alternatives.</p>`}
         </div>
+
         ${alloc.notes ? `<div class="card"><h2 style="font-family:'Poppins',sans-serif; font-size:14px;">Notes from the team</h2><p style="font-size:14px; color:#444; line-height:1.5;">${escapeHtml(alloc.notes)}</p></div>` : ''}
+
+        ${(isAccepted || (!isAccepted && !isDeclined)) ? `
+          <div class="card">
+            <h2 style="font-family:'Poppins',sans-serif; font-size:15px; margin-bottom:6px;">Need a different college?</h2>
+            <p style="font-size:13px; color:#666; line-height:1.5; margin-bottom:14px;">Once the team has allocated you, your college choices are locked. If your circumstances have changed, you can request a reallocation. The Next Genius team will review and either approve or decline.</p>
+            ${reqPending ? `
+              <div style="padding:12px 14px; background:#fff7e0; border:1px solid #FFE08F; border-radius:8px; font-size:13px; color:#92400e;">
+                <strong>Request submitted</strong> on ${new Date(req.requestedAt).toLocaleDateString()}. Awaiting team review.
+                <div style="margin-top:6px; font-size:12px; color:#666;">Reason: ${escapeHtml(req.reason || '—')}</div>
+              </div>` :
+              reqDeclined ? `
+              <div style="padding:12px 14px; background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; font-size:13px; color:#991b1b;">
+                Your previous reallocation request was declined.
+                ${req.adminNote ? `<div style="margin-top:6px; font-size:12px; color:#444;">Note: ${escapeHtml(req.adminNote)}</div>` : ''}
+                <button class="btn-secondary btn" style="margin-top:10px;" onclick="requestReallocation()">Submit a new request</button>
+              </div>` :
+              `<button class="btn-secondary btn" onclick="requestReallocation()">Request Reallocation</button>`}
+          </div>` : ''}
       `;
     }
+
+    window.requestReallocation = async function() {
+      const reason = prompt('Please briefly explain why you would like to be reallocated:');
+      if (!reason || !reason.trim()) return;
+      const request = { reason: reason.trim(), requestedAt: new Date().toISOString(), status: 'pending' };
+      await updateDoc(doc(db, "applicants", currentUser.uid), { reallocationRequest: request });
+      applicantData.reallocationRequest = request;
+      renderAllocation();
+      // Notify admin via email
+      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=dknmsquad@gmail.com&firstName=Admin&subject=' + encodeURIComponent('Reallocation request from ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'')) + '&body=' + encodeURIComponent('Student: ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'') + ' (' + currentUser.email + ')\nCurrent allocation: ' + (applicantData.allocation?.college||'') + '\n\nReason:\n' + reason + '\n\nReview at https://next-genius.pages.dev/admin.html');
+      fetch(url, { mode: 'no-cors' }).catch(()=>{});
+      alert('Request submitted. The team will review and respond shortly.');
+    };
 
     window.acceptAllocation = async function() {
       if (!applicantData.allocation) return;
@@ -1349,6 +1384,11 @@
       goToTab('inventory');
     };
     window.saveColleges = async () => {
+      // Lock once allocation has been made
+      if (applicantData.allocation && applicantData.reallocationRequest?.status !== 'approved') {
+        alert('Your college choices are locked because the team has already allocated you. To change colleges, go to the Allocation tab and click "Request Reallocation".');
+        return;
+      }
       const order = [...document.querySelectorAll('#collegeChosen .college-card')].map(el => el.dataset.college);
       if (order.length < 3) { alert('Pick at least 3 colleges'); return; }
       await updateDoc(doc(db, "applicants", currentUser.uid), { collegeChoices: { order, submittedAt: new Date().toISOString() }, "onboarding.college": true });
