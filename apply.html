@@ -675,15 +675,12 @@
       try {
         const dup = await jsonpDupCheck({
           email: payload.email,
-          phone: payload.whatsapp,
-          firstName: payload.firstName,
-          lastName: payload.lastName
+          phone: payload.whatsapp
         });
         if (dup && dup.duplicate) {
           const reasons = {
             email: 'An application with this email already exists. Please sign in to your dashboard instead.',
-            phone: 'An application with this WhatsApp number already exists. Each student can only register once.',
-            name: 'An application with this exact name already exists. Each student can only register once. If this is not you, please contact nextgeniusindia@gmail.com.'
+            phone: 'An application with this WhatsApp number already exists. Each student can only register once.'
           };
           throw new Error(reasons[dup.reason] || 'A duplicate application was detected. Each student can only apply once.');
         }

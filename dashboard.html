@@ -1228,7 +1228,17 @@
     const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
     function syncAdmin() {
       try {
-        const payload = { uid: currentUser.uid, email: currentUser.email, firstName: applicantData.firstName, lastName: applicantData.lastName, status: applicantData.status, onboarding: applicantData.onboarding, allocation: applicantData.allocation, exitedAt: applicantData.exitedAt };
+        const payload = {
+          uid: currentUser.uid, email: currentUser.email,
+          firstName: applicantData.firstName, lastName: applicantData.lastName,
+          status: applicantData.status, onboarding: applicantData.onboarding,
+          allocation: applicantData.allocation, exitedAt: applicantData.exitedAt,
+          personal: applicantData.personal ? {
+            dob: applicantData.personal.dob,
+            fatherName: applicantData.personal.fatherName,
+            motherName: applicantData.personal.motherName
+          } : null
+        };
         fetch(SHEET_WEBHOOK_URL + "?type=admin", { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) }).catch(()=>{});
       } catch(_) {}
     }
@@ -1367,11 +1377,41 @@
     };
 
     // ── Profile forms ──
+    function jsonpIdentityCheck(params) {
+      return new Promise((resolve) => {
+        const cb = '__id_cb_' + Date.now() + Math.floor(Math.random()*1000);
+        const script = document.createElement('script');
+        const timer = setTimeout(() => { resolve({ ok: false, timeout: true }); cleanup(); }, 12000);
+        function cleanup() { clearTimeout(timer); delete window[cb]; script.remove(); }
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        const qs = Object.entries(params).map(([k,v]) => k + '=' + encodeURIComponent(v || '')).join('&');
+        script.src = SHEET_WEBHOOK_URL + '?check_dup=1&callback=' + cb + '&' + qs;
+        script.onerror = () => { cleanup(); resolve({ ok: false, network: true }); };
+        document.head.appendChild(script);
+      });
+    }
+
     window.savePersonal = async () => {
       const data = {};
       document.querySelectorAll('[data-personal]').forEach(el => data[el.getAttribute('data-personal')] = el.value);
       const empty = Object.entries(data).filter(([k,v]) => k !== 'siblings' ? !v : v === '');
       if (empty.length) { alert('All fields required: ' + empty.map(([k]) => k).join(', ')); return; }
+
+      // Strict identity duplicate check: DOB + first + last + father + mother
+      // Excludes the current user's own row.
+      const dup = await jsonpIdentityCheck({
+        dob: data.dob,
+        firstName: applicantData.firstName,
+        lastName: applicantData.lastName,
+        fatherName: data.fatherName,
+        motherName: data.motherName,
+        excludeUid: currentUser.uid
+      });
+      if (dup && dup.duplicate && dup.reason === 'identity') {
+        alert('An existing application matches this exact identity (date of birth + first name + last name + father\'s name + mother\'s name). Each student can only apply once.\n\nIf this is a mistake, please email nextgeniusindia@gmail.com.');
+        return;
+      }
+
       await updateDoc(doc(db, "applicants", currentUser.uid), { personal: data, "onboarding.personal": true });
       applicantData.personal = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), personal: true };
       document.getElementById('personalStatus').textContent = '✓ Saved';
