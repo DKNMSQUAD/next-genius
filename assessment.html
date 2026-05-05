@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assessment | Next Genius</title>
+  <title>Sign up | Next Genius</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -11,174 +11,81 @@
     body {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       background: #fafafa; color: #111; -webkit-font-smoothing: antialiased;
-      min-height: 100vh; padding: 32px 20px;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 32px 20px;
     }
-    .container { max-width: 720px; margin: 0 auto; }
+    .container { max-width: 460px; width: 100%; }
     .logo { width: 80px; height: 80px; margin-bottom: 20px; }
-    h1 { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 600; margin-bottom: 6px; }
-    h2 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; margin: 28px 0 14px; }
-    .subtitle { font-size: 15px; color: #555; margin-bottom: 24px; line-height: 1.5; }
-
-    .card {
-      background: #fff; border: 1px solid #eee; border-radius: 12px;
-      padding: 24px; margin-bottom: 16px;
-    }
-
-    .stepbar {
-      display: flex; gap: 6px; margin-bottom: 32px;
-    }
-    .stepbar div {
-      flex: 1; height: 4px; background: #f0f0f0; border-radius: 2px;
-    }
-    .stepbar div.done { background: #FFC72C; }
-    .stepbar div.active { background: #FFC72C; }
-
-    .interest-row {
-      display: grid; grid-template-columns: 1fr auto; gap: 12px;
-      align-items: center; padding: 12px 14px; border-bottom: 1px solid #f0f0f0;
-    }
-    .interest-row:last-child { border-bottom: none; }
-    .interest-row .label { font-size: 14px; }
-    .interest-row.error { background: #fef2f2; border-radius: 8px; padding-left: 14px; padding-right: 14px; margin: 0 -14px; border: 1px solid #fcc; }
-    .pill-group { display: flex; gap: 6px; }
-    .pill {
-      font-size: 12px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
-      border: 1px solid #ddd; background: #fff; font-family: inherit;
-      transition: all 0.12s;
-    }
-    .pill:hover { border-color: #FFC72C; }
-    .pill.selected { background: #FFC72C; border-color: #FFC72C; color: #111; font-weight: 600; }
-
-    .parent-q { padding: 18px 0; border-bottom: 1px solid #f0f0f0; }
-    .parent-q:last-child { border-bottom: none; }
-    .parent-q .qtext { font-weight: 600; font-size: 15px; margin-bottom: 12px; }
-    .parent-q .opts { display: flex; flex-direction: column; gap: 8px; }
-    .parent-q .opts label {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
-      cursor: pointer; font-size: 14px;
-      transition: all 0.12s;
-    }
-    .parent-q .opts label:hover { border-color: #FFC72C; }
-    .parent-q .opts label.selected { background: #fff7e0; border-color: #FFC72C; }
-    .parent-q .opts input { accent-color: #FFC72C; }
-
+    .card { background: #fff; border: 1px solid #eee; border-radius: 14px; padding: 32px; }
+    h1 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: #555; margin-bottom: 24px; line-height: 1.5; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .field input { width: 100%; padding: 11px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; }
+    .field input:focus { border-color: #FFC72C; }
     .btn {
-      font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 500; color: #111;
+      font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 500; color: #111;
       background: #FFC72C; border: none; border-radius: 999px;
-      padding: 13px 40px; cursor: pointer;
+      padding: 13px 32px; cursor: pointer; width: 100%;
     }
     .btn:hover:not(:disabled) { background: #F0B71F; }
     .btn:disabled { opacity: 0.5; cursor: wait; }
-    .btn-secondary { background: #fff; border: 1px solid #ddd; }
-    .btn-secondary:hover:not(:disabled) { background: #f5f5f5; }
-
-    .actions { display: flex; justify-content: space-between; margin-top: 20px; gap: 12px; }
-
-    /* Report */
-    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    .score-card {
-      background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 18px;
+    .btn-google {
+      background: #fff; border: 1px solid #ddd;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 13px;
     }
-    .score-card .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 6px; font-weight: 600; }
-    .score-card .value { font-family: 'Poppins', sans-serif; font-size: 32px; font-weight: 700; color: #111; }
-    .score-card .bar { height: 6px; background: #f0f0f0; border-radius: 3px; margin-top: 10px; overflow: hidden; }
-    .score-card .bar div { height: 100%; background: #FFC72C; transition: width 0.6s; }
-    .ai-section {
-      background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 24px; margin-bottom: 16px;
-    }
-    .ai-section h3 { font-family: 'Poppins', sans-serif; font-size: 15px; margin-bottom: 8px; color: #111; font-weight: 600; }
-    .ai-section p, .ai-section li { font-size: 14px; line-height: 1.6; color: #444; }
-    .ai-section ul { margin-left: 20px; margin-top: 8px; }
-    .ai-loading { padding: 40px 24px; text-align: center; color: #888; font-size: 14px; }
-    .ai-loading .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid #f0f0f0; border-top-color: #FFC72C; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    @media (max-width: 600px) {
-      .report-grid { grid-template-columns: 1fr; }
-      .interest-row { grid-template-columns: 1fr; }
-      .pill-group { justify-content: flex-start; }
-    }
+    .btn-google:hover:not(:disabled) { background: #fafafa; }
+    .or-divider { text-align: center; font-size: 12px; color: #888; margin: 16px 0; position: relative; }
+    .or-divider span { background: #fff; padding: 0 12px; position: relative; z-index: 1; }
+    .or-divider hr { position: absolute; top: 50%; left: 0; right: 0; border: none; border-top: 1px solid #eee; }
+    .err { color: #d93025; font-size: 13px; margin-top: 10px; text-align: center; }
+    .pending-info { background: #fff7e0; border: 1px solid #FFE08F; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #444; margin-bottom: 20px; }
+    .pending-info strong { color: #111; }
+    .footer { text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid #f0f0f0; font-size: 13px; color: #666; }
+    .footer a { color: #E8A020; font-weight: 600; text-decoration: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <a href="index.html"><img class="logo" src="NG_Logo.avif" alt="Next Genius"></a>
-
-    <!-- No registration yet -->
     <div id="noPendingGate" style="display:none;">
       <div class="card">
+        <a href="index.html"><img class="logo" src="NG_Logo.avif" alt="Next Genius"></a>
         <h1>Start with the registration form</h1>
-        <p class="subtitle">Please complete the registration first to take the assessment.</p>
-        <a href="apply.html" class="btn">Go to Registration</a>
-        <div style="margin-top:18px; font-size:13px; color:#888;">Already created an account? <a href="dashboard.html" style="color:#E8A020;">Sign in to your dashboard</a></div>
+        <p class="subtitle">Please complete the registration first.</p>
+        <a href="apply.html" class="btn" style="text-decoration:none; display:inline-block; text-align:center;">Go to Registration</a>
+        <div class="footer">Already have an account? <a href="dashboard.html">Sign in</a></div>
       </div>
     </div>
 
-    <!-- STEP 1: Intro -->
-    <div id="stepIntro" style="display:none;">
-      <div class="stepbar"><div class="active"></div><div></div><div></div></div>
-      <h1>A short assessment before your dashboard</h1>
-      <p class="subtitle">Mark your interests across 31 activities — takes about 4 minutes.</p>
+    <div id="signupBlock" style="display:none;">
       <div class="card">
-        <h2 style="margin-top:0;">Why this matters</h2>
-        <p style="font-size:14px; line-height:1.6; color:#444;">This isn't a test — there are no wrong answers. The results help us recommend the right college fit, the right academic path, and the right kind of support for you. Your honest answers give the most useful insights.</p>
-      </div>
-      <div class="actions" style="justify-content:flex-end;">
-        <button class="btn" onclick="goStep('Interests')">Begin</button>
-      </div>
-    </div>
+        <a href="index.html"><img class="logo" src="NG_Logo.avif" alt="Next Genius"></a>
+        <h1>Create your account</h1>
+        <p class="subtitle">One last step before your dashboard. Choose how you'd like to sign in.</p>
 
-    <!-- STEP 2: Interests -->
-    <div id="stepInterests" style="display:none;">
-      <div class="stepbar"><div class="done"></div><div class="active"></div><div></div></div>
-      <h1>What interests you?</h1>
-      <p class="subtitle">For each activity, tap how you feel about it.</p>
-      <div class="card">
-        <div id="interestList"></div>
-      </div>
-      <div class="actions">
-        <button class="btn-secondary btn" onclick="goStep('Intro')">Back</button>
-        <button class="btn" onclick="submitAssessment()" id="submitBtn">Submit & Generate Report</button>
-      </div>
-    </div>
+        <div class="pending-info">Account for: <strong id="pendingEmail"></strong></div>
 
-    <!-- STEP 3: Signup -->
-    <div id="stepReport" style="display:none;">
-      <div class="stepbar"><div class="done"></div><div class="done"></div><div class="active"></div></div>
-      <h1>One last step</h1>
-      <p class="subtitle">Create your account to save your progress and continue to your dashboard.</p>
-
-      <div class="card" id="signupCard" style="margin-top:24px; border:2px solid #FFC72C;">
-        <h2 style="margin-top:0;">Save your report — create your account</h2>
-        <p style="font-size:14px; color:#444; line-height:1.5; margin-bottom:18px;">Create an account so your dashboard, profile, and college choices are saved for next time. Pick one option:</p>
-
-        <button id="googleSignupBtn" onclick="signupWithGoogle()" class="btn" style="width:100%; background:#fff; border:1px solid #ddd; display:flex; align-items:center; justify-content:center; gap:10px; padding:13px; margin-bottom:16px;">
+        <button class="btn btn-google" onclick="signupWithGoogle()">
           <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09 0-.73.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           Continue with Google
         </button>
 
-        <div style="text-align:center; font-size:12px; color:#888; margin:14px 0; position:relative;">
-          <span style="background:#fff; padding:0 12px; position:relative; z-index:1;">or</span>
-          <hr style="position:absolute; top:50%; left:0; right:0; border:none; border-top:1px solid #eee;">
-        </div>
+        <div class="or-divider"><span>or</span><hr></div>
 
-        <div style="margin-bottom:12px;"><label style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">Set a password (8+ characters)</label><input type="password" id="signupPassword" style="width:100%; padding:11px 14px; border:1px solid #ddd; border-radius:8px; font-size:14px;" placeholder="At least 8 characters"></div>
-        <button class="btn" onclick="signupWithEmail()" style="width:100%;">Create Account with Email</button>
-        <div id="signupErr" style="color:#d93025; font-size:13px; margin-top:10px;"></div>
-        <div style="margin-top:18px; font-size:13px; color:#666; text-align:center;">Email: <strong id="signupEmail"></strong></div>
-      </div>
+        <div class="field"><label>Set a password (8+ characters)</label><input type="password" id="signupPassword"></div>
+        <button class="btn" onclick="signupWithEmail()">Create Account with Email</button>
+        <div id="signupErr" class="err"></div>
 
-      <div id="postSignup" style="display:none;" class="actions" style="justify-content:flex-end; margin-top:24px;">
-        <a href="dashboard.html" class="btn">Continue to Dashboard →</a>
+        <div class="footer">Already have an account? <a href="dashboard.html">Sign in</a></div>
       </div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
     const firebaseConfig = {
       apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
       authDomain: "next-genius-auto.firebaseapp.com",
@@ -190,225 +97,20 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const GEMINI_KEY = "AIzaSyBV7nAq1Xh4jVRiB7tBDVjum899BapAYjM";
-
-    const INTERESTS = [
-      { label:"Acting, Theatre, Public Speaking", cat:"EQ" },
-      { label:"Aeromodelling", cat:"IQ" },
-      { label:"Art, Painting", cat:"DQ" },
-      { label:"Astronomy", cat:"IQ" },
-      { label:"Cartoons, Comics, Anime", cat:"DQ" },
-      { label:"Chess", cat:"IQ" },
-      { label:"Coding, AI", cat:"IQ" },
-      { label:"Community Service", cat:"EQ" },
-      { label:"Dance, DJ", cat:"EQ" },
-      { label:"Doodling, Calligraphy", cat:"DQ" },
-      { label:"Fashion, Makeup", cat:"DQ" },
-      { label:"Film Making, Video Editing", cat:"DQ" },
-      { label:"Films / TV Shows", cat:"DQ" },
-      { label:"Food, Cooking or Eating Out", cat:"EQ" },
-      { label:"Gaming & Animation", cat:"DQ" },
-      { label:"Gardening", cat:"EQ" },
-      { label:"Interior & Home Decor", cat:"DQ" },
-      { label:"Lego, Gadgets", cat:"IQ" },
-      { label:"Making New Friends, Hanging Out", cat:"EQ" },
-      { label:"Mathematics", cat:"IQ" },
-      { label:"Music — Playing, Singing, Listening", cat:"EQ" },
-      { label:"Origami", cat:"IQ" },
-      { label:"Pet Care", cat:"EQ" },
-      { label:"Photography", cat:"DQ" },
-      { label:"Puzzles, Quizzing", cat:"IQ" },
-      { label:"Reading, Writing", cat:"EQ" },
-      { label:"Robotics", cat:"IQ" },
-      { label:"Rubik's Cube", cat:"IQ" },
-      { label:"Sculpture / Pottery", cat:"DQ" },
-      { label:"Travelling", cat:"EQ" }
-    ];
-
     const provider = new GoogleAuthProvider();
-    let interestAnswers = {};
+
     let pendingReg = null;
-    let computedAssessment = null;
-
-    window.goStep = function(step) {
-      ['Intro','Interests','Report'].forEach(s => {
-        document.getElementById('step' + s).style.display = (s === step) ? 'block' : 'none';
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    function renderInterests() {
-      const wrap = document.getElementById('interestList');
-      wrap.innerHTML = INTERESTS.map(i => `
-        <div class="interest-row">
-          <div class="label">${i.label}</div>
-          <div class="pill-group" data-interest="${i.label}">
-            <button class="pill" onclick="setInterest('${i.label.replace(/'/g,"\\'")}', 'interested', this)">Interested</button>
-            <button class="pill" onclick="setInterest('${i.label.replace(/'/g,"\\'")}', 'maybe', this)">Maybe</button>
-            <button class="pill" onclick="setInterest('${i.label.replace(/'/g,"\\'")}', 'not', this)">Not really</button>
-          </div>
-        </div>
-      `).join('');
-    }
-    window.setInterest = function(label, value, btn) {
-      interestAnswers[label] = value;
-      btn.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
-      btn.classList.add('selected');
-      btn.closest('.interest-row')?.classList.remove('error');
-    };
-
-    function calculateScores() {
-      const raw = { IQ: 0, EQ: 0, DQ: 0 };
-      INTERESTS.forEach(i => {
-        const v = interestAnswers[i.label];
-        const pts = v === 'interested' ? 2 : v === 'maybe' ? 1 : 0;
-        raw[i.cat] += pts;
-      });
-      const total = raw.IQ + raw.EQ + raw.DQ || 1;
-      const IQ = Math.round((raw.IQ / total) * 100);
-      const EQ = Math.round((raw.EQ / total) * 100);
-      const DQ = Math.round((raw.DQ / total) * 100);
-      const logicPct = IQ;
-      const peoplePct = EQ + DQ;
-      const dominant = raw.IQ >= raw.EQ && raw.IQ >= raw.DQ ? 'IQ' : raw.EQ >= raw.DQ ? 'EQ' : 'DQ';
-      const topInterests = INTERESTS.filter(i => interestAnswers[i.label] === 'interested').map(i => i.label);
-      // alias `top` for backward compatibility with renderer
-      return { raw: { ...raw, PQ: 0 }, IQ, EQ, DQ, AQ: 0, logicPct, peoplePct, dominant, topInterests, top: topInterests };
+    try { pendingReg = JSON.parse(sessionStorage.getItem('ng_pending') || 'null'); } catch(_) {}
+    if (!pendingReg) {
+      document.getElementById('noPendingGate').style.display = 'block';
+    } else {
+      document.getElementById('signupBlock').style.display = 'block';
+      document.getElementById('pendingEmail').textContent = pendingReg.email;
     }
 
-    window.submitAssessment = async function() {
-      const unanswered = INTERESTS.filter(i => !interestAnswers[i.label]);
-      if (unanswered.length > 0) {
-        // Highlight unanswered rows + scroll to first
-        document.querySelectorAll('.interest-row').forEach(r => r.classList.remove('error'));
-        unanswered.forEach(i => {
-          const el = document.querySelector(`.pill-group[data-interest="${CSS.escape(i.label)}"]`);
-          if (el) el.closest('.interest-row').classList.add('error');
-        });
-        const firstErr = document.querySelector('.interest-row.error');
-        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        alert(`Please answer all ${INTERESTS.length} interests. ${unanswered.length} still need a response.`);
-        return;
-      }
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true; btn.textContent = 'Calculating...';
-
-      const scores = calculateScores();
-      const insights = generateInsights(scores, pendingReg);
-      computedAssessment = {
-        interests: interestAnswers, scores, insights,
-        submittedAt: new Date().toISOString()
-      };
-      sessionStorage.setItem('ng_assessment', JSON.stringify(computedAssessment));
-
-      // Push assessment to backend Sheet (no auth needed; backend keyed by email)
-      const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
-      fetch(SHEET_WEBHOOK_URL + "?type=assessment", {
-        method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({
-          email: pendingReg.email, firstName: pendingReg.firstName, lastName: pendingReg.lastName,
-          submittedAt: computedAssessment.submittedAt, scores, insights
-        })
-      }).catch(()=>{});
-
-      goStep('Report');
-      document.getElementById('signupEmail').textContent = pendingReg.email;
-    };
-
-    function generateInsights(scores, reg) {
-      const dom = scores.dominant;
-      const profiles = {
-        IQ: {
-          personalityShort: 'Analytical thinker',
-          strengthDesc: `Your interests cluster around problem-solving, logic, and systems. You tend to enjoy understanding how things work, breaking complex ideas into pieces, and finding patterns. This is the foundation of strong academic and research-oriented students.`,
-          academicOrientation: 'STEM-leaning',
-          careers: ['Software Engineer / AI Researcher', 'Data Scientist / Analyst', 'Engineer (Mechanical, Electrical, Aerospace)', 'Mathematician / Quantitative Analyst', 'Architect (Structural)', 'Medical Researcher'],
-          collegeFit: 'You will thrive in a research-active university with strong STEM faculty, lab access, and project-based courses. Mid-to-large universities (Centre, Syracuse, IE, Northwestern Qatar) typically have the resources you need. Smaller liberal arts colleges (Cottey, Muhlenberg) work too if you want close mentorship over scale.',
-          studentMessage: `You have a builder's instinct. The world has many surface-level thinkers — what makes you valuable is your willingness to go a layer deeper. As you choose colleges, look for ones where students get hands-on with real problems early, not just classroom theory. You don't need to know your exact career yet, but lean into rigor.`,
-          parentMessage: `Your child thinks deeply and may take longer to articulate emotions than ideas. Trust that. Push them toward unstructured project time over more tuitions. The colleges that suit them are the ones where professors are accessible and labs are open to undergraduates — not necessarily the highest-ranked names.`,
-          areasToDevelop: ['Communication and presentation skills', 'Collaborative / team projects (not just solo work)', 'Empathy-driven leadership']
-        },
-        EQ: {
-          personalityShort: 'People-oriented connector',
-          strengthDesc: `Your interests revolve around people, expression, and social engagement. You likely understand others quickly, communicate naturally, and are energised by groups. This is the foundation of strong leaders, communicators, and changemakers.`,
-          academicOrientation: 'Humanities, Social Sciences, Business',
-          careers: ['Public Policy / Social Impact', 'Business Strategy / Consulting', 'Journalism / Media / Communications', 'Psychology / Counselling', 'Education / Teaching', 'Hospitality / Event Management'],
-          collegeFit: 'You will thrive in a residential college with a strong campus community, clubs, and small discussion-based classes. Liberal arts colleges (Centre, Cottey, Muhlenberg, Capital, Lynn, Ithaca) are an excellent fit — you grow by being seen and known. Avoid impersonal mega-campuses unless you have a specific programme reason.',
-          studentMessage: `Your superpower is the ability to make people feel understood. That doesn't show up on a transcript, but admissions officers can spot it in essays and recommendations. Choose colleges where you'll be challenged academically AND where you can lead — student government, peer mentoring, journalism. Both matter.`,
-          parentMessage: `Your child reads people well, which means they'll thrive in a college community where they can be a leader, not just a number. Push them on academic depth (not just social) — strong people-skills paired with disciplined study habits is rare and powerful. Check in on confidence, not just grades.`,
-          areasToDevelop: ['Quantitative / analytical skills', 'Independent deep work (avoid being always-on socially)', 'Long-form writing and research']
-        },
-        DQ: {
-          personalityShort: 'Visual creative',
-          strengthDesc: `Your interests cluster around design, aesthetics, and creative expression. You likely see the world in terms of how things look and feel, and gravitate toward making, building, and crafting. This is the foundation of strong designers, filmmakers, and creative entrepreneurs.`,
-          academicOrientation: 'Creative, Design, Arts (or STEM with creative bent)',
-          careers: ['Product / UX Designer', 'Filmmaker / Animator', 'Architect / Interior Designer', 'Brand & Marketing Creative', 'Game Designer', 'Fashion / Industrial Designer'],
-          collegeFit: 'You need a college with strong creative facilities — studios, makerspaces, theatre, film labs. American University of Paris, IE University (Spain), and Ithaca College stand out among partner colleges for arts/media. Build a portfolio early — for creative-track students, the work matters more than the rank of the university.',
-          studentMessage: `What you make is how the world will know you. Start a portfolio now — even rough work, consistently shared, builds a story over four years that no GPA can match. Creative students often underestimate themselves academically. Don't. The best designers also read widely and think rigorously.`,
-          parentMessage: `Your child is wired to make things. The instinct to push them toward "safer" academic paths is understandable but often counterproductive — creative careers are real, growing, and well-paying. Support a portfolio. Encourage internships at studios or media houses early. Trust the path even if it looks less linear than a traditional STEM track.`,
-          areasToDevelop: ['Critical writing and analysis', 'Quantitative literacy (designers who code/analyze are unstoppable)', 'Showing work consistently in public']
-        }
-      };
-      const profile = profiles[dom];
-      const topInterests = scores.top.slice(0, 8);
-      return { ...profile, dominantCategory: dom, topInterests };
-    }
-
-    function renderReport(scores, ins) {
-      const wrap = document.getElementById('aiArea');
-      wrap.innerHTML = `
-        <div class="ai-section">
-          <h3>Personality Snapshot</h3>
-          <p style="font-size:16px; font-weight:500; color:#111; margin-bottom:6px;">${ins.personalityShort}</p>
-          <p style="font-size:13px; color:#888;">Academic orientation — ${ins.academicOrientation}</p>
-        </div>
-
-        <div class="ai-section">
-          <h3>Your Dominant Strength: ${ins.dominantCategory}</h3>
-          <p>${ins.strengthDesc}</p>
-        </div>
-
-        ${ins.topInterests.length ? `
-        <div class="ai-section">
-          <h3>What Lights You Up</h3>
-          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
-            ${ins.topInterests.map(t => `<span style="background:#fff7e0; border:1px solid #FFE08F; padding:6px 12px; border-radius:999px; font-size:13px;">${escapeHtml(t)}</span>`).join('')}
-          </div>
-        </div>` : ''}
-
-        <div class="ai-section">
-          <h3>Career Directions to Explore</h3>
-          <ul>${ins.careers.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
-        </div>
-
-        <div class="ai-section">
-          <h3>What Kind of College Suits You</h3>
-          <p>${ins.collegeFit}</p>
-        </div>
-
-        <div class="ai-section" style="background:#fffaf0; border-color:#FFE08F;">
-          <h3>For You${pendingReg.firstName ? ', ' + escapeHtml(pendingReg.firstName) : ''}</h3>
-          <p>${ins.studentMessage}</p>
-        </div>
-
-        <div class="ai-section">
-          <h3>For Parents</h3>
-          <p>${ins.parentMessage}</p>
-        </div>
-
-        <div class="ai-section">
-          <h3>Areas to Develop</h3>
-          <ul>${ins.areasToDevelop.map(a => `<li>${escapeHtml(a)}</li>`).join('')}</ul>
-        </div>
-      `;
-    }
-
-    // ── Signup ──
     window.signupWithGoogle = async function() {
-      try {
-        const cred = await signInWithPopup(auth, provider);
-        await finalizeSignup(cred.user);
-      } catch (e) { document.getElementById('signupErr').textContent = e.message.replace('Firebase: ',''); }
+      try { const cred = await signInWithPopup(auth, provider); await finalizeSignup(cred.user); }
+      catch (e) { document.getElementById('signupErr').textContent = e.message.replace('Firebase: ',''); }
     };
     window.signupWithEmail = async function() {
       const pw = document.getElementById('signupPassword').value;
@@ -435,42 +137,11 @@
         createdAt: serverTimestamp(),
         source: "next-genius.pages.dev",
         status: "registered",
-        onboarding: { photo: !!user.photoURL, personal: false, academic: false, college: false, checklist: false, interview: false },
-        assessment: computedAssessment
+        onboarding: { photo: !!user.photoURL, personal: false, academic: false, inventory: false, college: false, interview: false, groupInterview: false, decision: false }
       };
       await setDoc(doc(db, "applicants", user.uid), enriched);
       sessionStorage.removeItem('ng_pending');
-      sessionStorage.removeItem('ng_assessment');
-      document.getElementById('signupCard').style.display = 'none';
       window.location.href = 'dashboard.html';
-    }
-
-    function renderScores(s) {
-      const grid = document.getElementById('scoreGrid');
-      const cards = [
-        { label: 'Analytical (IQ)', value: s.IQ },
-        { label: 'Emotional / Social (EQ)', value: s.EQ },
-        { label: 'Creative / Design (DQ)', value: s.DQ },
-        { label: 'Dominant Strength', value: s.dominant, bare: true }
-      ];
-      grid.innerHTML = cards.map(c => `
-        <div class="score-card">
-          <div class="label">${c.label}</div>
-          <div class="value">${c.bare ? c.value : c.value + '%'}</div>
-          ${c.bare ? '' : `<div class="bar"><div style="width:${c.value}%"></div></div>`}
-        </div>
-      `).join('');
-    }
-
-    function escapeHtml(s) { return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-
-    // Bootstrap (run after all functions are defined)
-    try { pendingReg = JSON.parse(sessionStorage.getItem('ng_pending') || 'null'); } catch(_) {}
-    if (!pendingReg) {
-      document.getElementById('noPendingGate').style.display = 'block';
-    } else {
-      renderInterests();
-      goStep('Intro');
     }
   </script>
 </body>

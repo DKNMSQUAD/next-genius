@@ -136,6 +136,12 @@
       width: 40px; height: 40px; border-radius: 8px;
       object-fit: contain; background: #f5f5f5; padding: 4px; flex-shrink: 0;
     }
+    .college-card .logo-initials {
+      width: 40px; height: 40px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px;
+      flex-shrink: 0; letter-spacing: 0.5px;
+    }
     .college-card .info { flex: 1; min-width: 0; }
     .college-card .info .nm { font-weight: 600; font-size: 14px; color: #111; }
     .college-card .info .cn { font-size: 12px; color: #888; }
@@ -145,6 +151,28 @@
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .college-card .grip { color: #ccc; font-size: 16px; cursor: grab; }
+
+    /* Interest Inventory */
+    .inv-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 12px;
+      align-items: center; padding: 12px 14px; border-bottom: 1px solid #f0f0f0;
+      transition: background 0.15s;
+    }
+    .inv-row:last-child { border-bottom: none; }
+    .inv-row.error { background: #fef2f2; border: 1px solid #fcc; border-radius: 8px; margin: 0; padding-left: 14px; padding-right: 14px; }
+    .inv-label { font-size: 14px; }
+    .inv-pills { display: flex; gap: 6px; }
+    .inv-pill {
+      font-size: 12px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+      border: 1px solid #ddd; background: #fff; font-family: inherit;
+      transition: all 0.12s;
+    }
+    .inv-pill:hover { border-color: #FFC72C; }
+    .inv-pill.selected { background: #FFC72C; border-color: #FFC72C; color: #111; font-weight: 600; }
+    @media (max-width: 600px) {
+      .inv-row { grid-template-columns: 1fr; }
+      .inv-pills { justify-content: flex-start; }
+    }
 
     /* Checklist */
     .checklist-item {
@@ -350,24 +378,46 @@
           <span class="lock-ico" data-lock="academic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
         </a>
 
-        <a data-tab="college" data-requires="academic">
+        <a data-tab="inventory" data-requires="academic">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M9 2v6m6-6v6"/><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 12h8M8 16h5"/></svg></span>
+          <span class="label">Interest Inventory</span>
+          <span class="check" data-check="inventory"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="inventory"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+        </a>
+
+        <a data-tab="college" data-requires="inventory">
           <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg></span>
           <span class="label">College Discovery</span>
           <span class="check" data-check="college"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
           <span class="lock-ico" data-lock="college"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
         </a>
 
-        <a data-tab="checklist">
-          <span class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg></span>
-          <span class="label">Application Checklist</span>
-          <span class="check" data-check="checklist"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+        <a data-tab="allocation" data-requires="college">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span>
+          <span class="label">Allocation</span>
+          <span class="check" data-check="allocation"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="allocation"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
         </a>
 
-        <a data-tab="interview" data-requires="checklist">
+        <a data-tab="interview" data-requires="allocation">
           <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M17 10l4-2v8l-4-2z"/></svg></span>
-          <span class="label">Interview</span>
+          <span class="label">Interview Videos</span>
           <span class="check" data-check="interview"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
           <span class="lock-ico" data-lock="interview"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+        </a>
+
+        <a data-tab="groupinterview" data-requires="interview">
+          <span class="ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"/><circle cx="17" cy="9" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M14 15c1-1 2-1 3-1 3 0 6 2 6 5"/></svg></span>
+          <span class="label">Group Interview</span>
+          <span class="check" data-check="groupInterview"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="groupInterview"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+        </a>
+
+        <a data-tab="decision" data-requires="groupInterview">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 15l-3-3 3-3 3 3-3 3z"/><circle cx="12" cy="12" r="9"/></svg></span>
+          <span class="label">Final Decision</span>
+          <span class="check" data-check="decision"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="decision"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
         </a>
 
         <div class="section-label">Account</div>
@@ -401,16 +451,17 @@
           <div class="status-banner">
             <h3 style="display:flex; justify-content:space-between; align-items:center;">
               <span>Onboarding progress</span>
-              <span style="font-weight:400; font-size:13px; color:#666;" id="progressText">0 of 7 steps complete</span>
+              <span style="font-weight:400; font-size:13px; color:#666;" id="progressText">0 of 8 steps complete</span>
             </h3>
             <div class="progress" id="progressBar">
               <div data-step="photo"></div>
               <div data-step="personal"></div>
               <div data-step="academic"></div>
+              <div data-step="inventory"></div>
               <div data-step="college"></div>
-              <div data-step="checklist"></div>
+              <div data-step="allocation"></div>
               <div data-step="interview"></div>
-              <div data-step="allocated"></div>
+              <div data-step="groupInterview"></div>
             </div>
           </div>
 
@@ -450,7 +501,7 @@
           <div class="card">
             <div class="field-row">
               <div class="field"><label>Date of Birth <span class="req">*</span></label><input type="date" data-personal="dob"></div>
-              <div class="field"><label>Gender <span class="req">*</span></label><select data-personal="gender"><option value="">Select</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select></div>
+              <div class="field"><label>Gender <span class="req">*</span></label><select data-personal="gender"><option value="">Select</option><option>Female</option><option>Male</option></select></div>
             </div>
             <div class="field"><label>Citizenship <span class="req">*</span></label><select data-personal="citizenship"><option value="">Select</option><option>Indian</option><option>Nepali</option><option>Bangladeshi</option><option>Sri Lankan</option><option>Other</option></select></div>
             <div class="field"><label>Home Address <span class="req">*</span></label><textarea data-personal="address"></textarea></div>
@@ -466,6 +517,21 @@
             <div class="field-row">
               <div class="field"><label>Number of Siblings <span class="req">*</span></label><input type="number" data-personal="siblings" min="0"></div>
               <div class="field"><label>Languages Spoken <span class="req">*</span></label><input data-personal="languages" placeholder="e.g. Hindi, English, Marathi"></div>
+            </div>
+            <div class="field"><label>How did you find out about us? <span class="req">*</span></label>
+              <select data-personal="hearAbout">
+                <option value="">Select</option>
+                <option>Social Media</option>
+                <option>School</option>
+                <option>Private Counselor or Tutor</option>
+                <option>Friends</option>
+                <option>Next Genius Scholar</option>
+                <option>Email</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field"><label>What other colleges are you applying to? <span class="req">*</span></label>
+              <textarea data-personal="otherColleges" placeholder="List the other colleges/universities you are applying to (one per line)"></textarea>
             </div>
             <button class="btn" onclick="savePersonal()">Save Personal Profile</button>
             <span id="personalStatus" style="margin-left:16px; font-size:13px; color:#4caf50;"></span>
@@ -524,15 +590,64 @@
           </div>
         </section>
 
-        <!-- CHECKLIST -->
-        <section class="panel" id="panel-checklist">
-          <h1>Application Checklist</h1>
-          <p class="subtitle">Tick each item as you complete it. Saves automatically.</p>
+        <!-- INTEREST INVENTORY -->
+        <section class="panel" id="panel-inventory">
+          <h1>Interest Inventory</h1>
+          <p class="subtitle">Mark how you feel about each activity. All 30 are required. Takes about 4 minutes.</p>
           <div class="card">
-            <div id="checklistItems"></div>
-            <div style="margin-top:20px; padding-top:16px; border-top:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
-              <span style="font-size:14px; color:#666;"><span id="checklistDone">0</span> of <span id="checklistTotal">17</span> items complete</span>
-              <span id="checklistStatus" style="font-size:13px; color:#4caf50;"></span>
+            <div id="inventoryList"></div>
+            <div style="margin-top:20px; padding-top:16px; border-top:1px solid #eee; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+              <span style="font-size:14px; color:#666;"><span id="inventoryDone">0</span> of 30 answered</span>
+              <button class="btn" onclick="submitInventory()">Submit</button>
+            </div>
+            <div id="inventoryStatus" style="margin-top:10px; font-size:13px; color:#4caf50;"></div>
+          </div>
+        </section>
+
+        <!-- ALLOCATION -->
+        <section class="panel" id="panel-allocation">
+          <h1>College Allocation</h1>
+          <p class="subtitle">Reviewed and assigned by the Next Genius team.</p>
+          <div class="card" id="allocationCard">
+            <div id="allocationContent">
+              <p style="font-size:14px; color:#666;">Your college choices have been submitted. The Next Genius team is reviewing your profile and matching you with the most suitable partner college based on your preferences, scores, profile fit, and college capacity.</p>
+              <p style="font-size:14px; color:#666; margin-top:12px;">You'll be notified here and via email once an allocation is made. Typical turnaround: 5–10 working days.</p>
+              <div id="allocationDecision" style="margin-top:20px;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- GROUP INTERVIEW -->
+        <section class="panel" id="panel-groupinterview">
+          <h1>Group Interview</h1>
+          <p class="subtitle">Joint interview with the Next Genius team and your allocated college's admissions officer.</p>
+          <div class="card">
+            <div id="groupInterviewContent">
+              <p>Once your individual interview videos are reviewed, you'll be invited to a group interview slot. The Next Genius team and a representative from your allocated college will join.</p>
+              <h3 style="font-family:'Poppins',sans-serif; font-size:14px; margin:20px 0 10px;">What to expect</h3>
+              <ul style="font-size:14px; line-height:1.7; color:#444; padding-left:20px;">
+                <li>~60–90 minutes online (Zoom/Meet link will be shared)</li>
+                <li>5 minute introduction from each panelist</li>
+                <li>15 minute Q&amp;A on your profile, motivation and fit</li>
+                <li>Time for you to ask questions about the college</li>
+                <li>Casual close — no formal scoring during the call</li>
+              </ul>
+              <div class="field" style="margin-top:24px;"><label>Group interview date (set by team)</label><input data-groupInterview="date" type="datetime-local" disabled></div>
+              <div class="field"><label>Meeting link (set by team)</label><input data-groupInterview="link" type="url" disabled placeholder="Will appear here when scheduled"></div>
+              <button class="btn" onclick="confirmGroupInterview()">I have completed the group interview</button>
+              <span id="groupInterviewStatus" style="margin-left:16px; font-size:13px;"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- FINAL DECISION -->
+        <section class="panel" id="panel-decision">
+          <h1>Final Decision</h1>
+          <p class="subtitle">The outcome of your scholarship application.</p>
+          <div class="card" id="decisionCard">
+            <div id="decisionContent">
+              <p style="font-size:14px; color:#666;">After the group interview, the Next Genius team and the partner college finalise their decision. You'll see the result here as soon as it's available.</p>
+              <div id="decisionResult" style="margin-top:20px;"></div>
             </div>
           </div>
         </section>
@@ -661,6 +776,38 @@
       { slug: "charleston", name: "University of Charleston", country: "USA (West Virginia)", domain: "ucwv.edu" }
     ];
 
+    const INTERESTS = [
+      { label:"Acting, Theatre, Public Speaking", cat:"EQ" },
+      { label:"Aeromodelling", cat:"IQ" },
+      { label:"Art, Painting", cat:"DQ" },
+      { label:"Astronomy", cat:"IQ" },
+      { label:"Cartoons, Comics, Anime", cat:"DQ" },
+      { label:"Chess", cat:"IQ" },
+      { label:"Coding, AI", cat:"IQ" },
+      { label:"Community Service", cat:"EQ" },
+      { label:"Dance, DJ", cat:"EQ" },
+      { label:"Doodling, Calligraphy", cat:"DQ" },
+      { label:"Fashion, Makeup", cat:"DQ" },
+      { label:"Film Making, Video Editing", cat:"DQ" },
+      { label:"Films / TV Shows", cat:"DQ" },
+      { label:"Food, Cooking or Eating Out", cat:"EQ" },
+      { label:"Gaming & Animation", cat:"DQ" },
+      { label:"Gardening", cat:"EQ" },
+      { label:"Interior & Home Decor", cat:"DQ" },
+      { label:"Lego, Gadgets", cat:"IQ" },
+      { label:"Making New Friends, Hanging Out", cat:"EQ" },
+      { label:"Mathematics", cat:"IQ" },
+      { label:"Music — Playing, Singing, Listening", cat:"EQ" },
+      { label:"Origami", cat:"IQ" },
+      { label:"Pet Care", cat:"EQ" },
+      { label:"Photography", cat:"DQ" },
+      { label:"Puzzles, Quizzing", cat:"IQ" },
+      { label:"Reading, Writing", cat:"EQ" },
+      { label:"Robotics", cat:"IQ" },
+      { label:"Rubik's Cube", cat:"IQ" },
+      { label:"Sculpture / Pottery", cat:"DQ" },
+      { label:"Travelling", cat:"EQ" }
+    ];
     const CHECKLIST_ITEMS = [
       { id: 'collegeListFinalized', label: 'College List Finalized' },
       { id: 'eaEdStrategy', label: 'EA / ED / rEA / Oxbridge Strategy' },
@@ -687,14 +834,6 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        // Bounce to assessment if not yet completed
-        try {
-          const snap = await getDoc(doc(db, "applicants", user.uid));
-          if (!snap.exists() || !snap.data().assessment) {
-            window.location.href = 'assessment.html';
-            return;
-          }
-        } catch (e) { /* allow through if check fails */ }
         document.getElementById('authGate').style.display = 'none';
         document.getElementById('dashboardWrap').style.display = 'block';
         document.getElementById('userEmail').textContent = user.email;
@@ -731,7 +870,7 @@
         document.getElementById('photoPreview').innerHTML = `<img src="${applicantData.photoURL}">`;
       }
       // commonApp review
-      renderChecklist();
+      renderInventory();
       renderInbox();
       renderStatus();
       applyLocks();
@@ -739,39 +878,56 @@
 
     function updateProgress() {
       const ob = applicantData.onboarding || {};
-      const steps = ['photo','personal','academic','college','checklist','interview'];
+      const steps = ['photo','personal','academic','inventory','college','allocation','interview','groupInterview'];
       let done = 0;
       steps.forEach(s => {
         const bar = document.querySelector(`#progressBar div[data-step="${s}"]`);
         const check = document.querySelector(`.sidebar a[data-tab="${s}"] [data-check="${s}"]`);
-        if (ob[s]) { if (bar) bar.classList.add('done'); if (check) check.style.display = 'inline-flex'; done++; }
+        const isDone = (s === 'allocation') ? !!applicantData.allocation : !!ob[s];
+        if (isDone) { if (bar) bar.classList.add('done'); if (check) check.style.display = 'inline-flex'; done++; }
         else { if (bar) bar.classList.remove('done'); if (check) check.style.display = 'none'; }
       });
-      // allocated extra step
-      const allocBar = document.querySelector('#progressBar div[data-step="allocated"]');
-      if (applicantData.allocation && allocBar) { allocBar.classList.add('done'); done++; }
-      document.getElementById('progressText').textContent = `${done} of 7 steps complete`;
-      const next = steps.find(s => !ob[s]);
+      document.getElementById('progressText').textContent = `${done} of 8 steps complete`;
+      const next = steps.find(s => s === 'allocation' ? !applicantData.allocation : !ob[s]);
       const nextBtn = document.getElementById('nextBtn');
       if (next) {
-        const labels = { photo: 'Upload your photo', personal: 'Fill the personal profile', academic: 'Fill the academic profile', college: 'Pick your college choices', checklist: 'Work through your application checklist', interview: 'Submit your interview videos' };
+        const labels = {
+          photo: 'Upload your photo',
+          personal: 'Fill the personal profile',
+          academic: 'Fill the academic profile',
+          inventory: 'Complete the interest inventory',
+          college: 'Pick your college choices',
+          allocation: 'Awaiting college allocation by the team',
+          interview: 'Submit your interview videos',
+          groupInterview: 'Complete the group interview'
+        };
         document.getElementById('nextStep').textContent = labels[next];
-        nextBtn.dataset.target = next;
-        nextBtn.style.display = 'inline-block';
+        nextBtn.dataset.target = next === 'allocation' ? 'allocation' : next;
+        nextBtn.style.display = next === 'allocation' ? 'none' : 'inline-block';
       } else {
-        document.getElementById('nextStep').textContent = applicantData.allocation ? 'You have been allocated. Check your status.' : 'Onboarding complete. Awaiting college allocation.';
+        document.getElementById('nextStep').textContent = 'Awaiting final decision.';
         nextBtn.style.display = 'none';
       }
     }
 
-    function logoFor(c) {
-      return `https://logo.clearbit.com/${c.domain}`;
+    function initialsFor(name) {
+      return name.replace(/\(.*?\)/g,'').split(/\s+/).filter(Boolean).map(w => w[0]).filter(c => /[A-Z]/i.test(c)).slice(0,3).join('').toUpperCase();
+    }
+    function logoColor(slug) {
+      const palettes = {
+        aup: '#0033A0', centre: '#FFB81C', capital: '#A6192E', cottey: '#5D2F8A',
+        ithaca: '#1B4D3E', ie: '#E60000', lynn: '#003DA5', 'masters-union': '#1A1A1A',
+        muhlenberg: '#9D2235', nuq: '#4E2A84', syracuse: '#F76900', charleston: '#7A0019'
+      };
+      return palettes[slug] || '#FFC72C';
     }
     function collegeCardHtml(c, withRank, rankNum) {
+      const initials = initialsFor(c.name);
+      const color = logoColor(c.slug);
       return `<div class="college-card" draggable="true" data-college="${c.slug}">
         <span class="grip">⋮⋮</span>
         ${withRank ? `<div class="rank-badge">${rankNum}</div>` : ''}
-        <img class="logo" src="${logoFor(c)}" alt="" onerror="this.style.background='#FFC72C'; this.replaceWith(Object.assign(document.createElement('div'),{className:'logo',innerText:'${c.name.split(' ').map(w=>w[0]).slice(0,2).join('')}',style:'display:flex;align-items:center;justify-content:center;background:#FFC72C;color:#111;font-weight:600;font-size:13px;'}))">
+        <div class="logo-initials" style="background:${color}; color:#fff;">${initials}</div>
         <div class="info"><div class="nm">${c.name}</div><div class="cn">${c.country}</div></div>
       </div>`;
     }
@@ -844,6 +1000,84 @@
       const count = ch.querySelectorAll('.college-card').length;
       document.getElementById('chosenCount').textContent = `(${count})`;
     }
+
+    function goToTab(tab) {
+      const link = document.querySelector(`.sidebar a[data-tab="${tab}"]`);
+      if (!link || link.classList.contains('locked')) return;
+      link.click();
+    }
+    function renderInventory() {
+      const wrap = document.getElementById('inventoryList');
+      const saved = applicantData.inventory?.answers || {};
+      wrap.innerHTML = INTERESTS.map(i => `
+        <div class="inv-row">
+          <div class="inv-label">${escapeHtml(i.label)}</div>
+          <div class="inv-pills" data-inv="${escapeHtml(i.label)}">
+            ${['interested','maybe','not'].map(v => `<button class="inv-pill ${saved[i.label]===v?'selected':''}" onclick="setInventory('${i.label.replace(/'/g,"\\'")}','${v}',this)">${v==='interested'?'Interested':v==='maybe'?'Maybe':'Not really'}</button>`).join('')}
+          </div>
+        </div>
+      `).join('');
+      updateInventoryCount();
+    }
+    window.setInventory = function(label, val, btn) {
+      const inv = applicantData.inventory || { answers: {} };
+      inv.answers = inv.answers || {};
+      inv.answers[label] = val;
+      applicantData.inventory = inv;
+      btn.parentElement.querySelectorAll('.inv-pill').forEach(p => p.classList.remove('selected'));
+      btn.classList.add('selected');
+      btn.closest('.inv-row')?.classList.remove('error');
+      updateInventoryCount();
+    };
+    function updateInventoryCount() {
+      const ans = applicantData.inventory?.answers || {};
+      document.getElementById('inventoryDone').textContent = INTERESTS.filter(i => ans[i.label]).length;
+    }
+    function calcInventoryScores(answers) {
+      const raw = { IQ: 0, EQ: 0, DQ: 0 };
+      INTERESTS.forEach(i => {
+        const v = answers[i.label];
+        const pts = v === 'interested' ? 2 : v === 'maybe' ? 1 : 0;
+        raw[i.cat] += pts;
+      });
+      const total = raw.IQ + raw.EQ + raw.DQ || 1;
+      const IQ = Math.round((raw.IQ / total) * 100);
+      const EQ = Math.round((raw.EQ / total) * 100);
+      const DQ = Math.round((raw.DQ / total) * 100);
+      const dominant = raw.IQ >= raw.EQ && raw.IQ >= raw.DQ ? 'IQ' : raw.EQ >= raw.DQ ? 'EQ' : 'DQ';
+      const topInterests = INTERESTS.filter(i => answers[i.label] === 'interested').map(i => i.label);
+      return { raw: { ...raw, PQ: 0 }, IQ, EQ, DQ, AQ: 0, logicPct: IQ, peoplePct: EQ + DQ, dominant, topInterests };
+    }
+    window.submitInventory = async function() {
+      const ans = applicantData.inventory?.answers || {};
+      const unanswered = INTERESTS.filter(i => !ans[i.label]);
+      if (unanswered.length > 0) {
+        document.querySelectorAll('.inv-row').forEach(r => r.classList.remove('error'));
+        unanswered.forEach(i => {
+          const el = document.querySelector(`.inv-pills[data-inv="${CSS.escape(i.label)}"]`);
+          if (el) el.closest('.inv-row').classList.add('error');
+        });
+        document.querySelector('.inv-row.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        alert(`Please answer all 30 items. ${unanswered.length} still need a response.`);
+        return;
+      }
+      const scores = calcInventoryScores(ans);
+      const submittedAt = new Date().toISOString();
+      await updateDoc(doc(db, "applicants", currentUser.uid), {
+        inventory: { answers: ans, scores, submittedAt },
+        "onboarding.inventory": true
+      });
+      applicantData.inventory = { answers: ans, scores, submittedAt };
+      applicantData.onboarding = { ...(applicantData.onboarding||{}), inventory: true };
+      // Push to backend Sheet (assessments tab)
+      fetch(SHEET_WEBHOOK_URL + "?type=assessment", {
+        method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ email: currentUser.email, firstName: applicantData.firstName, lastName: applicantData.lastName, submittedAt, scores })
+      }).catch(()=>{});
+      document.getElementById('inventoryStatus').textContent = '✓ Submitted';
+      updateProgress(); applyLocks();
+      goToTab('college');
+    };
 
     function renderChecklist() {
       const wrap = document.getElementById('checklistItems');
@@ -925,15 +1159,15 @@
       const ob = applicantData.onboarding || {};
       const stages = [
         { id: 'registered', label: 'Registered', desc: 'Account created and form submitted', done: true },
-        { id: 'assessment', label: 'Interest Assessment', desc: 'Personality and strengths report', done: !!applicantData.assessment },
         { id: 'photo', label: 'Profile Photo', desc: 'Required for your application', done: !!ob.photo },
         { id: 'personal', label: 'Personal Profile', desc: 'Family, citizenship, languages', done: !!ob.personal },
         { id: 'academic', label: 'Academic Profile', desc: 'Grades, scores, intended major', done: !!ob.academic },
+        { id: 'inventory', label: 'Interest Inventory', desc: '30-item interest assessment', done: !!ob.inventory },
         { id: 'college', label: 'College Discovery', desc: 'Your ranked college choices', done: !!ob.college },
-        { id: 'checklist', label: 'Application Checklist', desc: '17-step submission tracker', done: !!ob.checklist },
-        { id: 'allocation', label: 'College Allocation', desc: 'Decision by Next Genius team', done: !!applicantData.allocation, locked: !ob.checklist },
+        { id: 'allocation', label: 'College Allocation', desc: 'Assigned by Next Genius team', done: !!applicantData.allocation, locked: !ob.college },
         { id: 'interview', label: 'Interview Videos', desc: 'Student + family video uploads', done: !!ob.interview, locked: !applicantData.allocation },
-        { id: 'decision', label: 'Final Decision', desc: 'Scholarship offer / outcome', done: !!applicantData.finalDecision, locked: !ob.interview }
+        { id: 'groupInterview', label: 'Group Interview', desc: 'Joint call with team and college', done: !!ob.groupInterview, locked: !ob.interview },
+        { id: 'decision', label: 'Final Decision', desc: 'Scholarship offer / outcome', done: !!applicantData.finalDecision, locked: !ob.groupInterview }
       ];
       const html = `
         <div class="status-stepper">
@@ -953,7 +1187,7 @@
                   </div>
                   <div class="step-desc">${s.desc}</div>
                   ${s.id === 'allocation' && applicantData.allocation ? `<div class="step-extra">Allocated to <strong>${applicantData.allocation.college}</strong> (${applicantData.allocation.status || 'pending acceptance'})</div>` : ''}
-                  ${s.id === 'assessment' && applicantData.assessment ? `<div class="step-extra">Dominant strength: <strong>${applicantData.assessment.scores?.dominant || ''}</strong></div>` : ''}
+                  ${s.id === 'inventory' && applicantData.inventory ? `<div class="step-extra">Dominant strength: <strong>${applicantData.inventory.scores?.dominant || ''}</strong></div>` : ''}
                 </div>
               </div>
             `;
@@ -1027,6 +1261,7 @@
         applicantData.onboarding = { ...(applicantData.onboarding||{}), photo: true };
         document.getElementById('photoStatus').textContent = '✓ Photo saved';
         updateProgress(); applyLocks();
+        goToTab('personal');
       } catch (e) {
         document.getElementById('photoStatus').textContent = '✗ ' + e.message;
       } finally {
@@ -1044,6 +1279,7 @@
       applicantData.personal = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), personal: true };
       document.getElementById('personalStatus').textContent = '✓ Saved';
       updateProgress(); applyLocks();
+      goToTab('academic');
     };
     window.saveAcademic = async () => {
       const data = {};
@@ -1054,6 +1290,7 @@
       applicantData.academic = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), academic: true };
       document.getElementById('academicStatus').textContent = '✓ Saved';
       updateProgress(); applyLocks();
+      goToTab('inventory');
     };
     window.saveColleges = async () => {
       const order = [...document.querySelectorAll('#collegeChosen .college-card')].map(el => el.dataset.college);
@@ -1062,6 +1299,7 @@
       applicantData.collegeChoices = { order }; applicantData.onboarding = { ...(applicantData.onboarding||{}), college: true };
       document.getElementById('collegeStatus').textContent = '✓ Submitted';
       updateProgress(); applyLocks();
+      goToTab('allocation');
     };
     window.saveInterview = async () => {
       const data = {};
@@ -1071,6 +1309,15 @@
       applicantData.interview = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), interview: true };
       document.getElementById('interviewStatus').textContent = '✓ Submitted';
       updateProgress(); applyLocks();
+      goToTab('groupinterview');
+    };
+
+    window.confirmGroupInterview = async () => {
+      await updateDoc(doc(db, "applicants", currentUser.uid), { "onboarding.groupInterview": true, groupInterviewCompletedAt: new Date().toISOString() });
+      applicantData.onboarding = { ...(applicantData.onboarding||{}), groupInterview: true };
+      document.getElementById('groupInterviewStatus').textContent = '✓ Marked complete';
+      updateProgress(); applyLocks();
+      goToTab('decision');
     };
 
     // ── Settings ──
