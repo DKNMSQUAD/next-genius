@@ -829,8 +829,14 @@
     let currentUser = null;
     let applicantData = {};
 
+    const ADMIN_EMAILS = ['dknmsquad@gmail.com'];
     onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // Admin accounts are not student applicants — bounce them to the admin panel
+        if (ADMIN_EMAILS.includes((user.email || '').toLowerCase())) {
+          window.location.href = 'admin.html';
+          return;
+        }
         currentUser = user;
         document.getElementById('authGate').style.display = 'none';
         document.getElementById('dashboardWrap').style.display = 'block';

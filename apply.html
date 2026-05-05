@@ -655,7 +655,42 @@
 
   <script>
     const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
+
+    function jsonpDupCheck(params) {
+      return new Promise((resolve, reject) => {
+        const cb = '__dup_cb_' + Date.now() + Math.floor(Math.random()*1000);
+        const script = document.createElement('script');
+        const timer = setTimeout(() => { reject(new Error('Timeout')); cleanup(); }, 12000);
+        function cleanup() { clearTimeout(timer); delete window[cb]; script.remove(); }
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        const qs = Object.entries(params).map(([k,v]) => k + '=' + encodeURIComponent(v || '')).join('&');
+        script.src = SHEET_WEBHOOK_URL + '?check_dup=1&callback=' + cb + '&' + qs;
+        script.onerror = () => { cleanup(); reject(new Error('Network error')); };
+        document.head.appendChild(script);
+      });
+    }
+
     window.__saveApplicant = async function(payload) {
+      // Duplicate guard — block re-registration with same email, phone, or full name
+      try {
+        const dup = await jsonpDupCheck({
+          email: payload.email,
+          phone: payload.whatsapp,
+          firstName: payload.firstName,
+          lastName: payload.lastName
+        });
+        if (dup && dup.duplicate) {
+          const reasons = {
+            email: 'An application with this email already exists. Please sign in to your dashboard instead.',
+            phone: 'An application with this WhatsApp number already exists. Each student can only register once.',
+            name: 'An application with this exact name already exists. Each student can only register once. If this is not you, please contact nextgeniusindia@gmail.com.'
+          };
+          throw new Error(reasons[dup.reason] || 'A duplicate application was detected. Each student can only apply once.');
+        }
+      } catch (e) {
+        if (e.message && (e.message.includes('already') || e.message.includes('only') || e.message.includes('duplicate'))) throw e;
+        // network error on dup check — proceed; Auth signup later will catch email duplicates
+      }
       sessionStorage.setItem('ng_pending', JSON.stringify({ ...payload, createdAt: new Date().toISOString() }));
       fetch(SHEET_WEBHOOK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ ...payload, createdAt: new Date().toISOString(), status: "registered" }) }).catch(()=>{});
       return { saved: true };
