@@ -1141,7 +1141,7 @@
       }
     };
 
-    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
+    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
     function syncAdmin() {
       try {
         const payload = { uid: currentUser.uid, email: currentUser.email, firstName: applicantData.firstName, lastName: applicantData.lastName, status: applicantData.status, onboarding: applicantData.onboarding, allocation: applicantData.allocation, exitedAt: applicantData.exitedAt };
@@ -1241,7 +1241,7 @@
       const email = document.getElementById('loginEmail').value.trim();
       if (!email) { alert('Enter your email above first'); return; }
       // Use our branded Gmail-sent reset (avoids Firebase noreply spam)
-      const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
+      const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
       try {
         await fetch(SHEET_WEBHOOK_URL + '?reset_password=' + encodeURIComponent(email), { mode: 'no-cors' });
         alert('Password reset link sent to ' + email + '. Check your inbox (and Promotions tab if you don\'t see it).');

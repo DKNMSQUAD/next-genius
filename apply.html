@@ -654,7 +654,7 @@
   </div>
 
   <script>
-    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
+    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
     window.__saveApplicant = async function(payload) {
       sessionStorage.setItem('ng_pending', JSON.stringify({ ...payload, createdAt: new Date().toISOString() }));
       fetch(SHEET_WEBHOOK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ ...payload, createdAt: new Date().toISOString(), status: "registered" }) }).catch(()=>{});

@@ -239,7 +239,7 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
+    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
 
     window.__saveTestResult = async function(result) {
       const enriched = { ...result, createdAt: serverTimestamp() };
