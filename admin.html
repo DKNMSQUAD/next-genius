@@ -168,10 +168,52 @@
     .alloc-banner .v { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: #111; margin-top: 4px; }
     .alloc-banner .s { font-size: 12px; color: #6b7280; margin-top: 4px; }
 
+    .college-mark {
+      width: 84px; height: 84px; border-radius: 18px;
+      background: linear-gradient(135deg, #FFC72C 0%, #E8A020 100%);
+      color: #111; display: flex; align-items: center; justify-content: center;
+      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px;
+      flex-shrink: 0; box-shadow: 0 4px 12px rgba(232, 160, 32, 0.3);
+      letter-spacing: 1px;
+    }
+
+    .stu-list { display: flex; flex-direction: column; gap: 8px; }
+    .stu-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 14px; background: #fff; border: 1px solid #e5e7eb;
+      border-radius: 12px; cursor: pointer; transition: all 0.12s;
+    }
+    .stu-card:hover { background: #fafafa; border-color: #d1d5db; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .stu-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #f3f4f6; }
+    .stu-avatar-fallback {
+      display: flex; align-items: center; justify-content: center;
+      background: #fff7e0; color: #92400e;
+      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px;
+    }
+    .stu-meta { flex: 1; min-width: 0; }
+    .stu-name { font-weight: 600; font-size: 14px; color: #111; }
+    .stu-sub { font-size: 12px; color: #6b7280; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .stu-badge {
+      flex-shrink: 0; font-size: 11px; padding: 5px 11px; border-radius: 999px;
+      font-weight: 600; letter-spacing: 0.3px;
+      background: #f3f4f6; color: #4b5563;
+    }
+    .stu-badge.green { background: #d1fae5; color: #065f46; }
+    .stu-badge.red { background: #fee2e2; color: #991b1b; }
+    .stu-badge.amber { background: #fff7e0; color: #92400e; border: 1px solid #FFE08F; }
+    .stu-badge.grey { background: #f3f4f6; color: #6b7280; }
+
+    .empty-block {
+      padding: 24px; text-align: center; color: #9ca3af; font-size: 13px;
+      background: #fafafa; border: 1px dashed #e5e7eb; border-radius: 10px;
+    }
+
     @media (max-width: 720px) {
       .detail-hero { flex-direction: column; text-align: center; }
       .detail-grid { grid-template-columns: 1fr; }
       .score-cards { grid-template-columns: 1fr; }
+      .stu-card { flex-wrap: wrap; }
+      .stu-badge { margin-top: 4px; }
     }
 
     .login-card {
@@ -1024,30 +1066,61 @@
       const c = PARTNER_COLLEGES.find(x => x.slug === slug);
       const allocatedList = applicants.filter(a => a.allocation?.slug === slug);
       const chosenList = applicants.filter(a => (a.collegeChoices?.order || []).includes(slug));
-      const studentRow = (a, extra) => `<tr onclick="closeDetail(); setTimeout(()=>openDetail('${a.uid}'), 50);" style="cursor:pointer;">
-        <td><strong>${escapeHtml(a.firstName||'')} ${escapeHtml(a.lastName||'')}</strong></td>
-        <td>${escapeHtml(a.email||'')}</td>
-        <td style="color:#6b7280;">${extra || ''}</td>
-      </tr>`;
-      document.getElementById('detailName').textContent = c.name;
+      const acceptedCount = allocatedList.filter(a => a.allocation?.status === 'accepted').length;
+      const initials = c.name.split(' ').map(w => w[0]).filter(x => /[A-Z]/i.test(x)).slice(0,3).join('').toUpperCase();
+
+      const studentCard = (a, badge, accent) => {
+        const stage = stageOf(a);
+        const ainit = ((a.firstName||'')[0] || '') + ((a.lastName||'')[0] || '');
+        return `<div class="stu-card" onclick="closeDetail(); setTimeout(()=>openDetail('${a.uid}'), 80);">
+          ${a.photoURL ? `<img class="stu-avatar" src="${a.photoURL}" alt="">` : `<div class="stu-avatar stu-avatar-fallback">${escapeHtml(ainit.toUpperCase()) || '?'}</div>`}
+          <div class="stu-meta">
+            <div class="stu-name">${escapeHtml((a.firstName||'') + ' ' + (a.lastName||''))}</div>
+            <div class="stu-sub">${escapeHtml(a.email||'')}${a.school ? ' · ' + escapeHtml(a.school) : ''}</div>
+          </div>
+          ${badge ? `<div class="stu-badge ${accent || ''}">${badge}</div>` : ''}
+        </div>`;
+      };
+
+      document.getElementById('detailName').textContent = 'Partner College';
       document.getElementById('detailBody').innerHTML = `
-        <div style="display:flex; gap:14px; margin-bottom:18px;">
-          <div class="kpi" style="flex:1;"><div class="label">Chose This</div><div class="value">${chosenList.length}</div></div>
-          <div class="kpi" style="flex:1;"><div class="label">Allocated</div><div class="value">${allocatedList.length}</div></div>
-          <div class="kpi" style="flex:1;"><div class="label">Accepted</div><div class="value">${allocatedList.filter(a => a.allocation?.status === 'accepted').length}</div></div>
+        <div class="detail-hero" style="background:linear-gradient(135deg, #fffaf0 0%, #fff7e0 100%);">
+          <div class="college-mark">${escapeHtml(initials)}</div>
+          <div class="meta">
+            <div class="name">${escapeHtml(c.name)}</div>
+            <div class="email">${escapeHtml(c.country)}</div>
+            <div class="sub">
+              <span><strong style="color:#111;">${chosenList.length}</strong> chose this</span>
+              <span><strong style="color:#111;">${allocatedList.length}</strong> allocated</span>
+              <span><strong style="color:#10b981;">${acceptedCount}</strong> accepted</span>
+            </div>
+          </div>
         </div>
 
-        <h3 style="margin:0 0 10px; font-family:'Poppins',sans-serif; font-size:14px;">Allocated students (${allocatedList.length})</h3>
-        ${allocatedList.length ? `<div style="background:#fafafa; border-radius:8px; overflow:hidden; margin-bottom:20px;"><table style="width:100%; font-size:13px;">${allocatedList.map(a => studentRow(a, a.allocation.status || 'pending')).join('')}</table></div>` : '<p style="color:#6b7280; font-size:13px; margin-bottom:18px;">No allocations yet.</p>'}
+        <div class="detail-section">
+          <h3>Allocated Students <span style="color:#9ca3af; font-weight:500; margin-left:4px;">(${allocatedList.length})</span></h3>
+          ${allocatedList.length ? `<div class="stu-list">${allocatedList.map(a => {
+              const status = a.allocation?.status || 'pending';
+              const statusLabel = status === 'accepted' ? 'Accepted' : status === 'declined' ? 'Declined' : 'Pending';
+              const accent = status === 'accepted' ? 'green' : status === 'declined' ? 'red' : '';
+              return studentCard(a, statusLabel, accent);
+            }).join('')}</div>` :
+            `<div class="empty-block">No students allocated to this college yet.</div>`}
+        </div>
 
-        <h3 style="margin:0 0 10px; font-family:'Poppins',sans-serif; font-size:14px;">Students who chose this college (${chosenList.length})</h3>
-        ${chosenList.length ? `<div style="background:#fafafa; border-radius:8px; overflow:hidden;"><table style="width:100%; font-size:13px;">${chosenList.map(a => {
-          const order = a.collegeChoices?.order || [];
-          const rank = order.indexOf(slug) + 1;
-          const allocated = a.allocation?.slug === slug ? '✓ Allocated here' : a.allocation ? 'Allocated to ' + a.allocation.college : '';
-          return studentRow(a, 'Choice #' + rank + (allocated ? ' · ' + allocated : ''));
-        }).join('')}</table></div>` : '<p style="color:#6b7280; font-size:13px;">No students have chosen this college yet.</p>'}
-      `;
+        <div class="detail-section">
+          <h3>Students Who Chose This College <span style="color:#9ca3af; font-weight:500; margin-left:4px;">(${chosenList.length})</span></h3>
+          ${chosenList.length ? `<div class="stu-list">${chosenList.map(a => {
+              const order = a.collegeChoices?.order || [];
+              const rank = order.indexOf(slug) + 1;
+              let badge, accent = '';
+              if (a.allocation?.slug === slug) { badge = 'Choice #' + rank + ' · Allocated here'; accent = 'amber'; }
+              else if (a.allocation) { badge = 'Choice #' + rank + ' · → ' + a.allocation.college; accent = 'grey'; }
+              else { badge = 'Choice #' + rank; }
+              return studentCard(a, badge, accent);
+            }).join('')}</div>` :
+            `<div class="empty-block">No students have chosen this college yet.</div>`}
+        </div>`;
       document.getElementById('detailModal').classList.add('open');
     };
 
