@@ -140,6 +140,10 @@
         onboarding: { photo: !!user.photoURL, personal: false, academic: false, inventory: false, college: false, interview: false, groupInterview: false, decision: false }
       };
       await setDoc(doc(db, "applicants", user.uid), enriched);
+      // Fire-and-forget welcome email via Apps Script (Gmail-sent, branded HTML)
+      const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxDrGKVAFa76WvmkAu1ULc0kLBNR27R3ZGH0KbNNYcwTzsIHX9oHNhkE-DG0GzGtRKANA/exec";
+      const url = SHEET_WEBHOOK_URL + "?welcome_email=" + encodeURIComponent(enriched.email) + "&firstName=" + encodeURIComponent(enriched.firstName || '');
+      fetch(url, { mode: "no-cors" }).catch(()=>{});
       sessionStorage.removeItem('ng_pending');
       window.location.href = 'dashboard.html';
     }
