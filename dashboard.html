@@ -612,13 +612,7 @@
         <section class="panel" id="panel-allocation">
           <h1>College Allocation</h1>
           <p class="subtitle">Reviewed and assigned by the Next Genius team.</p>
-          <div class="card" id="allocationCard">
-            <div id="allocationContent">
-              <p style="font-size:14px; color:#666;">Your college choices have been submitted. The Next Genius team is reviewing your profile and matching you with the most suitable partner college based on your preferences, scores, profile fit, and college capacity.</p>
-              <p style="font-size:14px; color:#666; margin-top:12px;">You'll be notified here and via email once an allocation is made. Typical turnaround: 5–10 working days.</p>
-              <div id="allocationDecision" style="margin-top:20px;"></div>
-            </div>
-          </div>
+          <div id="allocationContent"></div>
         </section>
 
         <!-- GROUP INTERVIEW -->
@@ -876,9 +870,58 @@
       // commonApp review
       renderInventory();
       renderInbox();
+      renderAllocation();
       renderStatus();
       applyLocks();
     }
+
+    function renderAllocation() {
+      const wrap = document.getElementById('allocationContent');
+      if (!wrap) return;
+      const alloc = applicantData.allocation;
+      if (!alloc) {
+        wrap.innerHTML = `<div class="card">
+          <p style="font-size:14px; color:#666; line-height:1.6;">Your college choices have been submitted. The Next Genius team is reviewing your profile and matching you with the most suitable partner college based on your preferences, scores, profile fit, and college capacity.</p>
+          <p style="font-size:14px; color:#666; margin-top:12px; line-height:1.6;">You'll be notified here and via email once an allocation is made. Typical turnaround: 5–10 working days.</p>
+        </div>`;
+        return;
+      }
+      const isAccepted = alloc.status === 'accepted';
+      const isDeclined = alloc.status === 'declined';
+      wrap.innerHTML = `
+        <div class="card" style="border:2px solid #FFC72C; background:#fff7e0;">
+          <div style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#92400e; font-weight:600; margin-bottom:8px;">You have been allocated to</div>
+          <h2 style="font-family:'Poppins',sans-serif; font-size:24px; font-weight:700; color:#111; margin-bottom:8px;">${escapeHtml(alloc.college)}</h2>
+          <p style="font-size:14px; color:#444; line-height:1.5;">After reviewing your profile, ranked choices, and academic fit, the Next Genius team has allocated you to <strong>${escapeHtml(alloc.college)}</strong>.</p>
+          ${isAccepted ? `<div style="margin-top:16px; padding:12px 16px; background:#d1fae5; border-radius:8px; font-size:14px; color:#065f46;">✓ You accepted this allocation. The Interview Videos stage is now unlocked.</div>` :
+            isDeclined ? `<div style="margin-top:16px; padding:12px 16px; background:#fee2e2; border-radius:8px; font-size:14px; color:#991b1b;">You declined this allocation. The Next Genius team will be in touch.</div>` :
+            `<div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn" onclick="acceptAllocation()">Accept allocation</button>
+              <button class="btn-secondary btn" onclick="declineAllocation()">Decline</button>
+            </div>
+            <p style="font-size:13px; color:#666; margin-top:14px;">Acceptance unlocks the Interview Videos stage. If you decline, the team will reach out to discuss alternatives.</p>`}
+        </div>
+        ${alloc.notes ? `<div class="card"><h2 style="font-family:'Poppins',sans-serif; font-size:14px;">Notes from the team</h2><p style="font-size:14px; color:#444; line-height:1.5;">${escapeHtml(alloc.notes)}</p></div>` : ''}
+      `;
+    }
+
+    window.acceptAllocation = async function() {
+      if (!applicantData.allocation) return;
+      const updated = { ...applicantData.allocation, status: 'accepted', acceptedAt: new Date().toISOString() };
+      await updateDoc(doc(db, "applicants", currentUser.uid), { allocation: updated, "onboarding.allocation": true, status: 'allocated_accepted' });
+      applicantData.allocation = updated;
+      applicantData.onboarding = { ...(applicantData.onboarding||{}), allocation: true };
+      applicantData.status = 'allocated_accepted';
+      renderAllocation(); updateProgress(); applyLocks();
+      goToTab('interview');
+    };
+    window.declineAllocation = async function() {
+      if (!confirm('Decline this allocation? The team will reach out to discuss alternatives.')) return;
+      const updated = { ...applicantData.allocation, status: 'declined', declinedAt: new Date().toISOString() };
+      await updateDoc(doc(db, "applicants", currentUser.uid), { allocation: updated, status: 'allocation_declined' });
+      applicantData.allocation = updated;
+      renderAllocation();
+    };
 
     function updateProgress() {
       const ob = applicantData.onboarding || {};

@@ -234,7 +234,7 @@
             <div style="overflow-x:auto;">
               <table id="applicantsTable">
                 <thead><tr>
-                  <th>Name</th><th>Email</th><th>City</th><th>School</th><th>Status</th><th>Progress</th><th>Updated</th>
+                  <th>Name</th><th>Email</th><th>City</th><th>School</th><th>Status</th><th>Progress</th><th>Updated</th><th></th>
                 </tr></thead>
                 <tbody></tbody>
               </table>
@@ -334,7 +334,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, arrayUnion, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
     const firebaseConfig = {
       apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
       authDomain: "next-genius-auto.firebaseapp.com",
@@ -423,10 +423,31 @@
       if (a.onboarding?.photo || a.onboarding?.personal || a.onboarding?.academic || a.onboarding?.inventory) return 'onboarding';
       return 'registered';
     }
-    function progressBar(a) {
+    function progressBar(a) { return progressInfo(a).html; }
+    function progressInfo(a) {
       const ob = a.onboarding || {};
-      const steps = ['photo','personal','academic','inventory','college','interview','groupInterview'];
-      return `<div class="progress-bar">${steps.map(s => `<div class="${ob[s] ? 'done' : ''}"></div>`).join('')}<div class="${a.allocation ? 'done' : ''}"></div></div>`;
+      const steps = [
+        ['photo', 'Photo'],
+        ['personal', 'Personal Profile'],
+        ['academic', 'Academic Profile'],
+        ['inventory', 'Interest Inventory'],
+        ['college', 'College Discovery'],
+        ['allocation', 'Allocation', !!a.allocation],
+        ['interview', 'Interview Videos'],
+        ['groupInterview', 'Group Interview']
+      ];
+      const flags = steps.map(([k, label, override]) => override !== undefined ? override : !!ob[k]);
+      const done = flags.filter(Boolean).length;
+      // Find next pending step's label
+      let currentLabel = 'Done';
+      let currentIdx = flags.findIndex(f => !f);
+      if (currentIdx >= 0) currentLabel = 'On: ' + steps[currentIdx][1];
+      const completed = steps.filter(([k,l,o], i) => flags[i]).map(s => s[1]);
+      const html = `<div style="font-size:13px; line-height:1.3;">
+        <div style="font-weight:600; color:#111;">${done} / 8</div>
+        <div style="font-size:11px; color:#6b7280;">${currentLabel}</div>
+      </div>`;
+      return { html, done, total: 8, currentLabel, completed };
     }
     function dateShort(ts) {
       if (!ts) return '—';
@@ -489,19 +510,33 @@
       const tbody = document.querySelector('#applicantsTable tbody');
       tbody.innerHTML = filtered.map(a => {
         const stage = stageOf(a);
-        return `<tr onclick="openDetail('${a.uid}')">
-          <td><strong>${escapeHtml(a.firstName || '')} ${escapeHtml(a.lastName || '')}</strong></td>
-          <td>${escapeHtml(a.email || '')}</td>
-          <td>${escapeHtml(a.city || '—')}</td>
-          <td style="max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(a.school || '—')}</td>
-          <td><span class="pill pill-${stage === 'registered' ? 'registered' : stage === 'allocated' || stage === 'interview' || stage === 'decision' ? 'allocated' : stage === 'exited' ? 'exited' : 'active'}">${stage}</span></td>
-          <td>${progressBar(a)}</td>
-          <td style="color:#6b7280;">${dateShort(a.createdAt)}</td>
+        return `<tr>
+          <td onclick="openDetail('${a.uid}')"><strong>${escapeHtml(a.firstName || '')} ${escapeHtml(a.lastName || '')}</strong></td>
+          <td onclick="openDetail('${a.uid}')">${escapeHtml(a.email || '')}</td>
+          <td onclick="openDetail('${a.uid}')">${escapeHtml(a.city || '—')}</td>
+          <td onclick="openDetail('${a.uid}')" style="max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(a.school || '—')}</td>
+          <td onclick="openDetail('${a.uid}')"><span class="pill pill-${stage === 'registered' ? 'registered' : stage === 'allocated' || stage === 'interview' || stage === 'decision' ? 'allocated' : stage === 'exited' ? 'exited' : 'active'}">${stage}</span></td>
+          <td onclick="openDetail('${a.uid}')">${progressBar(a)}</td>
+          <td onclick="openDetail('${a.uid}')" style="color:#6b7280;">${dateShort(a.createdAt)}</td>
+          <td><button onclick="deleteApplicant('${a.uid}', '${escapeHtml((a.firstName||'')+' '+(a.lastName||''))}', event)" title="Delete record" style="background:none; border:none; color:#dc2626; cursor:pointer; padding:6px; border-radius:6px; display:inline-flex; align-items:center;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></td>
         </tr>`;
       }).join('');
       document.getElementById('applicantsEmpty').style.display = filtered.length ? 'none' : 'block';
       document.getElementById('applicantCount').textContent = filtered.length + ' of ' + applicants.length;
     }
+
+    window.deleteApplicant = async function(uid, name, ev) {
+      ev.stopPropagation();
+      if (!confirm('Delete the record for "' + name + '"?\n\nThis removes the applicant document from Firestore (their Firebase Auth account remains).\n\nThis cannot be undone.')) return;
+      try {
+        await deleteDoc(doc(db, "applicants", uid));
+        applicants = applicants.filter(a => a.uid !== uid);
+        renderApplicants(); renderOverview(); renderColleges();
+        toast('Deleted: ' + name);
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    };
 
     document.getElementById('searchBox').addEventListener('input', renderApplicants);
     document.getElementById('filterStage').addEventListener('change', renderApplicants);
@@ -596,6 +631,20 @@
       toast('Reset email sent.');
     };
 
+    const BOT_PROXY = "https://script.google.com/macros/s/AKfycbzQUQoW6PGd--G_pzL1LjLlEsDXwqZSGfntEeKTgDHNtDN_R-DrTpNb5bqErX9LSD2I/exec";
+    function jsonpSuggest(profile) {
+      return new Promise((resolve, reject) => {
+        const cb = '__sugg_cb_' + Date.now() + Math.floor(Math.random()*1000);
+        const script = document.createElement('script');
+        const timer = setTimeout(() => { reject(new Error('Timeout')); cleanup(); }, 30000);
+        function cleanup() { clearTimeout(timer); delete window[cb]; script.remove(); }
+        window[cb] = (data) => { cleanup(); data.ok ? resolve(data.suggestions || []) : reject(new Error(data.error || 'Bot error')); };
+        script.src = BOT_PROXY + '?callback=' + cb + '&suggest=' + encodeURIComponent(JSON.stringify(profile));
+        script.onerror = () => { cleanup(); reject(new Error('Network error')); };
+        document.head.appendChild(script);
+      });
+    }
+
     window.quickAllocate = function(uid) {
       const a = applicants.find(x => x.uid === uid);
       if (!a) return;
@@ -608,6 +657,11 @@
       const html = `
         <h3 style="margin:0 0 10px; font-family:'Poppins',sans-serif; font-size:14px;">Student's ranked choices</h3>
         ${choices.length ? choices.map(c => `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; background:#fff7e0; border:1px solid #FFE08F; border-radius:8px; margin-bottom:6px;"><div style="width:24px; height:24px; border-radius:50%; background:#FFC72C; color:#111; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">${c.rank}</div><div style="flex:1;"><strong style="font-size:14px;">${c.name}</strong><div style="font-size:12px; color:#6b7280;">${c.country}</div></div></div>`).join('') : '<p style="color:#6b7280; font-size:13px;">No college choices submitted yet.</p>'}
+
+        <h3 style="margin:18px 0 8px; font-family:'Poppins',sans-serif; font-size:14px; display:flex; align-items:center; gap:8px;">AI Suggestions <span style="font-size:10px; background:#ddd6fe; color:#5b21b6; padding:2px 8px; border-radius:999px; font-weight:600; letter-spacing:0.4px;">SUGGESTION</span></h3>
+        <div id="aiSuggestions" style="margin-bottom:14px;">
+          <div style="font-size:13px; color:#9ca3af; padding:10px 12px; background:#f9fafb; border-radius:8px;">Generating suggestions based on profile fit...</div>
+        </div>
 
         <h3 style="margin:18px 0 10px; font-family:'Poppins',sans-serif; font-size:14px;">Allocate to</h3>
         <select id="allocCollege" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; margin-bottom:10px;">
@@ -623,6 +677,35 @@
       document.getElementById('detailName').textContent = 'Allocate — ' + (a.firstName || '') + ' ' + (a.lastName || '');
       document.getElementById('detailBody').innerHTML = html;
       document.getElementById('detailModal').classList.add('open');
+
+      // Fire AI suggestion
+      const profile = {
+        firstName: a.firstName, gender: a.personal?.gender, citizenship: a.personal?.citizenship,
+        dominant: a.inventory?.scores?.dominant, IQ: a.inventory?.scores?.IQ, EQ: a.inventory?.scores?.EQ, DQ: a.inventory?.scores?.DQ,
+        topInterests: a.inventory?.scores?.topInterests || [],
+        intendedMajor: a.academic?.major, subjects: a.academic?.subjects,
+        grade10: a.academic?.grade10Score, grade11: a.academic?.grade11Score, predicted12: a.academic?.predicted12Score,
+        city: a.city, school: a.school,
+        choices: order
+      };
+      jsonpSuggest(profile)
+        .then(suggestions => {
+          const wrap = document.getElementById('aiSuggestions');
+          if (!wrap) return;
+          if (!suggestions.length) { wrap.innerHTML = '<div style="font-size:13px; color:#9ca3af;">No suggestions returned.</div>'; return; }
+          wrap.innerHTML = suggestions.map((s, i) => {
+            const c = PARTNER_COLLEGES.find(x => x.slug === s.slug);
+            if (!c) return '';
+            return `<div style="display:flex; align-items:flex-start; gap:10px; padding:10px 12px; background:#f5f3ff; border:1px solid #ddd6fe; border-radius:8px; margin-bottom:6px; cursor:pointer;" onclick="document.getElementById('allocCollege').value='${c.slug}'; this.style.background='#ede9fe';">
+              <div style="width:24px; height:24px; border-radius:50%; background:#7c3aed; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">${i+1}</div>
+              <div style="flex:1;"><strong style="font-size:14px; color:#111;">${escapeHtml(c.name)}</strong><div style="font-size:12px; color:#5b21b6; margin-top:2px; line-height:1.4;">${escapeHtml(s.rationale)}</div></div>
+            </div>`;
+          }).join('');
+        })
+        .catch(err => {
+          const wrap = document.getElementById('aiSuggestions');
+          if (wrap) wrap.innerHTML = `<div style="font-size:13px; color:#9ca3af;">AI suggestion unavailable (${err.message}).</div>`;
+        });
     };
 
     window.confirmAllocate = async function(uid) {
