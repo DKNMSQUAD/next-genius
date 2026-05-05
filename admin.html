@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | Next Genius</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f5f6f8; color: #111; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px; background: #111; color: #fff; border-bottom: 1px solid #222;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar .brand { display: flex; align-items: center; gap: 12px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; }
+    .topbar .brand img { width: 32px; height: 32px; border-radius: 6px; }
+    .topbar .brand .badge { background: #FFC72C; color: #111; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 700; letter-spacing: 0.5px; }
+    .topbar .user { display: flex; align-items: center; gap: 14px; font-size: 13px; }
+    .topbar .user button { background: transparent; border: 1px solid #444; color: #fff; padding: 6px 14px; border-radius: 6px; font-family: inherit; cursor: pointer; font-size: 12px; }
+    .topbar .user button:hover { background: #222; }
+
+    .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 57px); }
+    .sidebar { background: #fff; border-right: 1px solid #e5e7eb; padding: 16px 0; }
+    .sidebar a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 22px;
+      font-size: 14px; color: #374151; text-decoration: none; cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+    .sidebar a:hover { background: #f9fafb; }
+    .sidebar a.active { color: #111; background: #fffaf0; border-left-color: #FFC72C; font-weight: 600; }
+    .sidebar a .ico { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+    .sidebar a.active .ico { opacity: 1; }
+    .sidebar a .ico svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .sidebar .group-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: #9ca3af; padding: 14px 22px 4px; font-weight: 600; }
+
+    .main { padding: 24px 32px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .panel h1 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    .panel .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 20px; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .kpi { background: #fff; border-radius: 12px; padding: 18px; border: 1px solid #e5e7eb; }
+    .kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; color: #6b7280; margin-bottom: 6px; font-weight: 600; }
+    .kpi .value { font-family: 'Poppins', sans-serif; font-size: 28px; font-weight: 700; color: #111; }
+    .kpi .change { font-size: 12px; color: #16a34a; margin-top: 4px; }
+
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .card h2 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+
+    .toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+    .toolbar input, .toolbar select {
+      padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px;
+      font-size: 13px; font-family: inherit; outline: none; background: #fff;
+    }
+    .toolbar input:focus, .toolbar select:focus { border-color: #FFC72C; }
+    .toolbar input { min-width: 240px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table th { text-align: left; font-weight: 600; color: #6b7280; padding: 10px 12px; border-bottom: 2px solid #e5e7eb; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    table td { padding: 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    table tr:hover td { background: #fafafa; cursor: pointer; }
+    table tr.selected td { background: #fff7e0; }
+    .pill { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; }
+    .pill-registered { background: #f3f4f6; color: #374151; }
+    .pill-active { background: #fff7e0; color: #92400e; }
+    .pill-allocated { background: #d1fae5; color: #065f46; }
+    .pill-exited { background: #fee2e2; color: #991b1b; }
+    .pill-done { background: #d1fae5; color: #065f46; }
+
+    .progress-bar { display: flex; gap: 2px; margin-top: 4px; }
+    .progress-bar div { width: 10px; height: 4px; background: #e5e7eb; border-radius: 1px; }
+    .progress-bar div.done { background: #FFC72C; }
+
+    .btn { font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #111; background: #FFC72C; border: none; border-radius: 999px; padding: 9px 22px; cursor: pointer; }
+    .btn:hover:not(:disabled) { background: #F0B71F; }
+    .btn:disabled { opacity: 0.5; cursor: wait; }
+    .btn-secondary { background: #fff; border: 1px solid #d1d5db; }
+    .btn-secondary:hover:not(:disabled) { background: #f9fafb; }
+    .btn-danger { background: #fff; border: 1px solid #dc2626; color: #dc2626; }
+    .btn-danger:hover:not(:disabled) { background: #fef2f2; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #374151; }
+    .field input, .field textarea, .field select {
+      width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: #FFC72C; }
+    .field textarea { min-height: 100px; resize: vertical; }
+
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-bg.open { display: flex; }
+    .modal { background: #fff; border-radius: 14px; max-width: 720px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-head { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+    .modal-head h2 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; }
+    .modal-head button { background: none; border: none; font-size: 22px; cursor: pointer; color: #9ca3af; }
+    .modal-body { padding: 22px 24px; }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
+    .detail-item .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; font-weight: 600; margin-bottom: 2px; }
+    .detail-item .val { font-size: 14px; color: #111; word-break: break-word; }
+
+    .login-card {
+      max-width: 380px; margin: 80px auto; background: #fff; border-radius: 14px;
+      padding: 32px; border: 1px solid #e5e7eb;
+    }
+    .login-card img { width: 64px; height: 64px; margin-bottom: 16px; }
+    .login-card h1 { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .login-card .subtitle { font-size: 13px; color: #6b7280; margin-bottom: 20px; }
+
+    .empty { text-align: center; padding: 60px 20px; color: #9ca3af; font-size: 14px; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #111; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 200; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: flex; overflow-x: auto; padding: 0; border-bottom: 1px solid #e5e7eb; }
+      .sidebar a { white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; padding: 12px 14px; }
+      .sidebar a.active { border-bottom-color: #FFC72C; border-left: none; }
+      .main { padding: 16px; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth gate -->
+  <div id="authGate" style="display:none;">
+    <div class="login-card">
+      <img src="NG_Logo.avif" alt="Next Genius">
+      <h1>Admin sign-in</h1>
+      <p class="subtitle">Restricted to authorised team members.</p>
+      <button class="btn" onclick="loginGoogle()" style="width:100%; background:#fff; border:1px solid #d1d5db; display:flex; align-items:center; justify-content:center; gap:10px;">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09 0-.73.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+      <div id="loginErr" style="color:#dc2626; font-size:13px; margin-top:12px; text-align:center;"></div>
+    </div>
+  </div>
+
+  <div id="forbidden" style="display:none;">
+    <div class="login-card">
+      <h1 style="color:#dc2626;">Access denied</h1>
+      <p class="subtitle">You're signed in as <span id="forbiddenEmail"></span>, but this account is not authorised for the admin panel. Contact dknmsquad@gmail.com.</p>
+      <button class="btn" onclick="signOutClick()" style="width:100%;">Sign out</button>
+    </div>
+  </div>
+
+  <div id="adminWrap" style="display:none;">
+    <div class="topbar">
+      <div class="brand"><img src="NG_Logo.avif" alt="NG"><span>Next Genius</span><span class="badge">ADMIN</span></div>
+      <div class="user"><span id="userEmail"></span><button onclick="signOutClick()">Sign out</button></div>
+    </div>
+
+    <div class="layout">
+      <nav class="sidebar">
+        <a data-tab="overview" class="active"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span> Overview</a>
+        <a data-tab="applicants"><span class="ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span> Applicants</a>
+        <a data-tab="cohorts"><span class="ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span> Cohorts</a>
+        <a data-tab="colleges"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg></span> Partner Colleges</a>
+        <a data-tab="messages"><span class="ico"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span> Messages</a>
+        <a data-tab="automations"><span class="ico"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> Automations</a>
+        <div class="group-label">Sheets</div>
+        <a href="https://docs.google.com/spreadsheets/d/1aURna2hml5A3yPYCQiTldEq6UGHvTLzPLP6o8MXARug/edit" target="_blank"><span class="ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span> Open Backend Sheet ↗</a>
+      </nav>
+
+      <main class="main">
+
+        <!-- OVERVIEW -->
+        <section class="panel active" id="panel-overview">
+          <h1>Overview</h1>
+          <p class="subtitle">Live snapshot of the scholarship pipeline.</p>
+          <div class="kpi-grid" id="kpiGrid"></div>
+          <div class="card">
+            <h2>Funnel</h2>
+            <div id="funnel"></div>
+          </div>
+        </section>
+
+        <!-- APPLICANTS -->
+        <section class="panel" id="panel-applicants">
+          <h1>Applicants</h1>
+          <p class="subtitle">All registered students. Click a row to see full details.</p>
+          <div class="toolbar">
+            <input type="text" id="searchBox" placeholder="Search name, email, school...">
+            <select id="filterStage">
+              <option value="">All stages</option>
+              <option value="registered">Registered (no progress)</option>
+              <option value="onboarding">Onboarding in progress</option>
+              <option value="college">College choices submitted</option>
+              <option value="allocated">Allocated</option>
+              <option value="interview">Interview submitted</option>
+              <option value="decision">Decision made</option>
+              <option value="exited">Exited</option>
+            </select>
+            <button class="btn btn-sm btn-secondary" onclick="exportApplicantsCSV()">Export CSV</button>
+            <span style="margin-left:auto; font-size:12px; color:#6b7280;" id="applicantCount"></span>
+          </div>
+          <div class="card" style="padding: 0; overflow: hidden;">
+            <div style="overflow-x:auto;">
+              <table id="applicantsTable">
+                <thead><tr>
+                  <th>Name</th><th>Email</th><th>City</th><th>School</th><th>Status</th><th>Progress</th><th>Updated</th>
+                </tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="applicantsEmpty" class="empty" style="display:none;">No applicants match the current filter.</div>
+          </div>
+        </section>
+
+        <!-- COHORTS -->
+        <section class="panel" id="panel-cohorts">
+          <h1>Cohorts</h1>
+          <p class="subtitle">Grouped by registration year-month.</p>
+          <div id="cohortList"></div>
+        </section>
+
+        <!-- COLLEGES -->
+        <section class="panel" id="panel-colleges">
+          <h1>Partner Colleges</h1>
+          <p class="subtitle">12 partners. Manage details, MoU PDFs, and capacity.</p>
+          <div id="collegesList"></div>
+        </section>
+
+        <!-- MESSAGES -->
+        <section class="panel" id="panel-messages">
+          <h1>Messages</h1>
+          <p class="subtitle">Send a message to one applicant or broadcast to many. Lands in their dashboard inbox + email.</p>
+          <div class="card">
+            <div class="field"><label>Recipient(s)</label>
+              <select id="msgRecipient">
+                <option value="all">All applicants</option>
+                <option value="stage">Filter by stage…</option>
+                <option value="single">Single applicant…</option>
+              </select>
+            </div>
+            <div class="field" id="msgStageWrap" style="display:none;"><label>Stage</label>
+              <select id="msgStage">
+                <option value="registered">Registered (no progress)</option>
+                <option value="onboarding">Onboarding in progress</option>
+                <option value="college">College choices submitted</option>
+                <option value="allocated">Allocated</option>
+                <option value="interview">Interview submitted</option>
+              </select>
+            </div>
+            <div class="field" id="msgSingleWrap" style="display:none;"><label>Email</label><input id="msgSingleEmail" type="email"></div>
+            <div class="field"><label>Subject</label><input id="msgSubject" type="text" placeholder="e.g. Reminder: complete your photo upload"></div>
+            <div class="field"><label>Body</label><textarea id="msgBody" placeholder="Write your message..."></textarea></div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <label style="font-size:13px; display:flex; align-items:center; gap:6px;"><input type="checkbox" id="msgInbox" checked> Add to dashboard inbox</label>
+              <label style="font-size:13px; display:flex; align-items:center; gap:6px;"><input type="checkbox" id="msgEmail" checked> Send email via Gmail</label>
+              <button class="btn" onclick="sendMessage()" style="margin-left:auto;">Send</button>
+            </div>
+            <div id="msgStatus" style="margin-top:14px; font-size:13px;"></div>
+          </div>
+        </section>
+
+        <!-- AUTOMATIONS -->
+        <section class="panel" id="panel-automations">
+          <h1>Automations</h1>
+          <p class="subtitle">One-click actions across the applicant pool.</p>
+          <div class="kpi-grid">
+            <div class="kpi" style="cursor:pointer;" onclick="bulkReminder()">
+              <div class="label">Bulk reminder</div>
+              <div style="font-size:14px; color:#111; margin-top:6px;">Email everyone stuck on photo / personal / academic with a nudge.</div>
+            </div>
+            <div class="kpi" style="cursor:pointer;" onclick="bulkWelcome()">
+              <div class="label">Resend welcome email</div>
+              <div style="font-size:14px; color:#111; margin-top:6px;">For applicants who say they didn't receive it.</div>
+            </div>
+            <div class="kpi" style="cursor:pointer;" onclick="copyExportLink()">
+              <div class="label">Copy CSV export link</div>
+              <div style="font-size:14px; color:#111; margin-top:6px;">For Excel / external analytics.</div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Coming soon</h2>
+            <p style="font-size:13px; color:#6b7280;">AI fit-scoring per applicant · Auto-allocation suggestion · Partner college weekly digest · WhatsApp triggers (Twilio) · Voice call reminders (Retell AI).</p>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Applicant detail modal -->
+  <div class="modal-bg" id="detailModal" onclick="if(event.target===this) closeDetail()">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="detailName">Applicant</h2>
+        <button onclick="closeDetail()">×</button>
+      </div>
+      <div class="modal-body" id="detailBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
+      authDomain: "next-genius-auto.firebaseapp.com",
+      projectId: "next-genius-auto",
+      storageBucket: "next-genius-auto.firebasestorage.app",
+      messagingSenderId: "557092273631",
+      appId: "1:557092273631:web:192264bb43324a69a4186a"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+    const ADMIN_EMAILS = ['dknmsquad@gmail.com'];
+    const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec';
+
+    const PARTNER_COLLEGES = [
+      { slug: "aup", name: "American University of Paris", country: "France" },
+      { slug: "centre", name: "Centre College", country: "USA (Kentucky)" },
+      { slug: "capital", name: "Capital University", country: "USA (Ohio)" },
+      { slug: "cottey", name: "Cottey College", country: "USA (Missouri)" },
+      { slug: "ithaca", name: "Ithaca College", country: "USA (New York)" },
+      { slug: "ie", name: "IE University", country: "Spain" },
+      { slug: "lynn", name: "Lynn University", country: "USA (Florida)" },
+      { slug: "masters-union", name: "Masters' Union", country: "India" },
+      { slug: "muhlenberg", name: "Muhlenberg College", country: "USA (Pennsylvania)" },
+      { slug: "nuq", name: "Northwestern University in Qatar", country: "Qatar" },
+      { slug: "syracuse", name: "Syracuse University", country: "USA (New York)" },
+      { slug: "charleston", name: "University of Charleston", country: "USA (West Virginia)" }
+    ];
+
+    let applicants = [];
+    let currentUser = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        document.getElementById('authGate').style.display = 'block';
+        document.getElementById('forbidden').style.display = 'none';
+        document.getElementById('adminWrap').style.display = 'none';
+        return;
+      }
+      currentUser = user;
+      if (!ADMIN_EMAILS.includes(user.email)) {
+        document.getElementById('authGate').style.display = 'none';
+        document.getElementById('forbidden').style.display = 'block';
+        document.getElementById('forbiddenEmail').textContent = user.email;
+        document.getElementById('adminWrap').style.display = 'none';
+        return;
+      }
+      document.getElementById('authGate').style.display = 'none';
+      document.getElementById('forbidden').style.display = 'none';
+      document.getElementById('adminWrap').style.display = 'block';
+      document.getElementById('userEmail').textContent = user.email;
+      await loadApplicants();
+      renderOverview();
+      renderApplicants();
+      renderCohorts();
+      renderColleges();
+    });
+
+    window.loginGoogle = async function() {
+      try { await signInWithPopup(auth, provider); }
+      catch (e) { document.getElementById('loginErr').textContent = e.message.replace('Firebase: ',''); }
+    };
+    window.signOutClick = async function() { await signOut(auth); };
+
+    async function loadApplicants() {
+      const snap = await getDocs(collection(db, "applicants"));
+      applicants = [];
+      snap.forEach(d => {
+        const data = d.data();
+        applicants.push({ uid: d.id, ...data });
+      });
+      applicants.sort((a, b) => {
+        const ta = a.createdAt?.seconds || 0;
+        const tb = b.createdAt?.seconds || 0;
+        return tb - ta;
+      });
+    }
+
+    function stageOf(a) {
+      if (a.exitedAt) return 'exited';
+      if (a.finalDecision) return 'decision';
+      if (a.onboarding?.interview) return 'interview';
+      if (a.allocation) return 'allocated';
+      if (a.onboarding?.college) return 'college';
+      if (a.onboarding?.photo || a.onboarding?.personal || a.onboarding?.academic || a.onboarding?.inventory) return 'onboarding';
+      return 'registered';
+    }
+    function progressBar(a) {
+      const ob = a.onboarding || {};
+      const steps = ['photo','personal','academic','inventory','college','interview','groupInterview'];
+      return `<div class="progress-bar">${steps.map(s => `<div class="${ob[s] ? 'done' : ''}"></div>`).join('')}<div class="${a.allocation ? 'done' : ''}"></div></div>`;
+    }
+    function dateShort(ts) {
+      if (!ts) return '—';
+      const d = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
+      return d.toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+    }
+
+    function renderOverview() {
+      const total = applicants.length;
+      const onb = applicants.filter(a => stageOf(a) === 'onboarding').length;
+      const college = applicants.filter(a => stageOf(a) === 'college').length;
+      const allocated = applicants.filter(a => stageOf(a) === 'allocated' || a.allocation).length;
+      const interview = applicants.filter(a => a.onboarding?.interview).length;
+      const exited = applicants.filter(a => stageOf(a) === 'exited').length;
+      const completedAssessment = applicants.filter(a => a.inventory?.scores).length;
+
+      const today = new Date(); today.setHours(0,0,0,0);
+      const newToday = applicants.filter(a => {
+        const ts = a.createdAt?.seconds; if (!ts) return false;
+        return new Date(ts * 1000) >= today;
+      }).length;
+
+      document.getElementById('kpiGrid').innerHTML = `
+        <div class="kpi"><div class="label">Total Applicants</div><div class="value">${total}</div><div class="change">+${newToday} today</div></div>
+        <div class="kpi"><div class="label">Onboarding</div><div class="value">${onb}</div></div>
+        <div class="kpi"><div class="label">Inventory Done</div><div class="value">${completedAssessment}</div></div>
+        <div class="kpi"><div class="label">College Choices</div><div class="value">${college + allocated + interview}</div></div>
+        <div class="kpi"><div class="label">Allocated</div><div class="value">${allocated}</div></div>
+        <div class="kpi"><div class="label">Exited</div><div class="value">${exited}</div></div>
+      `;
+
+      const stages = [
+        ['Registered', total, '#9ca3af'],
+        ['Photo', applicants.filter(a => a.onboarding?.photo).length, '#FFC72C'],
+        ['Personal', applicants.filter(a => a.onboarding?.personal).length, '#FFC72C'],
+        ['Academic', applicants.filter(a => a.onboarding?.academic).length, '#FFC72C'],
+        ['Inventory', applicants.filter(a => a.onboarding?.inventory).length, '#FFC72C'],
+        ['College', applicants.filter(a => a.onboarding?.college).length, '#FFC72C'],
+        ['Allocated', applicants.filter(a => a.allocation).length, '#10b981'],
+        ['Interview', applicants.filter(a => a.onboarding?.interview).length, '#10b981'],
+        ['Group Interview', applicants.filter(a => a.onboarding?.groupInterview).length, '#10b981'],
+        ['Decision', applicants.filter(a => a.finalDecision).length, '#10b981']
+      ];
+      const max = total || 1;
+      document.getElementById('funnel').innerHTML = stages.map(([label, n, color]) => `
+        <div style="margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span style="color:#374151;">${label}</span><span style="color:#6b7280; font-weight:600;">${n}</span></div>
+          <div style="height:8px; background:#f3f4f6; border-radius:4px; overflow:hidden;"><div style="height:100%; background:${color}; width:${(n/max)*100}%;"></div></div>
+        </div>
+      `).join('');
+    }
+
+    function renderApplicants() {
+      const search = document.getElementById('searchBox').value.toLowerCase().trim();
+      const filterStage = document.getElementById('filterStage').value;
+      let filtered = applicants;
+      if (search) filtered = filtered.filter(a =>
+        (a.firstName + ' ' + a.lastName + ' ' + a.email + ' ' + a.school + ' ' + a.city).toLowerCase().includes(search));
+      if (filterStage) filtered = filtered.filter(a => stageOf(a) === filterStage);
+      const tbody = document.querySelector('#applicantsTable tbody');
+      tbody.innerHTML = filtered.map(a => {
+        const stage = stageOf(a);
+        return `<tr onclick="openDetail('${a.uid}')">
+          <td><strong>${escapeHtml(a.firstName || '')} ${escapeHtml(a.lastName || '')}</strong></td>
+          <td>${escapeHtml(a.email || '')}</td>
+          <td>${escapeHtml(a.city || '—')}</td>
+          <td style="max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(a.school || '—')}</td>
+          <td><span class="pill pill-${stage === 'registered' ? 'registered' : stage === 'allocated' || stage === 'interview' || stage === 'decision' ? 'allocated' : stage === 'exited' ? 'exited' : 'active'}">${stage}</span></td>
+          <td>${progressBar(a)}</td>
+          <td style="color:#6b7280;">${dateShort(a.createdAt)}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('applicantsEmpty').style.display = filtered.length ? 'none' : 'block';
+      document.getElementById('applicantCount').textContent = filtered.length + ' of ' + applicants.length;
+    }
+
+    document.getElementById('searchBox').addEventListener('input', renderApplicants);
+    document.getElementById('filterStage').addEventListener('change', renderApplicants);
+
+    window.openDetail = function(uid) {
+      const a = applicants.find(x => x.uid === uid);
+      if (!a) return;
+      document.getElementById('detailName').textContent = (a.firstName || '') + ' ' + (a.lastName || '');
+      const ob = a.onboarding || {};
+      const inv = a.inventory?.scores || {};
+      const personal = a.personal || {};
+      const academic = a.academic || {};
+      document.getElementById('detailBody').innerHTML = `
+        ${a.photoURL ? `<div style="text-align:center; margin-bottom:18px;"><img src="${a.photoURL}" style="width:120px; height:120px; border-radius:60px; object-fit:cover;"></div>` : ''}
+        <div class="detail-grid">
+          <div class="detail-item"><div class="lbl">Email</div><div class="val">${escapeHtml(a.email)}</div></div>
+          <div class="detail-item"><div class="lbl">WhatsApp</div><div class="val">${escapeHtml(a.whatsapp || '—')}</div></div>
+          <div class="detail-item"><div class="lbl">City</div><div class="val">${escapeHtml(a.city || '—')}</div></div>
+          <div class="detail-item"><div class="lbl">School</div><div class="val">${escapeHtml(a.school || '—')}</div></div>
+          <div class="detail-item"><div class="lbl">Status</div><div class="val">${stageOf(a)}</div></div>
+          <div class="detail-item"><div class="lbl">Registered</div><div class="val">${dateShort(a.createdAt)}</div></div>
+        </div>
+
+        <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Onboarding</h3>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="lbl">Photo</div><div class="val">${ob.photo ? '✓' : '—'}</div></div>
+          <div class="detail-item"><div class="lbl">Personal</div><div class="val">${ob.personal ? '✓' : '—'}</div></div>
+          <div class="detail-item"><div class="lbl">Academic</div><div class="val">${ob.academic ? '✓' : '—'}</div></div>
+          <div class="detail-item"><div class="lbl">Inventory</div><div class="val">${ob.inventory ? '✓' : '—'}</div></div>
+          <div class="detail-item"><div class="lbl">College Choices</div><div class="val">${ob.college ? '✓' : '—'}</div></div>
+          <div class="detail-item"><div class="lbl">Allocation</div><div class="val">${a.allocation ? a.allocation.college : '—'}</div></div>
+          <div class="detail-item"><div class="lbl">Interview Videos</div><div class="val">${ob.interview ? '✓' : '—'}</div></div>
+          <div class="detail-item"><div class="lbl">Group Interview</div><div class="val">${ob.groupInterview ? '✓' : '—'}</div></div>
+        </div>
+
+        ${inv.dominant ? `
+          <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Interest Inventory</h3>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="lbl">Dominant</div><div class="val">${inv.dominant}</div></div>
+            <div class="detail-item"><div class="lbl">IQ / EQ / DQ</div><div class="val">${inv.IQ}% · ${inv.EQ}% · ${inv.DQ}%</div></div>
+            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Top Interests</div><div class="val">${(inv.topInterests || []).join(', ') || '—'}</div></div>
+          </div>` : ''}
+
+        ${personal.dob ? `
+          <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Personal Profile</h3>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="lbl">DOB</div><div class="val">${escapeHtml(personal.dob)}</div></div>
+            <div class="detail-item"><div class="lbl">Gender</div><div class="val">${escapeHtml(personal.gender || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">Citizenship</div><div class="val">${escapeHtml(personal.citizenship || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">Family Income</div><div class="val">${escapeHtml(personal.familyIncome || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">Father</div><div class="val">${escapeHtml(personal.fatherName || '—')} (${escapeHtml(personal.fatherOccupation || '—')})</div></div>
+            <div class="detail-item"><div class="lbl">Mother</div><div class="val">${escapeHtml(personal.motherName || '—')} (${escapeHtml(personal.motherOccupation || '—')})</div></div>
+            <div class="detail-item"><div class="lbl">Heard From</div><div class="val">${escapeHtml(personal.hearAbout || '—')}</div></div>
+            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Address</div><div class="val">${escapeHtml(personal.address || '—')}</div></div>
+            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Other Colleges</div><div class="val">${escapeHtml(personal.otherColleges || '—')}</div></div>
+          </div>` : ''}
+
+        ${academic.school ? `
+          <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Academic Profile</h3>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="lbl">Grade 10</div><div class="val">${escapeHtml(academic.grade10Board)} — ${escapeHtml(academic.grade10Score)}</div></div>
+            <div class="detail-item"><div class="lbl">Grade 11</div><div class="val">${escapeHtml(academic.grade11Board || '')} — ${escapeHtml(academic.grade11Score || '')}</div></div>
+            <div class="detail-item"><div class="lbl">Predicted 12</div><div class="val">${escapeHtml(academic.predicted12Score)}</div></div>
+            <div class="detail-item"><div class="lbl">Major</div><div class="val">${escapeHtml(academic.major)}</div></div>
+            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Subjects</div><div class="val">${escapeHtml(academic.subjects)}</div></div>
+            <div class="detail-item" style="grid-column:1/-1;"><div class="lbl">Extracurriculars</div><div class="val">${escapeHtml(academic.extracurriculars || '—')}</div></div>
+          </div>` : ''}
+
+        <h3 style="margin:24px 0 10px; font-family:'Poppins',sans-serif; font-size:14px; color:#111;">Actions</h3>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-sm btn-secondary" onclick="sendToSingle('${a.email}')">Send Message</button>
+          <button class="btn btn-sm btn-secondary" onclick="resetForUser('${a.email}', '${(a.firstName||'').replace(/'/g,'')}')">Send Password Reset</button>
+          ${!a.allocation ? `<button class="btn btn-sm" onclick="quickAllocate('${a.uid}')">Allocate to college...</button>` : ''}
+        </div>`;
+      document.getElementById('detailModal').classList.add('open');
+    };
+    window.closeDetail = () => document.getElementById('detailModal').classList.remove('open');
+
+    window.sendToSingle = function(email) {
+      closeDetail();
+      document.querySelector('.sidebar a[data-tab="messages"]').click();
+      document.getElementById('msgRecipient').value = 'single';
+      document.getElementById('msgSingleWrap').style.display = 'block';
+      document.getElementById('msgStageWrap').style.display = 'none';
+      document.getElementById('msgSingleEmail').value = email;
+    };
+
+    window.resetForUser = async function(email, firstName) {
+      if (!confirm('Send a password reset email to ' + email + '?')) return;
+      const url = SHEET_WEBHOOK_URL + '?reset_password=' + encodeURIComponent(email) + '&firstName=' + encodeURIComponent(firstName);
+      await fetch(url, { mode: 'no-cors' });
+      toast('Reset email sent.');
+    };
+
+    window.quickAllocate = async function(uid) {
+      const slug = prompt('Allocate to which partner college slug?\n\n' + PARTNER_COLLEGES.map(c => c.slug + ' = ' + c.name).join('\n'));
+      if (!slug) return;
+      const college = PARTNER_COLLEGES.find(c => c.slug === slug.trim());
+      if (!college) { alert('Unknown slug'); return; }
+      await updateDoc(doc(db, "applicants", uid), { allocation: { college: college.name, slug: college.slug, status: 'pending_acceptance', allocatedAt: new Date().toISOString() }, status: 'allocated' });
+      const a = applicants.find(x => x.uid === uid);
+      if (a) { a.allocation = { college: college.name, slug: college.slug, status: 'pending_acceptance' }; a.status = 'allocated'; }
+      toast('Allocated to ' + college.name);
+      closeDetail(); renderApplicants(); renderOverview();
+    };
+
+    function renderCohorts() {
+      const groups = {};
+      applicants.forEach(a => {
+        const ts = a.createdAt?.seconds || 0;
+        if (!ts) return;
+        const d = new Date(ts * 1000);
+        const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        groups[key] = groups[key] || { key, students: [] };
+        groups[key].students.push(a);
+      });
+      const ordered = Object.values(groups).sort((a, b) => b.key.localeCompare(a.key));
+      document.getElementById('cohortList').innerHTML = ordered.length === 0 ? '<div class="empty">No cohorts yet.</div>' : ordered.map(g => `
+        <div class="card">
+          <h2>${g.key}</h2>
+          <p style="font-size:13px; color:#6b7280;">${g.students.length} student${g.students.length === 1 ? '' : 's'} · ${g.students.filter(s => s.allocation).length} allocated · ${g.students.filter(s => s.exitedAt).length} exited</p>
+        </div>`).join('');
+    }
+
+    function renderColleges() {
+      document.getElementById('collegesList').innerHTML = PARTNER_COLLEGES.map(c => {
+        const allocated = applicants.filter(a => a.allocation?.slug === c.slug).length;
+        const chosen = applicants.filter(a => (a.collegeChoices?.order || []).includes(c.slug)).length;
+        return `<div class="card" style="display:flex; gap:18px; align-items:center;">
+          <div style="width:48px; height:48px; border-radius:10px; background:#fff7e0; display:flex; align-items:center; justify-content:center; font-family:'Poppins',sans-serif; font-weight:700; color:#92400e; font-size:14px; flex-shrink:0;">${c.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</div>
+          <div style="flex:1;">
+            <div style="font-weight:600; font-size:15px;">${c.name}</div>
+            <div style="font-size:13px; color:#6b7280;">${c.country}</div>
+          </div>
+          <div style="text-align:right; font-size:12px; color:#6b7280;">
+            <div><strong style="color:#111;">${chosen}</strong> chose this</div>
+            <div><strong style="color:#10b981;">${allocated}</strong> allocated</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('msgRecipient').addEventListener('change', () => {
+      const v = document.getElementById('msgRecipient').value;
+      document.getElementById('msgStageWrap').style.display = v === 'stage' ? 'block' : 'none';
+      document.getElementById('msgSingleWrap').style.display = v === 'single' ? 'block' : 'none';
+    });
+
+    window.sendMessage = async function() {
+      const subject = document.getElementById('msgSubject').value.trim();
+      const body = document.getElementById('msgBody').value.trim();
+      if (!subject || !body) { alert('Subject and body required'); return; }
+      const recipientType = document.getElementById('msgRecipient').value;
+      let targets = [];
+      if (recipientType === 'all') targets = applicants.filter(a => !a.exitedAt);
+      else if (recipientType === 'stage') {
+        const s = document.getElementById('msgStage').value;
+        targets = applicants.filter(a => stageOf(a) === s);
+      } else if (recipientType === 'single') {
+        const e = document.getElementById('msgSingleEmail').value.trim();
+        targets = applicants.filter(a => a.email === e);
+        if (!targets.length) { alert('No applicant found with that email'); return; }
+      }
+      if (!confirm('Send to ' + targets.length + ' recipient(s)?')) return;
+      const status = document.getElementById('msgStatus');
+      status.textContent = 'Sending...';
+      const sendInbox = document.getElementById('msgInbox').checked;
+      const sendEmail = document.getElementById('msgEmail').checked;
+      let okCount = 0, errCount = 0;
+      for (const a of targets) {
+        try {
+          if (sendInbox) {
+            await updateDoc(doc(db, "applicants", a.uid), {
+              notifications: arrayUnion({ subject, body, date: new Date().toISOString(), read: false, from: currentUser.email })
+            });
+          }
+          if (sendEmail) {
+            const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName || '') + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+            await fetch(url, { mode: 'no-cors' });
+          }
+          okCount++;
+        } catch (e) { errCount++; }
+      }
+      status.innerHTML = `✓ Sent to ${okCount}.` + (errCount ? ` ${errCount} failed.` : '');
+      document.getElementById('msgSubject').value = '';
+      document.getElementById('msgBody').value = '';
+      toast('Message sent to ' + okCount + ' recipient(s)');
+    };
+
+    window.bulkReminder = async function() {
+      const stuck = applicants.filter(a => !a.exitedAt && (!a.onboarding?.photo || !a.onboarding?.personal || !a.onboarding?.academic));
+      if (!stuck.length) { alert('No stuck applicants'); return; }
+      if (!confirm('Send reminder email to ' + stuck.length + ' stuck applicant(s)?')) return;
+      let okCount = 0;
+      for (const a of stuck) {
+        const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName || '') +
+          '&subject=' + encodeURIComponent('Quick reminder — finish your Next Genius profile') +
+          '&body=' + encodeURIComponent(`Hi ${a.firstName || 'there'},\n\nWe noticed you haven't finished your profile yet. The team can't review your application until photo, personal and academic profiles are complete.\n\nIt only takes 10 minutes:\nhttps://next-genius.pages.dev/dashboard.html\n\n— Next Genius`);
+        await fetch(url, { mode: 'no-cors' }); okCount++;
+      }
+      toast('Reminder sent to ' + okCount);
+    };
+    window.bulkWelcome = async function() {
+      const email = prompt('Send welcome email to which applicant email?');
+      if (!email) return;
+      const a = applicants.find(x => x.email === email);
+      if (!a) { alert('No such applicant'); return; }
+      await fetch(SHEET_WEBHOOK_URL + '?welcome_email=' + encodeURIComponent(email) + '&firstName=' + encodeURIComponent(a.firstName || ''), { mode: 'no-cors' });
+      toast('Welcome email re-sent to ' + email);
+    };
+    window.copyExportLink = function() {
+      const link = SHEET_WEBHOOK_URL;
+      navigator.clipboard.writeText(link);
+      toast('Link copied');
+    };
+
+    window.exportApplicantsCSV = function() {
+      const search = document.getElementById('searchBox').value.toLowerCase().trim();
+      const filterStage = document.getElementById('filterStage').value;
+      let list = applicants;
+      if (search) list = list.filter(a => (a.firstName + ' ' + a.lastName + ' ' + a.email).toLowerCase().includes(search));
+      if (filterStage) list = list.filter(a => stageOf(a) === filterStage);
+      const headers = ['email','firstName','lastName','city','school','whatsapp','status','photo','personal','academic','inventory','college','interview','allocation','dominantStrength'];
+      const rows = list.map(a => {
+        const ob = a.onboarding || {};
+        return [a.email, a.firstName, a.lastName, a.city, a.school, a.whatsapp, stageOf(a), ob.photo?'Y':'', ob.personal?'Y':'', ob.academic?'Y':'', ob.inventory?'Y':'', ob.college?'Y':'', ob.interview?'Y':'', a.allocation?.college||'', a.inventory?.scores?.dominant||''];
+      });
+      const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${(c||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'next-genius-applicants-' + new Date().toISOString().slice(0,10) + '.csv'; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    document.querySelectorAll('.sidebar a[data-tab]').forEach(el => el.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.sidebar a').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + el.getAttribute('data-tab')).classList.add('active');
+    }));
+
+    function escapeHtml(s) { return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+  </script>
+</body>
+</html>

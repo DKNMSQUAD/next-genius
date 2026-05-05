@@ -79,8 +79,8 @@
       padding: 20px 24px; margin-bottom: 24px;
     }
     .status-banner h3 { font-family: 'Poppins', sans-serif; font-size: 15px; margin-bottom: 8px; color: #111; font-weight: 600; }
-    .status-banner .progress { display: flex; gap: 4px; height: 6px; border-radius: 3px; overflow: hidden; margin: 12px 0 8px; background: #f0f0f0; }
-    .status-banner .progress div { flex: 1; background: #f0f0f0; }
+    .status-banner .progress { display: flex; gap: 6px; margin: 12px 0 8px; }
+    .status-banner .progress div { flex: 1; height: 10px; background: #f0f0f0; border-radius: 4px; transition: background 0.2s; }
     .status-banner .progress div.done { background: #FFC72C; }
     .status-banner .progress-text { font-size: 13px; color: #666; }
 
@@ -549,7 +549,7 @@
               <div class="field"><label>Grade 10 % / CGPA <span class="req">*</span></label><input data-academic="grade10Score" placeholder="e.g. 92% or 9.4 CGPA"></div>
             </div>
             <div class="field-row">
-              <div class="field"><label>Grade 11 Board <span class="req">*</span></label><select data-academic="grade11Board"><option value="">Select</option><option>CBSE</option><option>ICSE</option><option>IB</option><option>IGCSE</option><option>State Board</option><option>Other</option></select></div>
+              <div class="field"><label>Grade 11 Board <span class="req">*</span></label><select data-academic="grade11Board"><option value="">Select</option><option>CBSE</option><option>ISC</option><option>IBDP</option><option>AS &amp; A Levels</option><option>State Board</option><option>Other</option></select></div>
               <div class="field"><label>Grade 11 % / CGPA <span class="req">*</span></label><input data-academic="grade11Score" placeholder="e.g. 88% or 9.1 CGPA"></div>
             </div>
             <div class="field"><label>Predicted Grade 12 % / CGPA <span class="req">*</span></label>
