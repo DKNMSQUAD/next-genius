@@ -549,8 +549,12 @@
               <div class="field"><label>Grade 10 % / CGPA <span class="req">*</span></label><input data-academic="grade10Score" placeholder="e.g. 92% or 9.4 CGPA"></div>
             </div>
             <div class="field-row">
-              <div class="field"><label>Grade 11 % (if completed)</label><input data-academic="grade11Score"></div>
-              <div class="field"><label>Predicted Grade 12 % <span class="req">*</span></label><input data-academic="predicted12Score"></div>
+              <div class="field"><label>Grade 11 Board <span class="req">*</span></label><select data-academic="grade11Board"><option value="">Select</option><option>CBSE</option><option>ICSE</option><option>IB</option><option>IGCSE</option><option>State Board</option><option>Other</option></select></div>
+              <div class="field"><label>Grade 11 % / CGPA <span class="req">*</span></label><input data-academic="grade11Score" placeholder="e.g. 88% or 9.1 CGPA"></div>
+            </div>
+            <div class="field"><label>Predicted Grade 12 % / CGPA <span class="req">*</span></label>
+              <p style="font-size:12px; color:#888; margin:-2px 0 6px;">If you don't have predicted grades yet, type <strong>N/A</strong>.</p>
+              <input data-academic="predicted12Score" placeholder="e.g. 90% or 9.3 CGPA — or N/A">
             </div>
             <div class="field"><label>Subjects in Grade 12 <span class="req">*</span></label><input data-academic="subjects" placeholder="e.g. Physics, Chemistry, Math, English, CS"></div>
             <div class="field-row">
@@ -1147,6 +1151,7 @@
 
     function applyLocks() {
       syncAdmin();
+      try { renderStatus(); } catch(_) {}
       const ob = applicantData.onboarding || {};
       document.querySelectorAll('.sidebar a[data-requires]').forEach(a => {
         const req = a.getAttribute('data-requires');
@@ -1284,7 +1289,7 @@
     window.saveAcademic = async () => {
       const data = {};
       document.querySelectorAll('[data-academic]').forEach(el => data[el.getAttribute('data-academic')] = el.value);
-      const required = ['school','grade10Board','grade10Score','predicted12Score','subjects','major','extracurriculars'];
+      const required = ['school','grade10Board','grade10Score','grade11Board','grade11Score','predicted12Score','subjects','major','extracurriculars'];
       if (required.some(r => !data[r])) { alert('Required fields missing'); return; }
       await updateDoc(doc(db, "applicants", currentUser.uid), { academic: data, "onboarding.academic": true });
       applicantData.academic = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), academic: true };
