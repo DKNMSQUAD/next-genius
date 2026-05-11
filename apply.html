@@ -745,7 +745,12 @@
       const btn = document.querySelector('.submit-btn');
       btn.disabled = true; btn.textContent = 'Submitting...';
       try { await window.__saveApplicant(payload); }
-      catch (err) { console.error(err); alert('Submission failed. Please try again.'); btn.disabled = false; btn.textContent = 'Submit'; return; }
+      catch (err) {
+        console.error(err);
+        alert(err && err.message ? err.message : 'Submission failed. Please try again.');
+        btn.disabled = false; btn.textContent = 'Submit';
+        return;
+      }
       window.location.href = 'assessment.html';
     }
     function markError(fieldId, msg) {
