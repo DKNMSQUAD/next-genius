@@ -143,7 +143,7 @@
         lastName: pendingReg.lastName || (user.displayName || '').split(' ').slice(1).join(' ') || '',
         photoURL: user.photoURL || null,
         createdAt: serverTimestamp(),
-        source: "next-genius.pages.dev",
+        source: "www.next-genius.com",
         status: "registered",
         onboarding: { photo: !!user.photoURL, personal: false, academic: false, inventory: false, college: false, interview: false, groupInterview: false, decision: false }
       };

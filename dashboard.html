@@ -942,7 +942,7 @@
       applicantData.reallocationRequest = request;
       renderAllocation();
       // Notify admin via email
-      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=dknmsquad@gmail.com&firstName=Admin&subject=' + encodeURIComponent('Reallocation request from ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'')) + '&body=' + encodeURIComponent('Student: ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'') + ' (' + currentUser.email + ')\nCurrent allocation: ' + (applicantData.allocation?.college||'') + '\n\nReason:\n' + reason + '\n\nReview at https://next-genius.pages.dev/admin.html');
+      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=dknmsquad@gmail.com&firstName=Admin&subject=' + encodeURIComponent('Reallocation request from ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'')) + '&body=' + encodeURIComponent('Student: ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'') + ' (' + currentUser.email + ')\nCurrent allocation: ' + (applicantData.allocation?.college||'') + '\n\nReason:\n' + reason + '\n\nReview at https://www.next-genius.com/admin.html');
       fetch(url, { mode: 'no-cors' }).catch(()=>{});
       alert('Request submitted. The team will review and respond shortly.');
     };

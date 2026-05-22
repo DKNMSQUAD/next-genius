@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /dashboard.html
+Disallow: /admin.html
+Disallow: /assessment.html
+Disallow: /test.html
+
+Sitemap: https://www.next-genius.com/sitemap.xml

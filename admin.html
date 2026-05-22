@@ -1115,7 +1115,7 @@
       a.reallocationRequest = updatedReq; a.allocation = null;
       a.onboarding = { ...(a.onboarding||{}), allocation: false, college: false };
       // Email student
-      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation approved') + '&body=' + encodeURIComponent('Hi ' + (a.firstName||'') + ',\n\nYour reallocation request has been approved. Your previous allocation has been cleared. Please open your dashboard and update your college choices.' + (note ? '\n\nNote from team: ' + note : '') + '\n\nhttps://next-genius.pages.dev/dashboard.html\n\n— Next Genius');
+      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation approved') + '&body=' + encodeURIComponent('Hi ' + (a.firstName||'') + ',\n\nYour reallocation request has been approved. Your previous allocation has been cleared. Please open your dashboard and update your college choices.' + (note ? '\n\nNote from team: ' + note : '') + '\n\nhttps://www.next-genius.com/dashboard.html\n\n— Next Genius');
       fetch(url, { mode: 'no-cors' }).catch(()=>{});
       toast('Approved');
       renderRequests(); renderApplicants(); renderOverview(); renderColleges();
@@ -1274,7 +1274,7 @@
       for (const a of stuck) {
         const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName || '') +
           '&subject=' + encodeURIComponent('Quick reminder — finish your Next Genius profile') +
-          '&body=' + encodeURIComponent(`Hi ${a.firstName || 'there'},\n\nWe noticed you haven't finished your profile yet. The team can't review your application until photo, personal and academic profiles are complete.\n\nIt only takes 10 minutes:\nhttps://next-genius.pages.dev/dashboard.html\n\n— Next Genius`);
+          '&body=' + encodeURIComponent(`Hi ${a.firstName || 'there'},\n\nWe noticed you haven't finished your profile yet. The team can't review your application until photo, personal and academic profiles are complete.\n\nIt only takes 10 minutes:\nhttps://www.next-genius.com/dashboard.html\n\n— Next Genius`);
         await fetch(url, { mode: 'no-cors' }); okCount++;
       }
       toast('Reminder sent to ' + okCount);
