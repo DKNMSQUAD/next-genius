@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 """
-Next Genius interview auto-scoring worker (runs in GitHub Actions).
+Next Genius interview auto-scoring worker.
 
-Flow per applicant who has submitted interview videos but has no up-to-date eval:
-  yt-dlp downloads compressed audio of each YouTube (unlisted) URL
+Runs on a residential IP (a scheduled job on a Mac) because YouTube blocks
+yt-dlp from cloud/datacenter IPs. Flow per applicant who has submitted
+interview videos but has no up-to-date eval:
+  yt-dlp downloads audio of each YouTube (unlisted) URL
     -> Groq Whisper transcribes
     -> Groq Llama scores the transcripts against a scholarship rubric (JSON)
     -> result written to Firestore collection `interviewEvals/{uid}` (admin-only).
 
-Secrets (env): GROQ_API_KEY, FIREBASE_SA (full service-account JSON string).
-Test mode:  python interview_eval.py --test-url "<youtube url>"   (no Firestore needed)
+Env: GROQ_API_KEY, and either FIREBASE_SA (service-account JSON string) or
+     FIREBASE_SA_FILE (path to the service-account JSON).
+Test mode:  python interview_eval.py --test-url "<youtube url>"   (no Firestore)
 """
-import os, sys, json, hashlib, tempfile, subprocess, time
+import os, sys, json, hashlib, tempfile, subprocess, time, glob, shutil
 
 GROQ = "https://api.groq.com/openai/v1"
 WHISPER_MODEL = "whisper-large-v3-turbo"
 CHAT_MODEL = "llama-3.3-70b-versatile"
-MAX_AUDIO_SECONDS = 900  # trim to 15 min for scoring
+MAX_AUDIO_SECONDS = 900  # trim to 15 min when ffmpeg is available
 
 RUBRIC = """You are an admissions reviewer for the Next Genius Scholarship, which funds
 high-performing, middle-income Indian high-school students to attend leading global colleges.
@@ -48,36 +51,39 @@ def log(*a):
 
 
 def download_audio(url, outdir):
-    """yt-dlp -> compressed mono 16k mp3 (small enough for Whisper). Returns path or None."""
-    out = os.path.join(outdir, "a.%(ext)s")
-    cmd = [
-        "yt-dlp", "--no-playlist", "--quiet", "--no-warnings",
-        "--extractor-args", "youtube:player_client=android,web",
-        "-f", "bestaudio/best", "-x", "--audio-format", "mp3",
-        "--postprocessor-args", f"ffmpeg:-ac 1 -ar 16000 -b:a 48k -t {MAX_AUDIO_SECONDS}",
-        "-o", out, url,
-    ]
+    """yt-dlp -> small mp3 if ffmpeg present, else raw bestaudio (webm/m4a, also
+    accepted by Whisper). Returns the downloaded file path or None."""
+    have_ff = shutil.which("ffmpeg") is not None
+    base = [sys.executable, "-m", "yt_dlp", "--no-playlist", "--no-warnings",
+            "--extractor-args", "youtube:player_client=android,web",
+            "-f", "bestaudio/best", "-o", os.path.join(outdir, "a.%(ext)s")]
+    if have_ff:
+        base += ["-x", "--audio-format", "mp3",
+                 "--postprocessor-args", f"ffmpeg:-ac 1 -ar 16000 -b:a 48k -t {MAX_AUDIO_SECONDS}"]
+    cmd = base + [url]
     for attempt in range(3):
         try:
-            subprocess.run(cmd, check=True, capture_output=True, timeout=300)
-            mp3 = os.path.join(outdir, "a.mp3")
-            if os.path.exists(mp3) and os.path.getsize(mp3) > 1000:
-                return mp3
+            r = subprocess.run(cmd, capture_output=True, timeout=300, text=True)
+            files = [f for f in glob.glob(os.path.join(outdir, "a.*")) if os.path.getsize(f) > 1000]
+            if files:
+                return max(files, key=os.path.getsize)
+            log(f"  yt-dlp attempt {attempt+1}: no audio. stderr: {(r.stderr or '')[:200]}")
         except Exception as e:
             log(f"  yt-dlp attempt {attempt+1} failed: {str(e)[:200]}")
-            time.sleep(5)
+        time.sleep(4)
     return None
 
 
 def transcribe(path, key):
     import requests
+    ext = os.path.splitext(path)[1].lstrip(".") or "mp3"
     with open(path, "rb") as f:
         r = requests.post(
             f"{GROQ}/audio/transcriptions",
             headers={"Authorization": f"Bearer {key}"},
-            files={"file": (os.path.basename(path), f, "audio/mpeg")},
+            files={"file": (f"audio.{ext}", f, "application/octet-stream")},
             data={"model": WHISPER_MODEL, "response_format": "json", "language": "en"},
-            timeout=180,
+            timeout=240,
         )
     r.raise_for_status()
     return (r.json().get("text") or "").strip()
@@ -85,18 +91,16 @@ def transcribe(path, key):
 
 def score(student_tx, family_tx, key):
     import requests
-    user = f"STUDENT VIDEO TRANSCRIPT:\n{student_tx or '(no usable transcript)'}\n\nFAMILY VIDEO TRANSCRIPT:\n{family_tx or '(no usable transcript)'}"
+    user = (f"STUDENT VIDEO TRANSCRIPT:\n{student_tx or '(no usable transcript)'}\n\n"
+            f"FAMILY VIDEO TRANSCRIPT:\n{family_tx or '(no usable transcript)'}")
     r = requests.post(
         f"{GROQ}/chat/completions",
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
         json={
-            "model": CHAT_MODEL,
-            "temperature": 0.2,
+            "model": CHAT_MODEL, "temperature": 0.2,
             "response_format": {"type": "json_object"},
-            "messages": [
-                {"role": "system", "content": RUBRIC},
-                {"role": "user", "content": user},
-            ],
+            "messages": [{"role": "system", "content": RUBRIC},
+                         {"role": "user", "content": user}],
         },
         timeout=120,
     )
@@ -105,21 +109,22 @@ def score(student_tx, family_tx, key):
 
 
 def evaluate_urls(student_url, family_url, key):
-    """Returns (result_dict, status, reason). status in {ok, partial, failed}."""
-    with tempfile.TemporaryDirectory() as d:
+    """Returns (result_dict|None, status, reason). status in {ok, partial, failed}."""
+    with tempfile.TemporaryDirectory() as base:
         s_tx = f_tx = ""
         s_ok = f_ok = False
         if student_url:
-            p = download_audio(student_url, os.path.join(d, "s") if False else d)
+            sd = os.path.join(base, "s"); os.makedirs(sd, exist_ok=True)
+            p = download_audio(student_url, sd)
             if p:
                 s_tx = transcribe(p, key); s_ok = bool(s_tx)
-                os.remove(p)
         if family_url:
-            p = download_audio(family_url, d)
+            fd = os.path.join(base, "f"); os.makedirs(fd, exist_ok=True)
+            p = download_audio(family_url, fd)
             if p:
                 f_tx = transcribe(p, key); f_ok = bool(f_tx)
         if not (s_ok or f_ok):
-            return None, "failed", "could not download/transcribe either video (YouTube may have blocked the download)"
+            return None, "failed", "could not download/transcribe either video (YouTube block or no audio)"
         result = score(s_tx, f_tx, key)
         result["transcripts"] = {"student": s_tx[:6000], "family": f_tx[:6000]}
         result["videoUrls"] = {"student": student_url, "family": family_url}
@@ -132,17 +137,23 @@ def src_hash(s, f):
     return hashlib.sha256(f"{s}|{f}".encode()).hexdigest()[:16]
 
 
+def _load_sa():
+    p = os.environ.get("FIREBASE_SA_FILE")
+    if p and os.path.exists(p):
+        return json.load(open(p))
+    return json.loads(os.environ["FIREBASE_SA"])
+
+
 def run_firestore(key):
     import firebase_admin
     from firebase_admin import credentials, firestore
-    sa = json.loads(os.environ["FIREBASE_SA"])
-    firebase_admin.initialize_app(credentials.Certificate(sa))
+    from google.cloud.firestore_v1.base_query import FieldFilter
+    if not firebase_admin._apps:
+        firebase_admin.initialize_app(credentials.Certificate(_load_sa()))
     db = firestore.client()
-
     done = 0
-    for doc in db.collection("applicants").where("onboarding.interview", "==", True).stream():
-        a = doc.to_dict()
-        uid = doc.id
+    for doc in db.collection("applicants").where(filter=FieldFilter("onboarding.interview", "==", True)).stream():
+        a = doc.to_dict(); uid = doc.id
         iv = (a.get("interview") or {})
         su, fu = iv.get("studentVideo"), iv.get("familyVideo")
         if not (su or fu):
@@ -151,17 +162,15 @@ def run_firestore(key):
         ev_ref = db.collection("interviewEvals").document(uid)
         ev = ev_ref.get()
         if ev.exists and ev.to_dict().get("sourceHash") == h and ev.to_dict().get("status") in ("ok", "partial"):
-            continue  # already evaluated for these exact URLs
-        name = (a.get("firstName") or "") + " " + (a.get("lastName") or "")
-        log(f"Evaluating {uid} ({name.strip()}) ...")
+            continue
+        name = ((a.get("firstName") or "") + " " + (a.get("lastName") or "")).strip()
+        log(f"Evaluating {uid} ({name}) ...")
         try:
             result, status, reason = evaluate_urls(su, fu, key)
         except Exception as e:
             result, status, reason = None, "failed", str(e)[:300]
-        payload = {
-            "uid": uid, "sourceHash": h, "status": status, "reason": reason,
-            "evaluatedAt": firestore.SERVER_TIMESTAMP,
-        }
+        payload = {"uid": uid, "sourceHash": h, "status": status, "reason": reason,
+                   "evaluatedAt": firestore.SERVER_TIMESTAMP}
         if result:
             payload.update(result)
         ev_ref.set(payload)
@@ -174,8 +183,7 @@ def main():
     key = os.environ.get("GROQ_API_KEY")
     test = len(sys.argv) >= 3 and sys.argv[1] == "--test-url"
     if not key:
-        log("GROQ_API_KEY not configured yet; skipping (add repo secrets to enable).")
-        return
+        log("GROQ_API_KEY not configured; skipping."); return
     if test:
         url = sys.argv[2]
         log(f"TEST MODE: scoring single URL as student video: {url}")
@@ -183,9 +191,8 @@ def main():
         log("STATUS:", status, reason)
         log(json.dumps(result, indent=2)[:2500] if result else "(no result)")
         return
-    if not os.environ.get("FIREBASE_SA"):
-        log("FIREBASE_SA not configured yet; skipping live scan (add repo secrets to enable).")
-        return
+    if not (os.environ.get("FIREBASE_SA") or os.environ.get("FIREBASE_SA_FILE")):
+        log("FIREBASE_SA / FIREBASE_SA_FILE not configured; skipping live scan."); return
     run_firestore(key)
 
 
