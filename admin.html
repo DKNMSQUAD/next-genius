@@ -841,6 +841,16 @@
           </div>
         </div>` : ''}
 
+        ${a.onboarding?.interview ? `
+        <div class="detail-section">
+          <h3>Interview</h3>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="lbl">Student Video</div><div class="val">${a.interview?.studentVideo ? `<a href="${escapeHtml(a.interview.studentVideo)}" target="_blank" rel="noopener">Watch &#8599;</a>` : '—'}</div></div>
+            <div class="detail-item"><div class="lbl">Family Video</div><div class="val">${a.interview?.familyVideo ? `<a href="${escapeHtml(a.interview.familyVideo)}" target="_blank" rel="noopener">Watch &#8599;</a>` : '—'}</div></div>
+          </div>
+          <div id="interviewEvalBox" style="margin-top:14px;"><div style="font-size:13px; color:#6b7280;">Loading AI review…</div></div>
+        </div>` : ''}
+
         <div class="detail-section">
           <h3>Actions</h3>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -850,8 +860,44 @@
           </div>
         </div>`;
       document.getElementById('detailModal').classList.add('open');
+      if (a.onboarding?.interview) renderInterviewEval(a.uid);
     };
     window.closeDetail = () => document.getElementById('detailModal').classList.remove('open');
+
+    window.renderInterviewEval = async function(uid) {
+      const box = document.getElementById('interviewEvalBox');
+      if (!box) return;
+      try {
+        const snap = await getDoc(doc(db, "interviewEvals", uid));
+        if (!snap.exists()) { box.innerHTML = '<div style="font-size:13px; color:#6b7280;">No AI review yet — the scorer runs every 30 min after videos are submitted.</div>'; return; }
+        const e = snap.data();
+        if (e.status === 'failed') {
+          box.innerHTML = `<div style="font-size:13px; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px 12px;">AI review couldn't process the videos (${escapeHtml(e.reason||'')}). Please review the videos manually.</div>`;
+          return;
+        }
+        const dims = [['motivation_goals','Motivation & goals'],['communication','Communication'],['academic_fit','Academic fit'],['authenticity','Authenticity'],['family_support','Family support'],['need_fit','Need fit']];
+        const sc = e.scores || {};
+        const overall = (e.overall||'').toLowerCase();
+        const oColor = overall==='strong'?'#065f46':overall==='consider'?'#92400e':'#991b1b';
+        const oBg = overall==='strong'?'#d1fae5':overall==='consider'?'#fef3c7':'#fee2e2';
+        box.innerHTML = `
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <strong style="font-size:13px;">AI interview review</strong>
+            <span style="font-size:12px; font-weight:700; color:${oColor}; background:${oBg}; padding:3px 10px; border-radius:999px; text-transform:capitalize;">${escapeHtml(e.overall||'—')}</span>
+            ${e.status==='partial' ? '<span style="font-size:11px; color:#92400e;">(one video unscored)</span>' : ''}
+          </div>
+          <div class="score-cards">
+            ${dims.map(([k,label]) => { const s = sc[k]||{}; const pct = Math.round(((s.score||0)/5)*100); return `<div class="sc" title="${escapeHtml(s.reason||'')}"><div class="l">${label}</div><div class="v">${s.score||'—'}/5</div><div class="b"><div style="width:${pct}%"></div></div></div>`; }).join('')}
+          </div>
+          ${e.summary ? `<div style="font-size:13px; color:#374151; margin:10px 0; line-height:1.5;">${escapeHtml(e.summary)}</div>` : ''}
+          ${(e.red_flags||[]).length ? `<div style="font-size:13px; color:#991b1b;"><strong>Red flags:</strong> ${e.red_flags.map(escapeHtml).join(' · ')}</div>` : '<div style="font-size:12px; color:#6b7280;">No red flags noted.</div>'}
+          <details style="margin-top:10px;"><summary style="font-size:12px; color:#6b7280; cursor:pointer;">Transcripts</summary><div style="font-size:12px; color:#4b5563; margin-top:6px; white-space:pre-wrap;"><strong>Student:</strong> ${escapeHtml((e.transcripts||{}).student||'—')}
+
+<strong>Family:</strong> ${escapeHtml((e.transcripts||{}).family||'—')}</div></details>`;
+      } catch (err) {
+        box.innerHTML = `<div style="font-size:13px; color:#991b1b;">Could not load AI review (${escapeHtml(err.message||'')}).</div>`;
+      }
+    };
 
     window.sendToSingle = function(email) {
       closeDetail();
