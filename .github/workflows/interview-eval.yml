@@ -1,0 +1,43 @@
+name: Interview AI scoring
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # every 30 min (GitHub cron is best-effort)
+  workflow_dispatch:
+    inputs:
+      test_url:
+        description: "Optional: a YouTube URL to test the pipeline end-to-end (skips Firestore)"
+        required: false
+        default: ""
+
+concurrency:
+  group: interview-eval
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ffmpeg + yt-dlp + deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade pip
+          pip install yt-dlp requests firebase-admin
+
+      - name: Run interview scorer
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+          TEST_URL: ${{ github.event.inputs.test_url }}
+        run: |
+          if [ -n "$TEST_URL" ]; then
+            python scripts/interview_eval.py --test-url "$TEST_URL"
+          else
+            python scripts/interview_eval.py
+          fi
