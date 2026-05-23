@@ -172,14 +172,19 @@ def run_firestore(key):
 
 def main():
     key = os.environ.get("GROQ_API_KEY")
+    test = len(sys.argv) >= 3 and sys.argv[1] == "--test-url"
     if not key:
-        log("ERROR: GROQ_API_KEY not set"); sys.exit(1)
-    if len(sys.argv) >= 3 and sys.argv[1] == "--test-url":
+        log("GROQ_API_KEY not configured yet; skipping (add repo secrets to enable).")
+        return
+    if test:
         url = sys.argv[2]
         log(f"TEST MODE: scoring single URL as student video: {url}")
         result, status, reason = evaluate_urls(url, None, key)
         log("STATUS:", status, reason)
         log(json.dumps(result, indent=2)[:2500] if result else "(no result)")
+        return
+    if not os.environ.get("FIREBASE_SA"):
+        log("FIREBASE_SA not configured yet; skipping live scan (add repo secrets to enable).")
         return
     run_firestore(key)
 
