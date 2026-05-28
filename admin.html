@@ -476,8 +476,9 @@
             </div>
           </div>
           <div class="card">
-            <h2>Coming soon</h2>
-            <p style="font-size:13px; color:#6b7280;">AI fit-scoring per applicant · Auto-allocation suggestion · Partner college weekly digest · WhatsApp triggers (Twilio) · Voice call reminders (Retell AI).</p>
+            <h2>Automated reminders</h2>
+            <p style="font-size:13px; color:#6b7280; margin-bottom:14px;">A daily job nudges every applicant stalled on their next step. Email is always on; SMS and voice activate automatically once their keys are set; WhatsApp runs from the local app. All channels share one dedupe ledger, so nobody is double-nudged.</p>
+            <div id="reminderStatus" style="font-size:14px; color:#111;">Loading…</div>
           </div>
         </section>
 
@@ -518,29 +519,19 @@
     const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec';
 
     const PARTNER_COLLEGES = [
-      { slug: "aup", name: "American University of Paris", country: "France", domain: "aup.edu" },
-      { slug: "centre", name: "Centre College", country: "USA (Kentucky)", domain: "centre.edu" },
-      { slug: "capital", name: "Capital University", country: "USA (Ohio)", domain: "capital.edu" },
-      { slug: "cottey", name: "Cottey College", country: "USA (Missouri)", domain: "cottey.edu" },
-      { slug: "ithaca", name: "Ithaca College", country: "USA (New York)", domain: "ithaca.edu" },
-      { slug: "ie", name: "IE University", country: "Spain", domain: "ie.edu" },
-      { slug: "lynn", name: "Lynn University", country: "USA (Florida)", domain: "lynn.edu" },
-      { slug: "masters-union", name: "Masters' Union", country: "India", domain: "mastersunion.org" },
-      { slug: "muhlenberg", name: "Muhlenberg College", country: "USA (Pennsylvania)", domain: "muhlenberg.edu" },
-      { slug: "nuq", name: "Northwestern University in Qatar", country: "Qatar", domain: "northwestern.edu" },
-      { slug: "syracuse", name: "Syracuse University", country: "USA (New York)", domain: "syracuse.edu" },
-      { slug: "charleston", name: "University of Charleston", country: "USA (West Virginia)", domain: "ucwv.edu" }
+      { slug: "aup", name: "American University of Paris", country: "France" },
+      { slug: "centre", name: "Centre College", country: "USA (Kentucky)" },
+      { slug: "capital", name: "Capital University", country: "USA (Ohio)" },
+      { slug: "cottey", name: "Cottey College", country: "USA (Missouri)" },
+      { slug: "ithaca", name: "Ithaca College", country: "USA (New York)" },
+      { slug: "ie", name: "IE University", country: "Spain" },
+      { slug: "lynn", name: "Lynn University", country: "USA (Florida)" },
+      { slug: "masters-union", name: "Masters' Union", country: "India" },
+      { slug: "muhlenberg", name: "Muhlenberg College", country: "USA (Pennsylvania)" },
+      { slug: "nuq", name: "Northwestern University in Qatar", country: "Qatar" },
+      { slug: "syracuse", name: "Syracuse University", country: "USA (New York)" },
+      { slug: "charleston", name: "University of Charleston", country: "USA (West Virginia)" }
     ];
-
-    function collegeInitials_(name){ return name.split(' ').map(w=>w[0]).filter(x=>/[A-Z]/i.test(x)).slice(0,3).join('').toUpperCase(); }
-    function collegeLogo_(c, px, fontPx){
-      const ini = collegeInitials_(c.name);
-      const pad = Math.max(4, Math.round(px*0.14));
-      const img = c.domain
-        ? `<img src="https://www.google.com/s2/favicons?domain=${c.domain}&sz=128" alt="" loading="lazy" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#fff; padding:${pad}px; box-sizing:border-box;" onerror="this.style.display='none'">`
-        : '';
-      return `<div style="position:relative; width:${px}px; height:${px}px; border-radius:${Math.round(px*0.21)}px; background:#fff7e0; display:flex; align-items:center; justify-content:center; font-family:'Poppins',sans-serif; font-weight:700; color:#92400e; font-size:${fontPx}px; flex-shrink:0; overflow:hidden;">${ini}${img}</div>`;
-    }
 
     let applicants = [];
     let currentUser = null;
@@ -1171,7 +1162,7 @@
       a.reallocationRequest = updatedReq; a.allocation = null;
       a.onboarding = { ...(a.onboarding||{}), allocation: false, college: false };
       // Email student
-      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation approved') + '&body=' + encodeURIComponent('Your reallocation request has been approved. Your previous allocation has been cleared. Please open your dashboard and update your college choices.' + (note ? '\n\nNote from team: ' + note : '') + '\n\nhttps://www.next-genius.com/dashboard.html\n\n— Next Genius');
+      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation approved') + '&body=' + encodeURIComponent('Hi ' + (a.firstName||'') + ',\n\nYour reallocation request has been approved. Your previous allocation has been cleared. Please open your dashboard and update your college choices.' + (note ? '\n\nNote from team: ' + note : '') + '\n\nhttps://www.next-genius.com/dashboard.html\n\n— Next Genius');
       fetch(url, { mode: 'no-cors' }).catch(()=>{});
       toast('Approved');
       renderRequests(); renderApplicants(); renderOverview(); renderColleges();
@@ -1188,7 +1179,7 @@
         notifications: arrayUnion({ subject: 'Reallocation request declined', body: 'After review the team has decided to keep your current allocation.' + (note ? ' Reason: ' + note : ''), date: new Date().toISOString(), read: false, from: currentUser.email })
       });
       a.reallocationRequest = updatedReq;
-      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation request — update') + '&body=' + encodeURIComponent('After reviewing, the team has decided to keep your current allocation.' + (note ? '\n\nReason: ' + note : '') + '\n\nIf you have any questions please reply to this email.\n\n— Next Genius');
+      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation request — update') + '&body=' + encodeURIComponent('Hi ' + (a.firstName||'') + ',\n\nAfter reviewing, the team has decided to keep your current allocation.' + (note ? '\n\nReason: ' + note : '') + '\n\nIf you have any questions please reply to this email.\n\n— Next Genius');
       fetch(url, { mode: 'no-cors' }).catch(()=>{});
       toast('Declined');
       renderRequests();
@@ -1200,7 +1191,7 @@
         const chosenList = applicants.filter(a => (a.collegeChoices?.order || []).includes(c.slug));
         const accepted = allocatedList.filter(a => a.allocation?.status === 'accepted').length;
         return `<div class="card" style="display:flex; gap:18px; align-items:center; cursor:pointer;" onclick="openCollege('${c.slug}')" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)'" onmouseout="this.style.boxShadow=''">
-          ${collegeLogo_(c, 48, 14)}
+          <div style="width:48px; height:48px; border-radius:10px; background:#fff7e0; display:flex; align-items:center; justify-content:center; font-family:'Poppins',sans-serif; font-weight:700; color:#92400e; font-size:14px; flex-shrink:0;">${c.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</div>
           <div style="flex:1;">
             <div style="font-weight:600; font-size:15px;">${c.name}</div>
             <div style="font-size:13px; color:#6b7280;">${c.country}</div>
@@ -1218,6 +1209,7 @@
       const allocatedList = applicants.filter(a => a.allocation?.slug === slug);
       const chosenList = applicants.filter(a => (a.collegeChoices?.order || []).includes(slug));
       const acceptedCount = allocatedList.filter(a => a.allocation?.status === 'accepted').length;
+      const initials = c.name.split(' ').map(w => w[0]).filter(x => /[A-Z]/i.test(x)).slice(0,3).join('').toUpperCase();
 
       const studentCard = (a, badge, accent) => {
         const stage = stageOf(a);
@@ -1235,7 +1227,7 @@
       document.getElementById('detailName').textContent = 'Partner College';
       document.getElementById('detailBody').innerHTML = `
         <div class="detail-hero" style="background:linear-gradient(135deg, #fffaf0 0%, #fff7e0 100%);">
-          ${collegeLogo_(c, 84, 26)}
+          <div class="college-mark">${escapeHtml(initials)}</div>
           <div class="meta">
             <div class="name">${escapeHtml(c.name)}</div>
             <div class="email">${escapeHtml(c.country)}</div>
@@ -1329,7 +1321,7 @@
       for (const a of stuck) {
         const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName || '') +
           '&subject=' + encodeURIComponent('Quick reminder — finish your Next Genius profile') +
-          '&body=' + encodeURIComponent(`We noticed you haven't finished your profile yet. The team can't review your application until photo, personal and academic profiles are complete.\n\nIt only takes 10 minutes:\nhttps://www.next-genius.com/dashboard.html\n\n— Next Genius`);
+          '&body=' + encodeURIComponent(`Hi ${a.firstName || 'there'},\n\nWe noticed you haven't finished your profile yet. The team can't review your application until photo, personal and academic profiles are complete.\n\nIt only takes 10 minutes:\nhttps://www.next-genius.com/dashboard.html\n\n— Next Genius`);
         await fetch(url, { mode: 'no-cors' }); okCount++;
       }
       toast('Reminder sent to ' + okCount);
@@ -1373,7 +1365,41 @@
       el.classList.add('active');
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.getElementById('panel-' + el.getAttribute('data-tab')).classList.add('active');
+      if (el.getAttribute('data-tab') === 'automations') loadReminderStatus();
     }));
+
+    async function loadReminderStatus() {
+      const box = document.getElementById('reminderStatus');
+      if (!box) return;
+      box.textContent = 'Loading…';
+      try {
+        const [statusRes, audRes] = await Promise.all([
+          fetch(SHEET_WEBHOOK_URL + '?reminders_status=1').then(r => r.json()),
+          fetch(SHEET_WEBHOOK_URL + '?audience=reminders').then(r => r.json())
+        ]);
+        const ch = statusRes.channels || {};
+        const chip = (on, label) => '<span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; margin:0 6px 6px 0; background:' + (on ? '#d1fae5' : '#f3f4f6') + '; color:' + (on ? '#065f46' : '#9ca3af') + ';">' + label + (on ? ' · on' : ' · off') + '</span>';
+        const lr = statusRes.lastResult;
+        const lastRun = statusRes.lastRun ? new Date(statusRes.lastRun).toLocaleString() : 'never run yet';
+        const trig = statusRes.trigger ? 'scheduled (' + escapeHtml(statusRes.trigger) + ')' : 'not scheduled yet — run installReminderTrigger() once';
+        box.innerHTML =
+          '<div style="margin-bottom:10px;">' +
+            chip(ch.email !== false, 'Email') +
+            chip(!!ch.sms, 'SMS (Twilio)') +
+            chip(!!ch.voice, 'Voice (Retell)') +
+            '<span style="display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; margin:0 6px 6px 0; background:#e0e7ff; color:#3730a3;">WhatsApp · local app</span>' +
+          '</div>' +
+          '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px 24px; max-width:460px;">' +
+            '<div><span style="color:#6b7280;">Stalled now:</span> <b>' + (audRes.count != null ? audRes.count : '—') + '</b></div>' +
+            '<div><span style="color:#6b7280;">Schedule:</span> ' + trig + '</div>' +
+            '<div><span style="color:#6b7280;">Last run:</span> ' + lastRun + '</div>' +
+            '<div><span style="color:#6b7280;">Last sent:</span> ' + (lr ? ('email ' + lr.email + ' · sms ' + lr.sms + ' · voice ' + lr.voice) : '—') + '</div>' +
+          '</div>' +
+          (lr && lr.errors && lr.errors.length ? '<div style="margin-top:10px; font-size:12px; color:#b91c1c;">Recent errors: ' + escapeHtml(lr.errors.join(' | ')) + '</div>' : '');
+      } catch (e) {
+        box.textContent = 'Could not load reminder status.';
+      }
+    }
 
     function escapeHtml(s) { return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
     function toast(msg) {
