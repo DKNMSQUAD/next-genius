@@ -145,14 +145,31 @@
       flex-shrink: 0; letter-spacing: 0.5px;
     }
     .college-card .info { flex: 1; min-width: 0; }
-    .college-card .info .nm { font-weight: 600; font-size: 14px; color: #111; }
-    .college-card .info .cn { font-size: 12px; color: #888; }
+    .college-card .info .nm { font-weight: 600; font-size: 14px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .college-card .info .cn { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .college-card .rank-badge {
       width: 28px; height: 28px; border-radius: 50%;
       background: #FFC72C; color: #111; font-weight: 700; font-size: 13px;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .college-card .grip { color: #ccc; font-size: 16px; cursor: grab; }
+    .college-card .cc-actions { display: flex; gap: 6px; margin-left: auto; flex-shrink: 0; }
+    .cc-btn {
+      font-family: inherit; font-size: 13px; line-height: 1;
+      min-width: 34px; height: 34px; padding: 0 10px;
+      border: 1px solid #e0e0e0; background: #fff; color: #333;
+      border-radius: 8px; cursor: pointer; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all 0.12s; -webkit-tap-highlight-color: transparent;
+    }
+    .cc-btn:hover:not(:disabled) { border-color: #FFC72C; background: #fff7e0; }
+    .cc-btn:active:not(:disabled) { transform: scale(0.94); }
+    .cc-btn:disabled { opacity: 0.35; cursor: default; }
+    .cc-add { margin-left: auto; color: #1a7f37; border-color: #cde9d6; }
+    .cc-add:hover { background: #eafbf0; border-color: #1a7f37; }
+    .cc-remove { color: #d93025; }
+    .cc-remove:hover { background: #fee; border-color: #d93025; }
+    .cc-ic { display: none; font-size: 18px; }
 
     /* Interest Inventory */
     .inv-row {
@@ -244,6 +261,13 @@
 
     @media (max-width: 760px) {
       .college-grid { grid-template-columns: 1fr !important; }
+      .college-card { gap: 8px; padding: 10px; }
+      .college-card .grip { display: none; }
+      .cc-btn { min-width: 32px; height: 32px; padding: 0 8px; font-size: 12px; }
+      .cc-actions { gap: 4px; }
+      .cc-remove { min-width: 32px; padding: 0; }
+      .cc-remove .cc-txt { display: none; }
+      .cc-remove .cc-ic { display: inline; }
     }
 
     /* Photo upload */
@@ -577,17 +601,17 @@
         <!-- COLLEGE -->
         <section class="panel" id="panel-college">
           <h1>College Discovery</h1>
-          <p class="subtitle">Drag colleges into your "Choices" list, then drag to reorder by preference.</p>
+          <p class="subtitle">Tap "Add" to add a college to your Choices, then use the arrows to rank them. On a computer you can also drag.</p>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;" class="college-grid">
             <div class="card">
               <h2 style="margin-bottom:4px;">Available Partners</h2>
-              <p style="font-size:13px; color:#888; margin-bottom:14px;">Drag a college to add it to your choices →</p>
+              <p style="font-size:13px; color:#888; margin-bottom:14px;">Tap "Add" next to a college to add it to your choices.</p>
               <div id="collegeAvailable" class="college-pool"></div>
             </div>
             <div class="card">
               <h2 style="margin-bottom:4px;">Your Choices <span id="chosenCount" style="font-weight:400; font-size:13px; color:#666;">(0)</span></h2>
-              <p style="font-size:13px; color:#888; margin-bottom:14px;">Drag to reorder — top of list = first choice. Pick at least 3.</p>
-              <div id="collegeChosen" class="college-pool chosen-zone"><div class="empty-msg">Drop colleges here</div></div>
+              <p style="font-size:13px; color:#888; margin-bottom:14px;">Use the arrows to reorder, top of list = first choice. Pick at least 3.</p>
+              <div id="collegeChosen" class="college-pool chosen-zone"><div class="empty-msg">No colleges chosen yet. Tap "Add" on the left.</div></div>
             </div>
           </div>
           <div style="margin-top:16px;">
@@ -1010,41 +1034,75 @@
       };
       return palettes[slug] || '#FFC72C';
     }
-    function collegeCardHtml(c, withRank, rankNum) {
+    function collegeCardHtml(c, withRank, rankNum, isFirst, isLast) {
       const initials = initialsFor(c.name);
       const color = logoColor(c.slug);
+      const controls = withRank
+        ? `<div class="cc-actions">
+             <button type="button" class="cc-btn" title="Move up" aria-label="Move up" ${isFirst ? 'disabled' : ''} onclick="ngMoveCollege('${c.slug}',-1)">↑</button>
+             <button type="button" class="cc-btn" title="Move down" aria-label="Move down" ${isLast ? 'disabled' : ''} onclick="ngMoveCollege('${c.slug}',1)">↓</button>
+             <button type="button" class="cc-btn cc-remove" title="Remove from choices" aria-label="Remove from choices" onclick="ngRemoveCollege('${c.slug}')"><span class="cc-txt">Remove</span><span class="cc-ic">&times;</span></button>
+           </div>`
+        : `<button type="button" class="cc-btn cc-add" title="Add to choices" onclick="ngAddCollege('${c.slug}')">Add</button>`;
       return `<div class="college-card" draggable="true" data-college="${c.slug}">
         <span class="grip">⋮⋮</span>
         ${withRank ? `<div class="rank-badge">${rankNum}</div>` : ''}
         <div class="logo-initials" style="background:${color}; color:#fff;">${initials}</div>
         <div class="info"><div class="nm">${c.name}</div><div class="cn">${c.country}</div></div>
+        ${controls}
       </div>`;
     }
+    let chosenOrder = [];
     function renderColleges() {
-      const saved = applicantData.collegeChoices?.order || [];
-      const chosenSlugs = new Set(saved);
-      const available = PARTNER_COLLEGES.filter(c => !chosenSlugs.has(c.slug));
-      const chosen = saved.map(slug => PARTNER_COLLEGES.find(c => c.slug === slug)).filter(Boolean);
+      // Reset working order from what's saved, then paint.
+      chosenOrder = [...(applicantData.collegeChoices?.order || [])]
+        .filter(slug => PARTNER_COLLEGES.some(c => c.slug === slug));
+      paintColleges();
+    }
+    function paintColleges() {
+      const chosenSet = new Set(chosenOrder);
+      const available = PARTNER_COLLEGES.filter(c => !chosenSet.has(c.slug));
+      const chosen = chosenOrder.map(slug => PARTNER_COLLEGES.find(c => c.slug === slug)).filter(Boolean);
 
       const av = document.getElementById('collegeAvailable');
       const ch = document.getElementById('collegeChosen');
       av.innerHTML = available.length ? available.map(c => collegeCardHtml(c, false)).join('') : '<div class="empty-msg">All colleges added to your choices</div>';
-      ch.innerHTML = chosen.length ? chosen.map((c, i) => collegeCardHtml(c, true, i+1)).join('') : '<div class="empty-msg">Drop colleges here</div>';
+      ch.innerHTML = chosen.length ? chosen.map((c, i) => collegeCardHtml(c, true, i+1, i === 0, i === chosen.length-1)).join('') : '<div class="empty-msg">No colleges chosen yet. Tap "Add" on the left.</div>';
       document.getElementById('chosenCount').textContent = `(${chosen.length})`;
       attachDragHandlers();
     }
+    // Tap-based controls (work on touch devices where HTML5 drag does not fire).
+    window.ngAddCollege = (slug) => {
+      if (!chosenOrder.includes(slug) && PARTNER_COLLEGES.some(c => c.slug === slug)) {
+        chosenOrder.push(slug);
+        paintColleges();
+      }
+    };
+    window.ngRemoveCollege = (slug) => {
+      chosenOrder = chosenOrder.filter(s => s !== slug);
+      paintColleges();
+    };
+    window.ngMoveCollege = (slug, dir) => {
+      const i = chosenOrder.indexOf(slug);
+      if (i < 0) return;
+      const j = i + dir;
+      if (j < 0 || j >= chosenOrder.length) return;
+      [chosenOrder[i], chosenOrder[j]] = [chosenOrder[j], chosenOrder[i]];
+      paintColleges();
+    };
+    let poolHandlersReady = false;
     function attachDragHandlers() {
-      let dragSlug = null;
-      let dragOriginPool = null;
+      // Card-level listeners: cards are re-created on every paint, so (re)bind each time.
       document.querySelectorAll('.college-card').forEach(el => {
         el.addEventListener('dragstart', (e) => {
-          dragSlug = el.dataset.college;
-          dragOriginPool = el.closest('.college-pool').id;
           el.classList.add('dragging');
           e.dataTransfer.effectAllowed = 'move';
         });
         el.addEventListener('dragend', () => el.classList.remove('dragging'));
       });
+      // Pool-level listeners: the pool elements persist across paints, so bind only once.
+      if (poolHandlersReady) return;
+      poolHandlersReady = true;
       ['collegeAvailable','collegeChosen'].forEach(poolId => {
         const pool = document.getElementById(poolId);
         pool.addEventListener('dragover', (e) => {
@@ -1064,32 +1122,13 @@
         pool.addEventListener('drop', (e) => {
           e.preventDefault();
           pool.classList.remove('dragover');
-          // remove "Drop here" empty msgs since something is dropped
-          pool.querySelectorAll('.empty-msg').forEach(m => m.remove());
-          const empty = document.getElementById('collegeAvailable').querySelectorAll('.college-card').length;
-          if (empty === 0) document.getElementById('collegeAvailable').innerHTML = '<div class="empty-msg">All colleges added to your choices</div>';
-          // re-rank chosen
-          updateRankBadges();
+          // Sync the working order from the DOM after the drag, then repaint
+          // (restores buttons, rank badges, and empty-state messages).
+          chosenOrder = [...document.querySelectorAll('#collegeChosen .college-card')].map(el => el.dataset.college);
+          paintColleges();
         });
       });
     }
-    function updateRankBadges() {
-      const ch = document.getElementById('collegeChosen');
-      ch.querySelectorAll('.college-card').forEach((card, i) => {
-        let badge = card.querySelector('.rank-badge');
-        if (!badge) {
-          badge = document.createElement('div');
-          badge.className = 'rank-badge';
-          card.insertBefore(badge, card.querySelector('.logo'));
-        }
-        badge.textContent = i + 1;
-      });
-      // remove rank badges from available pool
-      document.getElementById('collegeAvailable').querySelectorAll('.rank-badge').forEach(b => b.remove());
-      const count = ch.querySelectorAll('.college-card').length;
-      document.getElementById('chosenCount').textContent = `(${count})`;
-    }
-
     function goToTab(tab) {
       const link = document.querySelector(`.sidebar a[data-tab="${tab}"]`);
       if (!link || link.classList.contains('locked')) return;
@@ -1436,7 +1475,7 @@
         alert('Your college choices are locked because the team has already allocated you. To change colleges, go to the Allocation tab and click "Request Reallocation".');
         return;
       }
-      const order = [...document.querySelectorAll('#collegeChosen .college-card')].map(el => el.dataset.college);
+      const order = [...chosenOrder];
       if (order.length < 3) { alert('Pick at least 3 colleges'); return; }
       await updateDoc(doc(db, "applicants", currentUser.uid), { collegeChoices: { order, submittedAt: new Date().toISOString() }, "onboarding.college": true });
       applicantData.collegeChoices = { order }; applicantData.onboarding = { ...(applicantData.onboarding||{}), college: true };
