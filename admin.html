@@ -317,7 +317,7 @@
   <div id="adminWrap" style="display:none;">
     <div class="topbar">
       <div class="brand"><img src="NG_Logo.avif" alt="NG"><span>Next Genius</span><span class="badge">ADMIN</span></div>
-      <div class="user"><span id="userEmail"></span><button onclick="signOutClick()">Sign out</button></div>
+      <div class="user"><span id="ngSyncLabel" style="font-size:12px;color:#9ca3af;"></span><button onclick="refreshApplicants()" title="Reload latest data from the database" style="font-size:12px;">Refresh</button><span id="userEmail"></span><button onclick="signOutClick()">Sign out</button></div>
     </div>
 
     <div class="layout">
@@ -563,13 +563,48 @@
       renderRequests();
     });
 
+    let signingIn = false;
     window.loginGoogle = async function() {
+      if (signingIn) return;            // ignore double-clicks (cause of auth/cancelled-popup-request)
+      signingIn = true;
+      const btn = document.querySelector('button[onclick="loginGoogle()"]');
+      if (btn) btn.disabled = true;
       try { await signInWithPopup(auth, provider); }
-      catch (e) { document.getElementById('loginErr').textContent = e.message.replace('Firebase: ',''); }
+      catch (e) {
+        // These are benign (user double-clicked or closed the popup) — don't scare them.
+        if (e.code !== 'auth/cancelled-popup-request' && e.code !== 'auth/popup-closed-by-user') {
+          document.getElementById('loginErr').textContent = e.message.replace('Firebase: ', '');
+        }
+      } finally { signingIn = false; if (btn) btn.disabled = false; }
     };
     window.signOutClick = async function() { await signOut(auth); };
 
-    async function loadApplicants() {
+    // ---- Applicants cache: avoid re-reading all ~1000 docs on every refresh.
+    // A full read costs 1 Firestore read PER doc; the free tier is 50k/day, so
+    // un-cached refreshes could exhaust it and take the whole site down. We cache
+    // the loaded set in localStorage for a short TTL and invalidate on any mutation.
+    const APPLICANTS_CACHE_KEY = 'ng_admin_applicants_v1';
+    const APPLICANTS_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+    let lastSync = 0;
+    function readApplicantsCache_() {
+      try {
+        const obj = JSON.parse(localStorage.getItem(APPLICANTS_CACHE_KEY) || 'null');
+        if (!obj || !obj.ts || !Array.isArray(obj.data)) return null;
+        if ((Date.now() - obj.ts) > APPLICANTS_CACHE_TTL) return null;
+        return obj;
+      } catch (e) { return null; }
+    }
+    function writeApplicantsCache_() {
+      try { localStorage.setItem(APPLICANTS_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: applicants })); } catch (e) { /* quota — skip caching */ }
+    }
+    function invalidateApplicantsCache_() {
+      try { localStorage.removeItem(APPLICANTS_CACHE_KEY); } catch (e) {}
+    }
+    async function loadApplicants(force) {
+      if (!force) {
+        const cached = readApplicantsCache_();
+        if (cached) { applicants = cached.data; lastSync = cached.ts; updateSyncLabel_(); return; }
+      }
       const snap = await getDocs(collection(db, "applicants"));
       applicants = [];
       snap.forEach(d => {
@@ -581,7 +616,25 @@
         const tb = b.createdAt?.seconds || 0;
         return tb - ta;
       });
+      lastSync = Date.now();
+      writeApplicantsCache_();
+      updateSyncLabel_();
     }
+    function updateSyncLabel_() {
+      const el = document.getElementById('ngSyncLabel');
+      if (!el || !lastSync) return;
+      const mins = Math.floor((Date.now() - lastSync) / 60000);
+      el.textContent = mins <= 0 ? 'synced just now' : ('synced ' + mins + 'm ago');
+    }
+    window.refreshApplicants = async function() {
+      const el = document.getElementById('ngSyncLabel');
+      if (el) el.textContent = 'syncing...';
+      try {
+        await loadApplicants(true);
+        renderOverview(); renderApplicants(); renderCohorts(); renderColleges(); renderRequests();
+        toast('Synced ' + applicants.length + ' applicants');
+      } catch (e) { toast('Sync failed: ' + e.message); }
+    };
 
     function stageOf(a) {
       if (a.exitedAt) return 'exited';
@@ -700,6 +753,7 @@
       try {
         await deleteDoc(doc(db, "applicants", uid));
         applicants = applicants.filter(a => a.uid !== uid);
+        writeApplicantsCache_();
         renderApplicants(); renderOverview(); renderColleges();
         toast('Deleted: ' + name);
       } catch (e) {
@@ -1046,9 +1100,11 @@
       const allocation = { college: college.name, slug: college.slug, status: 'pending_acceptance', allocatedAt: new Date().toISOString(), allocatedBy: currentUser.email, notes };
       await updateDoc(doc(db, "applicants", uid), { allocation, status: 'allocated', notifications: arrayUnion({ subject: 'You have been allocated to ' + college.name, body: 'Congratulations! After review, the Next Genius team has allocated you to ' + college.name + '. Please open your dashboard to accept this allocation and continue with the Interview stage.', date: new Date().toISOString(), read: false, from: currentUser.email }) });
       // Send email
-      const emailUrl = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName || '') + '&subject=' + encodeURIComponent('You have been allocated to ' + college.name) + '&body=' + encodeURIComponent('Congratulations! Our team has reviewed your profile and allocated you to ' + college.name + '. Open your dashboard to accept and move to the next stage.');
+      const allocTok = await currentUser.getIdToken().catch(()=>'');
+      const emailUrl = SHEET_WEBHOOK_URL + '?send_message=1&idToken=' + encodeURIComponent(allocTok) + '&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName || '') + '&subject=' + encodeURIComponent('You have been allocated to ' + college.name) + '&body=' + encodeURIComponent('Congratulations! Our team has reviewed your profile and allocated you to ' + college.name + '. Open your dashboard to accept and move to the next stage.');
       fetch(emailUrl, { mode: 'no-cors' }).catch(()=>{});
       if (a) { a.allocation = allocation; a.status = 'allocated'; }
+      writeApplicantsCache_();
       toast('Allocated to ' + college.name);
       closeDetail(); renderApplicants(); renderOverview(); renderColleges();
     };
@@ -1162,8 +1218,10 @@
       a.reallocationRequest = updatedReq; a.allocation = null;
       a.onboarding = { ...(a.onboarding||{}), allocation: false, college: false };
       // Email student
-      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation approved') + '&body=' + encodeURIComponent('Hi ' + (a.firstName||'') + ',\n\nYour reallocation request has been approved. Your previous allocation has been cleared. Please open your dashboard and update your college choices.' + (note ? '\n\nNote from team: ' + note : '') + '\n\nhttps://www.next-genius.com/dashboard.html\n\n— Next Genius');
+      const reTok1 = await currentUser.getIdToken().catch(()=>'');
+      const url = SHEET_WEBHOOK_URL + '?send_message=1&idToken=' + encodeURIComponent(reTok1) + '&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation approved') + '&body=' + encodeURIComponent('Hi ' + (a.firstName||'') + ',\n\nYour reallocation request has been approved. Your previous allocation has been cleared. Please open your dashboard and update your college choices.' + (note ? '\n\nNote from team: ' + note : '') + '\n\nhttps://www.next-genius.com/dashboard.html\n\n— Next Genius');
       fetch(url, { mode: 'no-cors' }).catch(()=>{});
+      writeApplicantsCache_();
       toast('Approved');
       renderRequests(); renderApplicants(); renderOverview(); renderColleges();
     };
@@ -1179,8 +1237,10 @@
         notifications: arrayUnion({ subject: 'Reallocation request declined', body: 'After review the team has decided to keep your current allocation.' + (note ? ' Reason: ' + note : ''), date: new Date().toISOString(), read: false, from: currentUser.email })
       });
       a.reallocationRequest = updatedReq;
-      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation request — update') + '&body=' + encodeURIComponent('Hi ' + (a.firstName||'') + ',\n\nAfter reviewing, the team has decided to keep your current allocation.' + (note ? '\n\nReason: ' + note : '') + '\n\nIf you have any questions please reply to this email.\n\n— Next Genius');
+      const reTok2 = await currentUser.getIdToken().catch(()=>'');
+      const url = SHEET_WEBHOOK_URL + '?send_message=1&idToken=' + encodeURIComponent(reTok2) + '&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName||'') + '&subject=' + encodeURIComponent('Reallocation request — update') + '&body=' + encodeURIComponent('Hi ' + (a.firstName||'') + ',\n\nAfter reviewing, the team has decided to keep your current allocation.' + (note ? '\n\nReason: ' + note : '') + '\n\nIf you have any questions please reply to this email.\n\n— Next Genius');
       fetch(url, { mode: 'no-cors' }).catch(()=>{});
+      writeApplicantsCache_();
       toast('Declined');
       renderRequests();
     };
@@ -1289,42 +1349,49 @@
       }
       if (!confirm('Send to ' + targets.length + ' recipient(s)?')) return;
       const status = document.getElementById('msgStatus');
-      status.textContent = 'Sending...';
       const sendInbox = document.getElementById('msgInbox').checked;
       const sendEmail = document.getElementById('msgEmail').checked;
-      let okCount = 0, errCount = 0;
-      for (const a of targets) {
-        try {
-          if (sendInbox) {
+      let inboxOk = 0, inboxErr = 0;
+      if (sendInbox) {
+        status.textContent = 'Posting inbox notifications...';
+        for (const a of targets) {
+          try {
             await updateDoc(doc(db, "applicants", a.uid), {
               notifications: arrayUnion({ subject, body, date: new Date().toISOString(), read: false, from: currentUser.email })
             });
-          }
-          if (sendEmail) {
-            const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName || '') + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-            await fetch(url, { mode: 'no-cors' });
-          }
-          okCount++;
-        } catch (e) { errCount++; }
+            inboxOk++;
+          } catch (e) { inboxErr++; }
+        }
       }
-      status.innerHTML = `✓ Sent to ${okCount}.` + (errCount ? ` ${errCount} failed.` : '');
+      if (sendEmail) {
+        status.textContent = 'Queuing emails...';
+        try {
+          await bulkEmail(targets, subject, body, status);
+        } catch (e) {
+          status.innerHTML = 'Email queue failed: ' + escapeHtml(e.message) + '. Try again — nothing was sent twice.';
+          return;
+        }
+      } else {
+        status.innerHTML = 'Inbox notifications posted to ' + inboxOk + '.' + (inboxErr ? ' ' + inboxErr + ' failed.' : '');
+      }
       document.getElementById('msgSubject').value = '';
       document.getElementById('msgBody').value = '';
-      toast('Message sent to ' + okCount + ' recipient(s)');
+      toast('Message dispatched to ' + targets.length + ' recipient(s)');
     };
 
     window.bulkReminder = async function() {
       const stuck = applicants.filter(a => !a.exitedAt && (!a.onboarding?.photo || !a.onboarding?.personal || !a.onboarding?.academic));
       if (!stuck.length) { alert('No stuck applicants'); return; }
       if (!confirm('Send reminder email to ' + stuck.length + ' stuck applicant(s)?')) return;
-      let okCount = 0;
-      for (const a of stuck) {
-        const url = SHEET_WEBHOOK_URL + '?send_message=1&to=' + encodeURIComponent(a.email) + '&firstName=' + encodeURIComponent(a.firstName || '') +
-          '&subject=' + encodeURIComponent('Quick reminder — finish your Next Genius profile') +
-          '&body=' + encodeURIComponent(`Hi ${a.firstName || 'there'},\n\nWe noticed you haven't finished your profile yet. The team can't review your application until photo, personal and academic profiles are complete.\n\nIt only takes 10 minutes:\nhttps://www.next-genius.com/dashboard.html\n\n— Next Genius`);
-        await fetch(url, { mode: 'no-cors' }); okCount++;
+      const status = document.getElementById('msgStatus') || document.createElement('div');
+      const subject = 'Quick reminder — finish your Next Genius profile';
+      const body = `We noticed you haven't finished your profile yet. The team can't review your application until photo, personal and academic profiles are complete.\n\nIt only takes 10 minutes:\nhttps://www.next-genius.com/dashboard.html`;
+      try {
+        await bulkEmail(stuck, subject, body, status);
+        toast('Reminder queued for ' + stuck.length + ' applicant(s)');
+      } catch (e) {
+        toast('Reminder failed: ' + e.message);
       }
-      toast('Reminder sent to ' + okCount);
     };
     window.bulkWelcome = async function() {
       const email = prompt('Send welcome email to which applicant email?');
@@ -1402,6 +1469,47 @@
     }
 
     function escapeHtml(s) { return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+    // JSONP GET so we can read Apps Script responses cross-origin (plain fetch can't).
+    function jsonpGet(url) {
+      return new Promise((resolve, reject) => {
+        const cb = 'ngcb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        const s = document.createElement('script');
+        const t = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 15000);
+        function cleanup() { clearTimeout(t); try { delete window[cb]; } catch (e) {} s.remove(); }
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        s.onerror = () => { cleanup(); reject(new Error('network')); };
+        s.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cb;
+        document.body.appendChild(s);
+      });
+    }
+    // Poll the server for honest sent/queued counts of a bulk email job.
+    async function pollBulkStatus(jobId, statusEl, total) {
+      for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, i === 0 ? 1500 : 3000));
+        try {
+          const d = await jsonpGet(SHEET_WEBHOOK_URL + '?bulk_status=1&jobId=' + encodeURIComponent(jobId));
+          if (d && d.ok) {
+            statusEl.innerHTML = 'Sent ' + d.sent + ' of ' + (d.total || total) + ' now' +
+              (d.queued ? '. ' + d.queued + ' queued and will auto-send over the next day or two (Gmail free limit is ~100/day) — none are lost.' : '. All delivered.');
+            if (d.queued === 0 && d.total > 0) return d;
+          }
+        } catch (e) { /* keep polling */ }
+      }
+      return null;
+    }
+    // Queue an admin bulk email server-side (verified by the admin's Firebase ID token).
+    async function bulkEmail(targets, subject, body, statusEl) {
+      const idToken = await currentUser.getIdToken();
+      const jobId = 'job_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+      const recipients = targets.map(a => ({ to: a.email, firstName: a.firstName || '' }));
+      await fetch(SHEET_WEBHOOK_URL + '?bulk_enqueue=1', {
+        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ jobId, idToken, subject, body, recipients })
+      });
+      if (statusEl) { statusEl.textContent = 'Queued ' + recipients.length + ' email(s). Checking progress...'; }
+      return pollBulkStatus(jobId, statusEl, recipients.length);
+    }
     function toast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg;

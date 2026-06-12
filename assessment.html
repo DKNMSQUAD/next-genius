@@ -102,7 +102,9 @@
     const provider = new GoogleAuthProvider();
 
     let pendingReg = null;
-    try { pendingReg = JSON.parse(sessionStorage.getItem('ng_pending') || 'null'); } catch(_) {}
+    // Read from localStorage (survives tab close / mobile backgrounding); fall back to
+    // sessionStorage for users mid-flow when this deploy lands.
+    try { pendingReg = JSON.parse(localStorage.getItem('ng_pending') || sessionStorage.getItem('ng_pending') || 'null'); } catch(_) {}
     if (!pendingReg) {
       document.getElementById('noPendingGate').style.display = 'block';
     } else {
@@ -147,12 +149,20 @@
         status: "registered",
         onboarding: { photo: !!user.photoURL, personal: false, academic: false, inventory: false, college: false, interview: false, groupInterview: false, decision: false }
       };
-      await setDoc(doc(db, "applicants", user.uid), enriched);
+      // Persist the applicant record. If this fails, do NOT strand an auth account
+      // with no data — roll the account back so the student can cleanly retry.
+      try {
+        await setDoc(doc(db, "applicants", user.uid), enriched);
+      } catch (err) {
+        try { await user.delete(); } catch(_) {}
+        document.getElementById('signupErr').textContent = 'We could not save your registration (a network issue). Please check your connection and try again.';
+        return;
+      }
       // Fire-and-forget welcome email via Apps Script (Gmail-sent, branded HTML)
       const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
       const url = SHEET_WEBHOOK_URL + "?welcome_email=" + encodeURIComponent(enriched.email) + "&firstName=" + encodeURIComponent(enriched.firstName || '');
       fetch(url, { mode: "no-cors" }).catch(()=>{});
-      sessionStorage.removeItem('ng_pending');
+      try { localStorage.removeItem('ng_pending'); sessionStorage.removeItem('ng_pending'); } catch(_) {}
       window.location.href = 'dashboard.html';
     }
   </script>

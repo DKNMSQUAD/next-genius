@@ -690,7 +690,10 @@
         if (e.message && (e.message.includes('already') || e.message.includes('only') || e.message.includes('duplicate'))) throw e;
         // network error on dup check — proceed; Auth signup later will catch email duplicates
       }
-      sessionStorage.setItem('ng_pending', JSON.stringify({ ...payload, createdAt: new Date().toISOString() }));
+      // localStorage (not sessionStorage) so a closed tab / backgrounded mobile browser
+      // doesn't lose the whole registration before the student finishes signup.
+      const pend = JSON.stringify({ ...payload, createdAt: new Date().toISOString() });
+      try { localStorage.setItem('ng_pending', pend); } catch(_) { try { sessionStorage.setItem('ng_pending', pend); } catch(__){} }
       fetch(SHEET_WEBHOOK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ ...payload, createdAt: new Date().toISOString(), status: "registered" }) }).catch(()=>{});
       return { saved: true };
     };

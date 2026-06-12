@@ -962,11 +962,13 @@
       const reason = prompt('Please briefly explain why you would like to be reallocated:');
       if (!reason || !reason.trim()) return;
       const request = { reason: reason.trim(), requestedAt: new Date().toISOString(), status: 'pending' };
-      await updateDoc(doc(db, "applicants", currentUser.uid), { reallocationRequest: request });
+      try { await persist({ reallocationRequest: request }); }
+      catch (e) { alert('Could not submit your request — please check your connection and try again.'); return; }
       applicantData.reallocationRequest = request;
       renderAllocation();
-      // Notify admin via email
-      const url = SHEET_WEBHOOK_URL + '?send_message=1&to=dknmsquad@gmail.com&firstName=Admin&subject=' + encodeURIComponent('Reallocation request from ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'')) + '&body=' + encodeURIComponent('Student: ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'') + ' (' + currentUser.email + ')\nCurrent allocation: ' + (applicantData.allocation?.college||'') + '\n\nReason:\n' + reason + '\n\nReview at https://www.next-genius.com/admin.html');
+      // Notify admin via email (recipient fixed to admin server-side; needs the student's token)
+      const reallocTok = await currentUser.getIdToken().catch(()=>'');
+      const url = SHEET_WEBHOOK_URL + '?notify_admin=1&idToken=' + encodeURIComponent(reallocTok) + '&subject=' + encodeURIComponent('Reallocation request from ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'')) + '&body=' + encodeURIComponent('Student: ' + (applicantData.firstName||'') + ' ' + (applicantData.lastName||'') + ' (' + currentUser.email + ')\nCurrent allocation: ' + (applicantData.allocation?.college||'') + '\n\nReason:\n' + reason + '\n\nReview at https://www.next-genius.com/admin.html');
       fetch(url, { mode: 'no-cors' }).catch(()=>{});
       alert('Request submitted. The team will review and respond shortly.');
     };
@@ -974,7 +976,8 @@
     window.acceptAllocation = async function() {
       if (!applicantData.allocation) return;
       const updated = { ...applicantData.allocation, status: 'accepted', acceptedAt: new Date().toISOString() };
-      await updateDoc(doc(db, "applicants", currentUser.uid), { allocation: updated, "onboarding.allocation": true, status: 'allocated_accepted' });
+      try { await persist({ allocation: updated, "onboarding.allocation": true, status: 'allocated_accepted' }); }
+      catch (e) { alert('Could not save — please check your connection and try again.'); return; }
       applicantData.allocation = updated;
       applicantData.onboarding = { ...(applicantData.onboarding||{}), allocation: true };
       applicantData.status = 'allocated_accepted';
@@ -984,7 +987,8 @@
     window.declineAllocation = async function() {
       if (!confirm('Decline this allocation? The team will reach out to discuss alternatives.')) return;
       const updated = { ...applicantData.allocation, status: 'declined', declinedAt: new Date().toISOString() };
-      await updateDoc(doc(db, "applicants", currentUser.uid), { allocation: updated, status: 'allocation_declined' });
+      try { await persist({ allocation: updated, status: 'allocation_declined' }); }
+      catch (e) { alert('Could not save — please check your connection and try again.'); return; }
       applicantData.allocation = updated;
       renderAllocation();
     };
@@ -1191,10 +1195,9 @@
       }
       const scores = calcInventoryScores(ans);
       const submittedAt = new Date().toISOString();
-      await updateDoc(doc(db, "applicants", currentUser.uid), {
-        inventory: { answers: ans, scores, submittedAt },
-        "onboarding.inventory": true
-      });
+      document.getElementById('inventoryStatus').textContent = 'Submitting...';
+      try { await persist({ inventory: { answers: ans, scores, submittedAt }, "onboarding.inventory": true }); }
+      catch (e) { saveFailed('inventoryStatus'); return; }
       applicantData.inventory = { answers: ans, scores, submittedAt };
       applicantData.onboarding = { ...(applicantData.onboarding||{}), inventory: true };
       // Push to backend Sheet (assessments tab)
@@ -1222,7 +1225,8 @@
       const data = { ...(applicantData.checklist || {}), [id]: checked };
       applicantData.checklist = data;
       const allDone = CHECKLIST_ITEMS.every(i => data[i.id]);
-      await updateDoc(doc(db, "applicants", currentUser.uid), { checklist: data, "onboarding.checklist": allDone });
+      try { await persist({ checklist: data, "onboarding.checklist": allDone }); }
+      catch (e) { document.getElementById('checklistStatus').textContent = '✗ Not saved — tap again'; return; }
       applicantData.onboarding = { ...(applicantData.onboarding||{}), checklist: allDone };
       const el = document.querySelector(`[data-checklist="${id}"]`);
       el?.classList.toggle('checked', checked);
@@ -1366,9 +1370,16 @@
       catch (e) { document.getElementById('loginErr').textContent = e.message.replace('Firebase: ','').replace(/\(auth\/[^\)]+\)/,''); }
     };
     const googleProvider = new GoogleAuthProvider();
+    let dashSigningIn = false;
     window.loginGoogle = async function() {
+      if (dashSigningIn) return;        // ignore double-clicks (cause of auth/cancelled-popup-request)
+      dashSigningIn = true;
       try { await signInWithPopup(auth, googleProvider); }
-      catch (e) { document.getElementById('loginErr').textContent = e.message.replace('Firebase: ',''); }
+      catch (e) {
+        if (e.code !== 'auth/cancelled-popup-request' && e.code !== 'auth/popup-closed-by-user') {
+          document.getElementById('loginErr').textContent = e.message.replace('Firebase: ', '');
+        }
+      } finally { dashSigningIn = false; }
     };
     window.logoutUser = async () => { await signOut(auth); };
     window.resetPassword = async function() {
@@ -1417,6 +1428,20 @@
     };
 
     // ── Profile forms ──
+    // Persist with one automatic retry. Throws only if BOTH attempts fail, so a
+    // single flaky-network blip never silently drops a student's save.
+    async function persist(updates) {
+      try {
+        await updateDoc(doc(db, "applicants", currentUser.uid), updates);
+      } catch (e1) {
+        await new Promise(r => setTimeout(r, 900));
+        await updateDoc(doc(db, "applicants", currentUser.uid), updates);
+      }
+    }
+    function saveFailed(statusElId) {
+      const el = document.getElementById(statusElId);
+      if (el) el.textContent = '✗ Could not save — check your connection and tap save again.';
+    }
     function jsonpIdentityCheck(params) {
       return new Promise((resolve) => {
         const cb = '__id_cb_' + Date.now() + Math.floor(Math.random()*1000);
@@ -1452,7 +1477,9 @@
         return;
       }
 
-      await updateDoc(doc(db, "applicants", currentUser.uid), { personal: data, "onboarding.personal": true });
+      document.getElementById('personalStatus').textContent = 'Saving...';
+      try { await persist({ personal: data, "onboarding.personal": true }); }
+      catch (e) { saveFailed('personalStatus'); return; }
       applicantData.personal = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), personal: true };
       document.getElementById('personalStatus').textContent = '✓ Saved';
       updateProgress(); applyLocks();
@@ -1463,7 +1490,9 @@
       document.querySelectorAll('[data-academic]').forEach(el => data[el.getAttribute('data-academic')] = el.value);
       const required = ['school','grade10Board','grade10Score','grade11Board','grade11Score','predicted12Score','subjects','major','extracurriculars'];
       if (required.some(r => !data[r])) { alert('Required fields missing'); return; }
-      await updateDoc(doc(db, "applicants", currentUser.uid), { academic: data, "onboarding.academic": true });
+      document.getElementById('academicStatus').textContent = 'Saving...';
+      try { await persist({ academic: data, "onboarding.academic": true }); }
+      catch (e) { saveFailed('academicStatus'); return; }
       applicantData.academic = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), academic: true };
       document.getElementById('academicStatus').textContent = '✓ Saved';
       updateProgress(); applyLocks();
@@ -1477,7 +1506,9 @@
       }
       const order = [...chosenOrder];
       if (order.length < 3) { alert('Pick at least 3 colleges'); return; }
-      await updateDoc(doc(db, "applicants", currentUser.uid), { collegeChoices: { order, submittedAt: new Date().toISOString() }, "onboarding.college": true });
+      document.getElementById('collegeStatus').textContent = 'Saving...';
+      try { await persist({ collegeChoices: { order, submittedAt: new Date().toISOString() }, "onboarding.college": true }); }
+      catch (e) { saveFailed('collegeStatus'); return; }
       applicantData.collegeChoices = { order }; applicantData.onboarding = { ...(applicantData.onboarding||{}), college: true };
       document.getElementById('collegeStatus').textContent = '✓ Submitted';
       updateProgress(); applyLocks();
@@ -1487,7 +1518,9 @@
       const data = {};
       document.querySelectorAll('[data-interview]').forEach(el => data[el.getAttribute('data-interview')] = el.value);
       if (!data.studentVideo || !data.familyVideo) { alert('Both videos required'); return; }
-      await updateDoc(doc(db, "applicants", currentUser.uid), { interview: data, "onboarding.interview": true });
+      document.getElementById('interviewStatus').textContent = 'Saving...';
+      try { await persist({ interview: data, "onboarding.interview": true }); }
+      catch (e) { saveFailed('interviewStatus'); return; }
       applicantData.interview = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), interview: true };
       document.getElementById('interviewStatus').textContent = '✓ Submitted';
       updateProgress(); applyLocks();
@@ -1495,7 +1528,9 @@
     };
 
     window.confirmGroupInterview = async () => {
-      await updateDoc(doc(db, "applicants", currentUser.uid), { "onboarding.groupInterview": true, groupInterviewCompletedAt: new Date().toISOString() });
+      document.getElementById('groupInterviewStatus').textContent = 'Saving...';
+      try { await persist({ "onboarding.groupInterview": true, groupInterviewCompletedAt: new Date().toISOString() }); }
+      catch (e) { saveFailed('groupInterviewStatus'); return; }
       applicantData.onboarding = { ...(applicantData.onboarding||{}), groupInterview: true };
       document.getElementById('groupInterviewStatus').textContent = '✓ Marked complete';
       updateProgress(); applyLocks();
@@ -1536,13 +1571,22 @@
       if (document.getElementById('exitConfirm').value !== 'EXIT') { alert('Type EXIT to confirm'); return; }
       if (!confirm('This is final. Delete everything?')) return;
       try {
-        // Note: Cloudinary delete from client requires signed call. Mark for cleanup; admin/cron purges later.
-        await updateDoc(doc(db, "applicants", currentUser.uid), { exitedAt: new Date().toISOString(), status: "exited" });
+        // Firestore rules require auth to delete the doc, so remove the data FIRST
+        // (while still signed in), then remove the auth account.
         await deleteDoc(doc(db, "applicants", currentUser.uid));
-        await deleteUser(currentUser);
+        try {
+          await deleteUser(currentUser);
+        } catch (delErr) {
+          // deleteUser can fail on an old session (auth/requires-recent-login). The data is
+          // already gone — sign them out so no logged-in-but-empty state lingers.
+          await signOut(auth).catch(()=>{});
+          alert('Your data has been deleted and you have been signed out. The login will be fully removed the next time you sign in.');
+          window.location.href = 'index.html';
+          return;
+        }
         alert('Your account and data have been deleted.');
         window.location.href = 'index.html';
-      } catch (e) { alert('Error: ' + e.message + '. You may need to sign in again first.'); }
+      } catch (e) { alert('Could not complete deletion: ' + e.message + '. Please sign out, sign back in, and try again.'); }
     };
 
     // ── Bot ──
