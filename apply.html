@@ -636,6 +636,16 @@
 <option>Witty International School</option>
         </datalist>
       </div>
+      <div class="field" id="f-grade">
+        <label>Current Class <span class="req">*</span></label>
+        <select id="grade">
+          <option value="">Select your current class</option>
+          <option>Class 12</option>
+          <option>Class 11</option>
+          <option>Class 10</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
       <div class="field" id="f-email">
         <label>Student Email ID <span class="req">*</span></label>
         <input type="email" id="email" autocomplete="email">
@@ -719,6 +729,7 @@
         ['f-lastName','lastName','Family name is required'],
         ['f-city','city','Please select a city'],
         ['f-school','school','School is required'],
+        ['f-grade','grade','Please select your current class'],
         ['f-email','email','Email is required'],
         ['f-whatsapp','whatsapp','WhatsApp number is required']
       ];
@@ -742,6 +753,7 @@
         lastName: document.getElementById('lastName').value.trim(),
         city: cityFinal,
         school: document.getElementById('school').value.trim(),
+        grade: document.getElementById('grade').value,
         email: email,
         whatsapp: document.getElementById('whatsapp').value.trim()
       };

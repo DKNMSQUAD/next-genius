@@ -835,6 +835,7 @@
             <div class="detail-item"><div class="lbl">WhatsApp</div><div class="val ${a.whatsapp?'':'empty'}">${escapeHtml(a.whatsapp || 'not provided')}</div></div>
             <div class="detail-item"><div class="lbl">City</div><div class="val">${escapeHtml(a.city || '—')}</div></div>
             <div class="detail-item"><div class="lbl">School</div><div class="val">${escapeHtml(a.school || '—')}</div></div>
+            <div class="detail-item"><div class="lbl">Class</div><div class="val ${a.grade?'':'empty'}">${escapeHtml(a.grade || 'not provided')}</div></div>
           </div>
         </div>
 
@@ -1413,10 +1414,10 @@
       let list = applicants;
       if (search) list = list.filter(a => (a.firstName + ' ' + a.lastName + ' ' + a.email).toLowerCase().includes(search));
       if (filterStage) list = list.filter(a => stageOf(a) === filterStage);
-      const headers = ['email','firstName','lastName','city','school','whatsapp','status','photo','personal','academic','inventory','college','interview','allocation','dominantStrength'];
+      const headers = ['email','firstName','lastName','city','school','grade','whatsapp','status','photo','personal','academic','inventory','college','interview','allocation','dominantStrength'];
       const rows = list.map(a => {
         const ob = a.onboarding || {};
-        return [a.email, a.firstName, a.lastName, a.city, a.school, a.whatsapp, stageOf(a), ob.photo?'Y':'', ob.personal?'Y':'', ob.academic?'Y':'', ob.inventory?'Y':'', ob.college?'Y':'', ob.interview?'Y':'', a.allocation?.college||'', a.inventory?.scores?.dominant||''];
+        return [a.email, a.firstName, a.lastName, a.city, a.school, a.grade||'', a.whatsapp, stageOf(a), ob.photo?'Y':'', ob.personal?'Y':'', ob.academic?'Y':'', ob.inventory?'Y':'', ob.college?'Y':'', ob.interview?'Y':'', a.allocation?.college||'', a.inventory?.scores?.dominant||''];
       });
       const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${(c||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
       const blob = new Blob([csv], { type: 'text/csv' });
