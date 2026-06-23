@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <title>Nominate a Student — The Next Genius Scholarship Program</title>
+  <meta name="description" content="Counsellors and education consultants: nominate a deserving, high-performing, middle-income student for a Next Genius scholarship to a leading global college.">
+  <meta name="robots" content="noindex">
+  <link rel="canonical" href="https://www.next-genius.com/nominate.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{ margin:0; padding:0; box-sizing:border-box; }
+    :root{
+      --gold:#FFC72C; --gold-deep:#b07a12; --ink:#1b1b1b; --ink-soft:#3a352a;
+      --cream:#fbf3e0; --paper:#fbf8f1; --line:#ece4d2;
+    }
+    html{ scroll-behavior:smooth; }
+    body{
+      font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+      color:var(--ink); background:var(--paper);
+      background-image:url('https://res.cloudinary.com/dxifrpuic/image/upload/ngsp_crosshatch.png');
+      background-repeat:repeat;
+      -webkit-font-smoothing:antialiased; line-height:1.5;
+    }
+    a{ color:inherit; }
+    .wrap{ max-width:760px; margin:0 auto; padding:0 20px; }
+
+    /* top bar */
+    .topbar{ background:#1c1b18; }
+    .topbar .wrap{ display:flex; align-items:center; gap:12px; padding:14px 20px; }
+    .topbar img{ width:38px; height:38px; border-radius:8px; display:block; }
+    .topbar .brand{ color:#fff; font-weight:700; font-size:15px; letter-spacing:0.3px; }
+    .topbar .est{ margin-left:auto; color:var(--gold); font-size:11px; font-weight:700; letter-spacing:1.5px; }
+
+    /* hero */
+    .hero{ background:var(--cream); border-bottom:1px solid var(--line); }
+    .hero .wrap{ padding:48px 20px 42px; }
+    .eyebrow{ font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--gold-deep); margin-bottom:12px; }
+    .hero h1{ font-family:Georgia,'Times New Roman',serif; font-size:42px; line-height:1.08; font-weight:700; color:var(--ink); margin-bottom:16px; }
+    .hero p{ font-size:16px; color:var(--ink-soft); max-width:560px; }
+
+    /* form card */
+    .card{ background:#fff; border:1px solid var(--line); border-radius:18px; box-shadow:0 10px 40px rgba(60,45,10,0.06); padding:34px 34px 30px; margin:-26px 0 0; }
+    .section-label{ display:flex; align-items:center; gap:10px; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-deep); margin:6px 0 18px; }
+    .section-label .num{ width:22px; height:22px; border-radius:50%; background:var(--gold); color:var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:12px; }
+    .section + .section{ margin-top:30px; padding-top:26px; border-top:1px solid #f1ece0; }
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px 18px; }
+    .field{ display:flex; flex-direction:column; }
+    .field.full{ grid-column:1 / -1; }
+    label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:7px; }
+    label .req{ color:#d4521f; }
+    input, select, textarea{
+      font-family:inherit; font-size:15px; color:var(--ink);
+      padding:12px 14px; border:1px solid #e2dccb; border-radius:10px; background:#fffdf8; width:100%;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(255,199,44,0.25); }
+    textarea{ resize:vertical; min-height:96px; }
+    .hint{ font-size:12px; color:#9a9384; margin-top:6px; }
+
+    .actions{ margin-top:28px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .btn{
+      font-family:inherit; font-size:16px; font-weight:700; color:var(--ink);
+      background:var(--gold); border:none; border-radius:999px; padding:15px 44px; cursor:pointer;
+      transition:background .15s, transform .05s;
+    }
+    .btn:hover{ background:#F0B71F; }
+    .btn:active{ transform:translateY(1px); }
+    .btn[disabled]{ opacity:.6; cursor:default; }
+    .reassure{ font-size:13px; color:#9a9384; }
+
+    /* success */
+    .success{ display:none; text-align:center; padding:46px 24px 40px; }
+    .success .tick{ width:64px; height:64px; border-radius:50%; background:var(--cream); display:inline-flex; align-items:center; justify-content:center; margin-bottom:20px; }
+    .success .tick svg{ width:30px; height:30px; stroke:var(--gold-deep); fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+    .success h2{ font-family:Georgia,serif; font-size:30px; color:var(--ink); margin-bottom:12px; }
+    .success p{ font-size:16px; color:var(--ink-soft); max-width:480px; margin:0 auto 8px; }
+    .success a.home{ display:inline-block; margin-top:22px; color:var(--gold-deep); font-weight:600; font-size:14px; text-decoration:none; }
+
+    /* footer */
+    footer{ background:#1c1b18; margin-top:44px; }
+    footer .wrap{ padding:30px 20px 32px; text-align:center; }
+    footer img{ width:42px; height:42px; border-radius:9px; display:inline-block; }
+    footer .fname{ color:#fff; font-weight:700; letter-spacing:1px; font-size:14px; margin-top:10px; }
+    footer .ftag{ color:#9a958a; font-size:12px; margin-top:6px; }
+    footer .social{ margin-top:14px; padding-top:14px; border-top:1px solid #34322c; }
+    footer .social a{ color:var(--gold); font-size:12px; font-weight:700; text-decoration:none; }
+    footer .social .dot{ color:#55524b; }
+    footer .links{ margin-top:10px; }
+    footer .links a{ color:#9a958a; font-size:12px; text-decoration:none; }
+
+    @media (max-width:600px){
+      .hero h1{ font-size:32px; }
+      .card{ padding:24px 20px; margin-top:-20px; }
+      .grid{ grid-template-columns:1fr; }
+      .btn{ width:100%; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <img src="https://res.cloudinary.com/dxifrpuic/image/upload/w_160,h_160,c_fit/ng_logo_email.png" alt="Next Genius">
+      <span class="brand">THE NEXT GENIUS</span>
+      <span class="est">EST. 2014</span>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow">The Next Genius Scholarship Program</div>
+      <h1>You know a<br>future genius.</h1>
+      <p>You see the students others overlook. Nominate one deserving, high-performing student from a middle-income family, and we will give them a real shot at a leading global college. It takes two minutes.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- FORM -->
+    <form class="card" id="nomForm" novalidate>
+      <div class="section">
+        <div class="section-label"><span class="num">1</span> About you</div>
+        <div class="grid">
+          <div class="field">
+            <label>Your name <span class="req">*</span></label>
+            <input id="counsellorName" type="text" required autocomplete="name" placeholder="e.g. Priya Sharma">
+          </div>
+          <div class="field">
+            <label>Your email <span class="req">*</span></label>
+            <input id="counsellorEmail" type="email" required autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="field full">
+            <label>Your school or practice</label>
+            <input id="counsellorOrg" type="text" placeholder="School name, or your consultancy / practice">
+            <span class="hint">Open to both school counsellors and independent education consultants (IECs).</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label"><span class="num">2</span> The student you're nominating</div>
+        <div class="grid">
+          <div class="field">
+            <label>Student's full name <span class="req">*</span></label>
+            <input id="studentName" type="text" required placeholder="Full name">
+          </div>
+          <div class="field">
+            <label>Student's email <span class="req">*</span></label>
+            <input id="studentEmail" type="email" required placeholder="student@example.com">
+            <span class="hint">We use this to reach the student with their invitation.</span>
+          </div>
+          <div class="field">
+            <label>Student's phone / WhatsApp</label>
+            <input id="studentPhone" type="tel" placeholder="+91 ">
+          </div>
+          <div class="field">
+            <label>Current class</label>
+            <select id="studentClass">
+              <option value="">Select…</option>
+              <option>Class 12</option>
+              <option>Class 11</option>
+              <option>Class 10</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Student's school</label>
+            <input id="studentSchool" type="text" placeholder="School name">
+          </div>
+          <div class="field">
+            <label>City</label>
+            <input id="studentCity" type="text" placeholder="City">
+          </div>
+          <div class="field full">
+            <label>Why are they a great fit? <span class="req">*</span></label>
+            <textarea id="why" required placeholder="Tell us what makes this student stand out, their drive, achievements, and what this opportunity would mean for them."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" type="submit" id="submitBtn">Submit Nomination</button>
+        <span class="reassure">The student and school are never charged. We will keep you posted.</span>
+      </div>
+      <div id="formError" style="display:none; margin-top:14px; color:#c0392b; font-size:14px;"></div>
+    </form>
+
+    <!-- SUCCESS -->
+    <div class="card success" id="successCard">
+      <div class="tick"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <h2>Thank you for your nomination.</h2>
+      <p id="successMsg">We have received your nomination. Our team will review it and reach out to the student with next steps. A confirmation is on its way to your inbox.</p>
+      <a class="home" href="https://www.next-genius.com">Back to next-genius.com</a>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <img src="https://res.cloudinary.com/dxifrpuic/image/upload/w_160,h_160,c_fit/ng_logo_email.png" alt="Next Genius">
+      <div class="fname">THE NEXT GENIUS FOUNDATION</div>
+      <div class="ftag">Full &amp; partial tuition scholarships to leading global colleges &middot; Est. 2014</div>
+      <div class="social">
+        <a href="https://instagram.com/nextgeniusindia">Instagram</a>
+        <span class="dot">&nbsp;&middot;&nbsp;</span>
+        <a href="https://www.linkedin.com/company/nextgenius">LinkedIn</a>
+        <span class="dot">&nbsp;&middot;&nbsp;</span>
+        <a href="https://www.youtube.com/@nextgenius">YouTube</a>
+      </div>
+      <div class="links">
+        <a href="https://www.next-genius.com">next-genius.com</a>
+        <span class="dot" style="color:#55524b;">&nbsp;|&nbsp;</span>
+        <a href="mailto:helpdesk@next-genius.com">helpdesk@next-genius.com</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec';
+    const form = document.getElementById('nomForm');
+    const errBox = document.getElementById('formError');
+    const btn = document.getElementById('submitBtn');
+    const val = id => (document.getElementById(id).value || '').trim();
+    const isEmail = s => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errBox.style.display = 'none';
+
+      const payload = {
+        counsellorName: val('counsellorName'),
+        counsellorEmail: val('counsellorEmail'),
+        counsellorOrg: val('counsellorOrg'),
+        studentName: val('studentName'),
+        studentEmail: val('studentEmail'),
+        studentPhone: val('studentPhone'),
+        studentSchool: val('studentSchool'),
+        studentCity: val('studentCity'),
+        studentClass: val('studentClass'),
+        why: val('why')
+      };
+
+      const missing = [];
+      if (!payload.counsellorName) missing.push('your name');
+      if (!isEmail(payload.counsellorEmail)) missing.push('a valid email for you');
+      if (!payload.studentName) missing.push("the student's name");
+      if (!isEmail(payload.studentEmail)) missing.push("a valid student email");
+      if (!payload.why) missing.push('why they are a good fit');
+      if (missing.length) {
+        errBox.textContent = 'Please add ' + missing.join(', ') + '.';
+        errBox.style.display = 'block';
+        errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+      try {
+        // Apps Script web apps don't send CORS headers; fire-and-forget then show success.
+        await fetch(SHEET_WEBHOOK_URL + '?nominate_submit=1', {
+          method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) { /* no-cors: opaque response, ignore */ }
+
+      if (payload.counsellorEmail) {
+        document.getElementById('successMsg').textContent =
+          'We have received your nomination of ' + payload.studentName + '. Our team will review it and reach out to the student with next steps. A confirmation is on its way to ' + payload.counsellorEmail + '.';
+      }
+      form.style.display = 'none';
+      document.getElementById('successCard').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
