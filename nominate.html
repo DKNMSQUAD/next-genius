@@ -62,6 +62,15 @@
     textarea{ resize:vertical; min-height:96px; }
     .hint{ font-size:12px; color:#9a9384; margin-top:6px; }
 
+    .student-block{ border:1px solid #ece4d2; border-radius:14px; padding:18px 18px 6px; margin-bottom:14px; background:#fffdf8; }
+    .sb-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .sb-title{ font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9a8a5a; }
+    .sb-remove{ width:28px; height:28px; border-radius:50%; border:1px solid #e2dccb; background:#fff; color:#a05a2c; font-size:18px; line-height:1; cursor:pointer; display:none; align-items:center; justify-content:center; }
+    .sb-remove:hover{ background:#fde8df; border-color:#f0c3ad; }
+    .add-student{ width:100%; font-family:inherit; font-size:14px; font-weight:600; color:#8a6d1f; background:#fff; border:2px dashed #e6d3a4; border-radius:12px; padding:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; transition:background .15s, border-color .15s; }
+    .add-student:hover{ background:#fffaf0; border-color:var(--gold); }
+    .add-student .plus{ display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--gold); color:var(--ink); font-weight:700; font-size:16px; line-height:1; }
+
     .actions{ margin-top:28px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
     .btn{
       font-family:inherit; font-size:16px; font-weight:700; color:var(--ink);
@@ -114,7 +123,7 @@
     <div class="wrap">
       <div class="eyebrow">The Next Genius Scholarship Program</div>
       <h1>You know a<br>future genius.</h1>
-      <p>You see the students others overlook. Nominate one deserving, high-performing student from a middle-income family, and we will give them a real shot at a leading global college. It takes two minutes.</p>
+      <p>If you know a student who has impressed you, someone who deserves a real shot at a leading global college, nominate them below. It only takes two minutes.</p>
     </div>
   </header>
 
@@ -141,44 +150,11 @@
       </div>
 
       <div class="section">
-        <div class="section-label"><span class="num">2</span> The student you're nominating</div>
-        <div class="grid">
-          <div class="field">
-            <label>Student's full name <span class="req">*</span></label>
-            <input id="studentName" type="text" required placeholder="Full name">
-          </div>
-          <div class="field">
-            <label>Student's email <span class="req">*</span></label>
-            <input id="studentEmail" type="email" required placeholder="student@example.com">
-            <span class="hint">We use this to reach the student with their invitation.</span>
-          </div>
-          <div class="field">
-            <label>Student's phone / WhatsApp</label>
-            <input id="studentPhone" type="tel" placeholder="+91 ">
-          </div>
-          <div class="field">
-            <label>Current class</label>
-            <select id="studentClass">
-              <option value="">Select…</option>
-              <option>Class 12</option>
-              <option>Class 11</option>
-              <option>Class 10</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Student's school</label>
-            <input id="studentSchool" type="text" placeholder="School name">
-          </div>
-          <div class="field">
-            <label>City</label>
-            <input id="studentCity" type="text" placeholder="City">
-          </div>
-          <div class="field full">
-            <label>Why are they a great fit? <span class="req">*</span></label>
-            <textarea id="why" required placeholder="Tell us what makes this student stand out, their drive, achievements, and what this opportunity would mean for them."></textarea>
-          </div>
-        </div>
+        <div class="section-label"><span class="num">2</span> The student(s) you're nominating</div>
+        <div id="studentsWrap"></div>
+        <button type="button" class="add-student" id="addStudentBtn">
+          <span class="plus">+</span> Have someone else in mind? Recommend another student
+        </button>
       </div>
 
       <div class="actions">
@@ -222,53 +198,92 @@
     const form = document.getElementById('nomForm');
     const errBox = document.getElementById('formError');
     const btn = document.getElementById('submitBtn');
-    const val = id => (document.getElementById(id).value || '').trim();
+    const studentsWrap = document.getElementById('studentsWrap');
     const isEmail = s => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
+
+    function studentBlockHTML() {
+      return `
+      <div class="student-block" data-block>
+        <div class="sb-head">
+          <span class="sb-title">Student <b>1</b></span>
+          <button type="button" class="sb-remove" title="Remove this student" aria-label="Remove student">&times;</button>
+        </div>
+        <div class="grid">
+          <div class="field"><label>Student's full name <span class="req">*</span></label><input class="s-name" type="text" placeholder="Full name"></div>
+          <div class="field"><label>Student's email <span class="req">*</span></label><input class="s-email" type="email" placeholder="student@example.com"></div>
+          <div class="field"><label>Phone / WhatsApp</label><input class="s-phone" type="tel" placeholder="+91 "></div>
+          <div class="field"><label>Current class</label><select class="s-class"><option value="">Select…</option><option>Class 12</option><option>Class 11</option><option>Class 10</option><option>Other</option></select></div>
+          <div class="field"><label>Student's school</label><input class="s-school" type="text" placeholder="School name"></div>
+          <div class="field"><label>City</label><input class="s-city" type="text" placeholder="City"></div>
+          <div class="field full"><label>Why are they a great fit? <span class="req">*</span></label><textarea class="s-why" placeholder="What makes this student stand out, their drive, achievements, and what this opportunity would mean for them."></textarea></div>
+        </div>
+      </div>`;
+    }
+    function renumber() {
+      const blocks = studentsWrap.querySelectorAll('[data-block]');
+      blocks.forEach((b, i) => {
+        b.querySelector('.sb-title b').textContent = (i + 1);
+        b.querySelector('.sb-remove').style.display = blocks.length > 1 ? 'inline-flex' : 'none';
+      });
+    }
+    function addStudentBlock() {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = studentBlockHTML();
+      const block = tmp.firstElementChild;
+      block.querySelector('.sb-remove').addEventListener('click', () => { block.remove(); renumber(); });
+      studentsWrap.appendChild(block);
+      renumber();
+      return block;
+    }
+    addStudentBlock(); // first student on load
+    document.getElementById('addStudentBtn').addEventListener('click', () => {
+      const b = addStudentBlock();
+      b.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const fn = b.querySelector('.s-name'); if (fn) fn.focus();
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errBox.style.display = 'none';
 
-      const payload = {
-        counsellorName: val('counsellorName'),
-        counsellorEmail: val('counsellorEmail'),
-        counsellorOrg: val('counsellorOrg'),
-        studentName: val('studentName'),
-        studentEmail: val('studentEmail'),
-        studentPhone: val('studentPhone'),
-        studentSchool: val('studentSchool'),
-        studentCity: val('studentCity'),
-        studentClass: val('studentClass'),
-        why: val('why')
-      };
+      const counsellorName = document.getElementById('counsellorName').value.trim();
+      const counsellorEmail = document.getElementById('counsellorEmail').value.trim();
+      const counsellorOrg = document.getElementById('counsellorOrg').value.trim();
+
+      const students = []; let badStudent = null;
+      [...studentsWrap.querySelectorAll('[data-block]')].forEach((b, i) => {
+        const g = sel => (b.querySelector(sel).value || '').trim();
+        const s = {
+          studentName: g('.s-name'), studentEmail: g('.s-email'), studentPhone: g('.s-phone'),
+          studentSchool: g('.s-school'), studentCity: g('.s-city'), studentClass: b.querySelector('.s-class').value, why: g('.s-why')
+        };
+        if (!s.studentName || !isEmail(s.studentEmail) || !s.why) { if (badStudent === null) badStudent = i + 1; }
+        students.push(s);
+      });
 
       const missing = [];
-      if (!payload.counsellorName) missing.push('your name');
-      if (!isEmail(payload.counsellorEmail)) missing.push('a valid email for you');
-      if (!payload.studentName) missing.push("the student's name");
-      if (!isEmail(payload.studentEmail)) missing.push("a valid student email");
-      if (!payload.why) missing.push('why they are a good fit');
+      if (!counsellorName) missing.push('your name');
+      if (!isEmail(counsellorEmail)) missing.push('a valid email for you');
+      if (badStudent !== null) missing.push('a name, valid email and reason for student ' + badStudent);
       if (missing.length) {
-        errBox.textContent = 'Please add ' + missing.join(', ') + '.';
+        errBox.textContent = 'Please add ' + missing.join('; ') + '.';
         errBox.style.display = 'block';
         errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
-      btn.disabled = true;
-      btn.textContent = 'Submitting…';
+      btn.disabled = true; btn.textContent = 'Submitting…';
       try {
-        // Apps Script web apps don't send CORS headers; fire-and-forget then show success.
         await fetch(SHEET_WEBHOOK_URL + '?nominate_submit=1', {
           method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ counsellorName, counsellorEmail, counsellorOrg, students })
         });
-      } catch (err) { /* no-cors: opaque response, ignore */ }
+      } catch (err) { /* no-cors opaque response */ }
 
-      if (payload.counsellorEmail) {
-        document.getElementById('successMsg').textContent =
-          'We have received your nomination of ' + payload.studentName + '. Our team will review it and reach out to the student with next steps. A confirmation is on its way to ' + payload.counsellorEmail + '.';
-      }
+      const names = students.map(s => s.studentName).filter(Boolean);
+      const whoTxt = names.length <= 1 ? (names[0] || 'your nominee') : (names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]);
+      document.getElementById('successMsg').textContent =
+        'We have received your nomination of ' + whoTxt + '. Our team will review and reach out to ' + (names.length > 1 ? 'each student' : 'the student') + ' with next steps. A confirmation is on its way to ' + counsellorEmail + '.';
       form.style.display = 'none';
       document.getElementById('successCard').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
