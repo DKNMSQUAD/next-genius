@@ -474,6 +474,13 @@
           <h1>Welcome <span id="welcomeName"></span></h1>
           <p class="subtitle">Your scholarship journey at a glance</p>
 
+          <div id="interviewBanner" style="display:none; background:#1c1b18; color:#fff; border-radius:14px; padding:22px 24px; margin-bottom:20px;">
+            <div style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#FFC72C; margin-bottom:8px;">Action needed</div>
+            <h2 style="font-family:'Poppins',sans-serif; font-size:19px; font-weight:600; margin:0 0 8px; color:#fff;">Record your interview video</h2>
+            <p style="font-size:14px; line-height:1.6; color:#d6d3cc; margin:0 0 16px;">This is the step that unlocks your college allocation. It takes about 3 minutes: pick one prompt, record a short 2 to 3 minute video on your phone, and paste the YouTube link. No studio or script needed, just be yourself.</p>
+            <button class="btn" onclick="goToTab('interview')" style="background:#FFC72C;">Record my video</button>
+          </div>
+
           <div class="status-banner">
             <h3 style="display:flex; justify-content:space-between; align-items:center;">
               <span>Onboarding progress</span>
@@ -1364,6 +1371,10 @@
         if (!req) { a.classList.remove('locked'); return; }
         a.classList.toggle('locked', !ob[req]);
       });
+      // Home banner: nudge students who reached College Discovery but have not
+      // recorded their interview (the step that now gates allocation).
+      const banner = document.getElementById('interviewBanner');
+      if (banner) banner.style.display = (ob.college && !ob.interview) ? 'block' : 'none';
     }
 
     function renderStatus() {

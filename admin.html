@@ -467,6 +467,10 @@
           <h1>Automations</h1>
           <p class="subtitle">One-click actions across the applicant pool.</p>
           <div class="kpi-grid">
+            <div class="kpi" style="cursor:pointer; border:2px solid #FFC72C; background:#fff7e0;" onclick="inviteAllToInterview()">
+              <div class="label">Invite to Interview</div>
+              <div style="font-size:14px; color:#111; margin-top:6px;">Email every participant who hasn't recorded their interview video yet. Sent from apply@next-genius.com.</div>
+            </div>
             <div class="kpi" style="cursor:pointer;" onclick="bulkReminder()">
               <div class="label">Bulk reminder</div>
               <div style="font-size:14px; color:#111; margin-top:6px;">Email everyone stuck on photo / personal / academic with a nudge.</div>
@@ -1444,6 +1448,27 @@
       toast('Message dispatched to ' + targets.length + ' recipient(s)');
     };
 
+    window.inviteAllToInterview = async function() {
+      const targets = applicants.filter(a => a.email && !a.exitedAt
+        && !['dknmsquad@gmail.com','mandhana.neeraj@gmail.com'].includes((a.email||'').toLowerCase())
+        && !a.onboarding?.interview);
+      if (!targets.length) { alert('Everyone has already submitted their interview video.'); return; }
+      if (!confirm('Email the interview invite to ' + targets.length + " participant(s) who haven't recorded yet?\n\nSends from apply@next-genius.com (falls back to the default sender until the alias is verified). Up to " + '90' + '/day send immediately; the rest queue and drain daily. Nothing is dropped.')) return;
+      const status = document.getElementById('msgStatus') || document.createElement('div');
+      try {
+        const idToken = await currentUser.getIdToken();
+        const jobId = 'interview_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        const recipients = targets.map(a => ({ to: a.email, firstName: a.firstName || '' }));
+        await fetch(SHEET_WEBHOOK_URL + '?interview_blast=1', {
+          method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ jobId, idToken, recipients })
+        });
+        toast('Interview invite queued for ' + recipients.length + ' participant(s)');
+        pollBulkStatus(jobId, status, recipients.length);
+      } catch (e) {
+        toast('Invite failed: ' + (e.message || e));
+      }
+    };
     window.bulkReminder = async function() {
       const stuck = applicants.filter(a => !a.exitedAt && (!a.onboarding?.photo || !a.onboarding?.personal || !a.onboarding?.academic));
       if (!stuck.length) { alert('No stuck applicants'); return; }
