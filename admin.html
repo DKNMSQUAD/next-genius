@@ -965,8 +965,8 @@
         <div class="detail-section">
           <h3>Interview</h3>
           <div class="detail-grid">
-            <div class="detail-item"><div class="lbl">Student Video</div><div class="val">${a.interview?.studentVideo ? `<a href="${escapeHtml(a.interview.studentVideo)}" target="_blank" rel="noopener">Watch &#8599;</a>` : '—'}</div></div>
-            <div class="detail-item"><div class="lbl">Family Video</div><div class="val">${a.interview?.familyVideo ? `<a href="${escapeHtml(a.interview.familyVideo)}" target="_blank" rel="noopener">Watch &#8599;</a>` : '—'}</div></div>
+            <div class="detail-item"><div class="lbl">Interview Video</div><div class="val">${a.interview?.studentVideo ? `<a href="${escapeHtml(a.interview.studentVideo)}" target="_blank" rel="noopener">Watch &#8599;</a>` : '—'}</div></div>
+            <div class="detail-item"><div class="lbl">Prompt Answered</div><div class="val">${a.interview?.prompt ? escapeHtml(a.interview.prompt) : (a.interview?.familyVideo ? `<a href="${escapeHtml(a.interview.familyVideo)}" target="_blank" rel="noopener">Family Video &#8599;</a>` : '—')}</div></div>
           </div>
           <div id="interviewEvalBox" style="margin-top:14px;"><div style="font-size:13px; color:#6b7280;">Loading AI review…</div></div>
         </div>` : ''}

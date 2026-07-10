@@ -418,21 +418,21 @@
           <span class="lock-ico" data-lock="college"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
         </a>
 
-        <a data-tab="allocation" data-requires="college">
+        <a data-tab="interview" data-requires="college">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M17 10l4-2v8l-4-2z"/></svg></span>
+          <span class="label">Interview Video</span>
+          <span class="check" data-check="interview"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
+          <span class="lock-ico" data-lock="interview"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
+        </a>
+
+        <a data-tab="allocation" data-requires="interview">
           <span class="ico"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span>
           <span class="label">Allocation</span>
           <span class="check" data-check="allocation"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
           <span class="lock-ico" data-lock="allocation"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
         </a>
 
-        <a data-tab="interview" data-requires="allocation">
-          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M17 10l4-2v8l-4-2z"/></svg></span>
-          <span class="label">Interview Videos</span>
-          <span class="check" data-check="interview"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
-          <span class="lock-ico" data-lock="interview"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>
-        </a>
-
-        <a data-tab="groupinterview" data-requires="interview">
+        <a data-tab="groupinterview" data-requires="allocation">
           <span class="ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"/><circle cx="17" cy="9" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M14 15c1-1 2-1 3-1 3 0 6 2 6 5"/></svg></span>
           <span class="label">Group Interview</span>
           <span class="check" data-check="groupInterview"><svg viewBox="0 0 14 14"><path d="M2.5 7.5L5.5 10.5L11.5 4"/></svg></span>
@@ -485,8 +485,8 @@
               <div data-step="academic"></div>
               <div data-step="inventory"></div>
               <div data-step="college"></div>
-              <div data-step="allocation"></div>
               <div data-step="interview"></div>
+              <div data-step="allocation"></div>
               <div data-step="groupInterview"></div>
             </div>
           </div>
@@ -678,13 +678,61 @@
 
         <!-- INTERVIEW -->
         <section class="panel" id="panel-interview">
-          <h1>Interview Videos</h1>
-          <p class="subtitle">Unlocks after college allocation.</p>
+          <style>
+            .iv-step { font-family:'Poppins',sans-serif; font-weight:700; font-size:15px; color:#111; margin-bottom:6px; }
+            .iv-list { margin:6px 0 0; padding-left:20px; }
+            .iv-list li { font-size:14px; color:#444; line-height:1.7; }
+            #interviewPrompts { display:flex; flex-direction:column; gap:10px; }
+            .iv-prompt { display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border:1px solid #e5e5e5; border-radius:10px; cursor:pointer; transition:border-color .15s, background .15s; }
+            .iv-prompt:hover { border-color:#FFC72C; }
+            .iv-prompt:has(input:checked) { border-color:#FFC72C; background:#fff7e0; }
+            .iv-prompt input { margin-top:3px; accent-color:#111; flex:0 0 auto; }
+            .iv-prompt span { font-size:14px; color:#333; line-height:1.55; }
+            .iv-help summary { cursor:pointer; font-size:14px; font-weight:600; color:#111; }
+            .iv-help ol { margin:10px 0 0; padding-left:20px; }
+            .iv-help li { font-size:14px; color:#444; line-height:1.7; }
+          </style>
+          <h1>Interview Video</h1>
+          <p class="subtitle">Record a short 2 to 3 minute video answering one of the prompts below, upload it to YouTube as an <strong>Unlisted</strong> video, and paste the link here. This step comes before your college allocation.</p>
+
           <div class="card">
-            <p>Upload your videos as <strong>Unlisted</strong> on YouTube and paste the URLs here.</p>
-            <div class="field"><label>Student Video (YouTube Unlisted URL) <span class="req">*</span></label><input type="url" data-interview="studentVideo" placeholder="https://youtu.be/..."></div>
-            <div class="field"><label>Family Video (YouTube Unlisted URL) <span class="req">*</span></label><input type="url" data-interview="familyVideo" placeholder="https://youtu.be/..."></div>
-            <button class="btn" onclick="saveInterview()">Submit Videos</button>
+            <div class="iv-step">1. Choose one prompt to answer</div>
+            <p style="font-size:14px; color:#666; line-height:1.6; margin:0 0 14px;">Pick the one that speaks to you the most. You will talk about it to camera, in your own words.</p>
+            <div id="interviewPrompts"></div>
+          </div>
+
+          <div class="card">
+            <div class="iv-step">2. Record your video</div>
+            <ul class="iv-list">
+              <li>Keep it between 2 and 3 minutes long.</li>
+              <li>Make sure your face is clearly visible and the room is well lit.</li>
+              <li>Find a quiet space with no background noise or disturbance.</li>
+              <li>Check that your audio and video are clear before you start.</li>
+              <li>Speak naturally in your own words. Do not read from a script.</li>
+              <li>Record on your own, in one take if you can.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="iv-step">3. Upload to YouTube as Unlisted</div>
+            <details class="iv-help">
+              <summary>How to upload an Unlisted video on YouTube</summary>
+              <ol>
+                <li>Open the YouTube app or youtube.com and sign in.</li>
+                <li>Tap the <strong>+ Create</strong> button, then <strong>Upload video</strong>, and select your recording.</li>
+                <li>On the details screen, set <strong>Visibility</strong> to <strong>Unlisted</strong>.</li>
+                <li>Finish uploading, then copy the video link.</li>
+                <li>Paste the link in step 4 below.</li>
+              </ol>
+              <p style="font-size:13px; margin-top:8px;"><a href="https://support.google.com/youtube/answer/57407" target="_blank" rel="noopener">YouTube's official upload help &#8599;</a></p>
+            </details>
+            <p style="font-size:13px; color:#92400e; background:#fff7e0; border:1px solid #FFE08F; border-radius:8px; padding:10px 12px; margin-top:12px;">Important: set the video to <strong>Unlisted</strong>, not Private. Private videos cannot be opened by the team.</p>
+          </div>
+
+          <div class="card">
+            <div class="iv-step">4. Paste your video link</div>
+            <div class="field"><label>Your YouTube Unlisted video link <span class="req">*</span></label><input type="url" data-interview="studentVideo" placeholder="https://youtu.be/..."></div>
+            <button class="btn" onclick="saveInterview()">Submit Video</button>
             <span id="interviewStatus" style="margin-left:16px; font-size:13px;"></span>
           </div>
         </section>
@@ -851,6 +899,25 @@
       { id: 'submitted', label: 'Submitted!' }
     ];
 
+    // Interview-video prompts (student picks one and answers it to camera).
+    const NG_ESSAY_PROMPTS = [
+      "Some students have a background, identity, interest, or talent so meaningful they believe their application would be incomplete without it. Share your story.",
+      "Recount a time you faced a challenge, setback, or failure. How did it affect you, and what did you learn from it?",
+      "Reflect on a time you questioned or challenged a belief or idea. What prompted your thinking, and what was the outcome?",
+      "Reflect on something someone has done for you that made you grateful in a surprising way. How has that gratitude motivated you?",
+      "Describe an accomplishment, event, or realization that sparked a period of personal growth and a new understanding of yourself or others.",
+      "Describe a topic, idea, or concept you find so engaging that you lose all track of time. Why does it captivate you, and where do you turn to learn more?",
+      "Tell us about something you care deeply about, or a question you keep coming back to, and why it matters to you."
+    ];
+    function renderInterviewPrompts() {
+      const box = document.getElementById('interviewPrompts');
+      if (!box) return;
+      const savedIdx = applicantData.interview?.promptIndex;
+      box.innerHTML = NG_ESSAY_PROMPTS.map((p, i) =>
+        `<label class="iv-prompt"><input type="radio" name="ivPrompt" value="${i}" ${i === savedIdx ? 'checked' : ''}><span>${escapeHtml(p)}</span></label>`
+      ).join('');
+    }
+
     let currentUser = null;
     let applicantData = {};
 
@@ -900,6 +967,7 @@
       }
       // commonApp review
       renderInventory();
+      renderInterviewPrompts();
       renderInbox();
       renderAllocation();
       renderStatus();
@@ -927,13 +995,13 @@
           <div style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#92400e; font-weight:600; margin-bottom:8px;">You have been allocated to</div>
           <h2 style="font-family:'Poppins',sans-serif; font-size:24px; font-weight:700; color:#111; margin-bottom:8px;">${escapeHtml(alloc.college)}</h2>
           <p style="font-size:14px; color:#444; line-height:1.5;">After reviewing your profile, ranked choices, and academic fit, the Next Genius team has allocated you to <strong>${escapeHtml(alloc.college)}</strong>.</p>
-          ${isAccepted ? `<div style="margin-top:16px; padding:12px 16px; background:#d1fae5; border-radius:8px; font-size:14px; color:#065f46;">✓ You accepted this allocation. The Interview Videos stage is now unlocked.</div>` :
+          ${isAccepted ? `<div style="margin-top:16px; padding:12px 16px; background:#d1fae5; border-radius:8px; font-size:14px; color:#065f46;">You accepted this allocation. The Group Interview stage is now unlocked.</div>` :
             isDeclined ? `<div style="margin-top:16px; padding:12px 16px; background:#fee2e2; border-radius:8px; font-size:14px; color:#991b1b;">You declined this allocation. The Next Genius team will be in touch.</div>` :
             `<div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" onclick="acceptAllocation()">Accept allocation</button>
               <button class="btn-secondary btn" onclick="declineAllocation()">Decline</button>
             </div>
-            <p style="font-size:13px; color:#666; margin-top:14px;">Acceptance unlocks the Interview Videos stage. If you decline, the team will reach out to discuss alternatives.</p>`}
+            <p style="font-size:13px; color:#666; margin-top:14px;">Acceptance unlocks the Group Interview stage. If you decline, the team will reach out to discuss alternatives.</p>`}
         </div>
 
         ${alloc.notes ? `<div class="card"><h2 style="font-family:'Poppins',sans-serif; font-size:14px;">Notes from the team</h2><p style="font-size:14px; color:#444; line-height:1.5;">${escapeHtml(alloc.notes)}</p></div>` : ''}
@@ -982,7 +1050,7 @@
       applicantData.onboarding = { ...(applicantData.onboarding||{}), allocation: true };
       applicantData.status = 'allocated_accepted';
       renderAllocation(); updateProgress(); applyLocks();
-      goToTab('interview');
+      goToTab('groupinterview');
     };
     window.declineAllocation = async function() {
       if (!confirm('Decline this allocation? The team will reach out to discuss alternatives.')) return;
@@ -995,7 +1063,7 @@
 
     function updateProgress() {
       const ob = applicantData.onboarding || {};
-      const steps = ['photo','personal','academic','inventory','college','allocation','interview','groupInterview'];
+      const steps = ['photo','personal','academic','inventory','college','interview','allocation','groupInterview'];
       let done = 0;
       steps.forEach(s => {
         const bar = document.querySelector(`#progressBar div[data-step="${s}"]`);
@@ -1015,7 +1083,7 @@
           inventory: 'Complete the interest inventory',
           college: 'Pick your college choices',
           allocation: 'Awaiting college allocation by the team',
-          interview: 'Submit your interview videos',
+          interview: 'Submit your interview video',
           groupInterview: 'Complete the group interview'
         };
         document.getElementById('nextStep').textContent = labels[next];
@@ -1307,9 +1375,9 @@
         { id: 'academic', label: 'Academic Profile', desc: 'Grades, scores, intended major', done: !!ob.academic },
         { id: 'inventory', label: 'Interest Inventory', desc: '30-item interest assessment', done: !!ob.inventory },
         { id: 'college', label: 'College Discovery', desc: 'Your ranked college choices', done: !!ob.college },
-        { id: 'allocation', label: 'College Allocation', desc: 'Assigned by Next Genius team', done: !!applicantData.allocation, locked: !ob.college },
-        { id: 'interview', label: 'Interview Videos', desc: 'Student + family video uploads', done: !!ob.interview, locked: !applicantData.allocation },
-        { id: 'groupInterview', label: 'Group Interview', desc: 'Joint call with team and college', done: !!ob.groupInterview, locked: !ob.interview },
+        { id: 'interview', label: 'Interview Video', desc: 'Your recorded interview video', done: !!ob.interview, locked: !ob.college },
+        { id: 'allocation', label: 'College Allocation', desc: 'Assigned by Next Genius team', done: !!applicantData.allocation, locked: !ob.interview },
+        { id: 'groupInterview', label: 'Group Interview', desc: 'Joint call with team and college', done: !!ob.groupInterview, locked: !ob.allocation },
         { id: 'decision', label: 'Final Decision', desc: 'Scholarship offer / outcome', done: !!applicantData.finalDecision, locked: !ob.groupInterview }
       ];
       const html = `
@@ -1348,7 +1416,7 @@
       if (!tab) return;
       if (a.classList.contains('locked')) {
         const req = a.getAttribute('data-requires');
-        const reqLabel = { photo: 'Photo', personal: 'Personal Profile', academic: 'Academic Profile', college: 'College Discovery', checklist: 'Application Checklist' }[req];
+        const reqLabel = { photo: 'Photo', personal: 'Personal Profile', academic: 'Academic Profile', college: 'College Discovery', interview: 'Interview Video', allocation: 'College Allocation', checklist: 'Application Checklist' }[req];
         alert(`Complete ${reqLabel || 'the previous step'} to unlock this section.`);
         return;
       }
@@ -1512,19 +1580,23 @@
       applicantData.collegeChoices = { order }; applicantData.onboarding = { ...(applicantData.onboarding||{}), college: true };
       document.getElementById('collegeStatus').textContent = '✓ Submitted';
       updateProgress(); applyLocks();
-      goToTab('allocation');
+      goToTab('interview');
     };
     window.saveInterview = async () => {
       const data = {};
-      document.querySelectorAll('[data-interview]').forEach(el => data[el.getAttribute('data-interview')] = el.value);
-      if (!data.studentVideo || !data.familyVideo) { alert('Both videos required'); return; }
+      document.querySelectorAll('[data-interview]').forEach(el => data[el.getAttribute('data-interview')] = el.value.trim());
+      const chosen = document.querySelector('input[name="ivPrompt"]:checked');
+      if (!chosen) { alert('Please choose one prompt to answer.'); return; }
+      if (!data.studentVideo) { alert('Please paste your YouTube Unlisted video link.'); return; }
+      data.promptIndex = +chosen.value;
+      data.prompt = NG_ESSAY_PROMPTS[+chosen.value] || '';
       document.getElementById('interviewStatus').textContent = 'Saving...';
       try { await persist({ interview: data, "onboarding.interview": true }); }
       catch (e) { saveFailed('interviewStatus'); return; }
       applicantData.interview = data; applicantData.onboarding = { ...(applicantData.onboarding||{}), interview: true };
       document.getElementById('interviewStatus').textContent = '✓ Submitted';
       updateProgress(); applyLocks();
-      goToTab('groupinterview');
+      goToTab('allocation');
     };
 
     window.confirmGroupInterview = async () => {
