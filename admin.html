@@ -703,8 +703,8 @@
     function stageOf(a) {
       if (a.exitedAt) return 'exited';
       if (a.finalDecision) return 'decision';
-      if (a.onboarding?.interview) return 'interview';
       if (a.allocation) return 'allocated';
+      if (a.onboarding?.interview) return 'interview';
       if (a.onboarding?.college) return 'college';
       if (a.onboarding?.photo || a.onboarding?.personal || a.onboarding?.academic || a.onboarding?.inventory) return 'onboarding';
       return 'registered';
@@ -718,8 +718,8 @@
         ['academic', 'Academic Profile'],
         ['inventory', 'Interest Inventory'],
         ['college', 'College Discovery'],
+        ['interview', 'Interview Video'],
         ['allocation', 'Allocation', !!a.allocation],
-        ['interview', 'Interview Videos'],
         ['groupInterview', 'Group Interview']
       ];
       const flags = steps.map(([k, label, override]) => override !== undefined ? override : !!ob[k]);
@@ -845,8 +845,8 @@
         ['Academic', !!ob.academic],
         ['Inventory', !!ob.inventory],
         ['College Choices', !!ob.college],
-        ['Allocation', !!a.allocation],
         ['Interview', !!ob.interview],
+        ['Allocation', !!a.allocation],
         ['Group Interview', !!ob.groupInterview]
       ];
 
