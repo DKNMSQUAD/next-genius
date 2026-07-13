@@ -175,16 +175,39 @@
       <p>We have emailed a confirmation from apply@next-genius.com. Our team will be in touch shortly with the next steps for this year's cohort.</p>
     </div>
 
+    <div class="done" id="declinedView">
+      <div class="ring" style="background:#efece6; color:#8f8a80;">-</div>
+      <h2 id="declinedTitle">Noted, thank you.</h2>
+      <p id="declinedText">We have recorded that you will not be taking part this cycle, and we will not write to you about it again. If that changes, simply reply to our email and we will pick it up from there.</p>
+    </div>
+
     <div class="foot">Questions? Write to apply@next-genius.com</div>
   </div>
 
   <script>
     const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
-    const TOKEN = new URLSearchParams(location.search).get('t') || '';
+    const params = new URLSearchParams(location.search);
+    const TOKEN = params.get('t') || '';
+    const ANSWER = params.get('a') || '';
     const answers = { full: '', partial: '' };
 
+    // "No, not this year" from the email: record it and show the branded confirmation. No form.
+    if (ANSWER === 'no') {
+      document.getElementById('formView').style.display = 'none';
+      document.getElementById('declinedView').style.display = 'block';
+      window.ngNo = function (d) {
+        if (d && d.ok && d.college) {
+          document.getElementById('declinedText').innerHTML =
+            'We have recorded that <strong>' + d.college + '</strong> will not be taking part this cycle, and we will not write to you about it again. If that changes, simply reply to our email and we will pick it up from there.';
+        }
+      };
+      const n = document.createElement('script');
+      n.src = SHEET_WEBHOOK_URL + '?partner_no=1&t=' + encodeURIComponent(TOKEN) + '&callback=ngNo';
+      document.body.appendChild(n);
+    }
+
     // Prefill from the emailed link so the college types as little as possible.
-    if (TOKEN) {
+    if (TOKEN && ANSWER !== 'no') {
       const s = document.createElement('script');
       window.ngLead = function (d) {
         if (!d || !d.ok) return;
