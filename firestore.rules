@@ -2,7 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
-      return request.auth != null && request.auth.token.email in ['helpdesk@next-genius.com', 'mandhana.neeraj@gmail.com'];
+      // dknmsquad@gmail.com is TRANSITIONAL: keeps DK in the admin panel until a fresh
+      // helpdesk@ sign-in works (Google is currently gating it on the old recovery phone).
+      return request.auth != null && request.auth.token.email in ['helpdesk@next-genius.com', 'mandhana.neeraj@gmail.com', 'dknmsquad@gmail.com'];
     }
 
     match /applicants/{uid} {
