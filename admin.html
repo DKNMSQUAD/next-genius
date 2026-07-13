@@ -309,7 +309,7 @@
   <div id="forbidden" style="display:none;">
     <div class="login-card">
       <h1 style="color:#dc2626;">Access denied</h1>
-      <p class="subtitle">You're signed in as <span id="forbiddenEmail"></span>, but this account is not authorised for the admin panel. Contact dknmsquad@gmail.com.</p>
+      <p class="subtitle">You're signed in as <span id="forbiddenEmail"></span>, but this account is not authorised for the admin panel. Contact apply@next-genius.com.</p>
       <button class="btn" onclick="signOutClick()" style="width:100%;">Sign out</button>
     </div>
   </div>
@@ -583,7 +583,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
-    const ADMIN_EMAILS = ['dknmsquad@gmail.com', 'mandhana.neeraj@gmail.com'];
+    const ADMIN_EMAILS = ['helpdesk@next-genius.com', 'mandhana.neeraj@gmail.com'];
     const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec';
 
     const PARTNER_COLLEGES = [
@@ -1450,7 +1450,7 @@
 
     window.inviteAllToInterview = async function() {
       const targets = applicants.filter(a => a.email && !a.exitedAt
-        && !['dknmsquad@gmail.com','mandhana.neeraj@gmail.com'].includes((a.email||'').toLowerCase())
+        && !['helpdesk@next-genius.com','apply@next-genius.com','dknmsquad@gmail.com','mandhana.neeraj@gmail.com'].includes((a.email||'').toLowerCase())
         && !a.onboarding?.interview);
       if (!targets.length) { alert('Everyone has already submitted their interview video.'); return; }
       if (!confirm('Email the interview invite to ' + targets.length + " participant(s) who haven't recorded yet?\n\nSends from apply@next-genius.com (falls back to the default sender until the alias is verified). Up to " + '90' + '/day send immediately; the rest queue and drain daily. Nothing is dropped.')) return;
