@@ -5,13 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <title>Partner Colleges | The Next Genius Scholarship Program</title>
-  <meta name="description" content="Selected partner colleges are invited to join the Next Genius Scholarship Program this year with the membership fee waived. Since 2014, close to 500 scholars from India and South Asia have enrolled at our partner colleges.">
-  <link rel="canonical" href="https://www.next-genius.com/partners.html">
-  <meta property="og:title" content="Partner Colleges | The Next Genius Scholarship Program">
-  <meta property="og:description" content="An invitation to selected partner colleges. Membership fee waived this year.">
-  <meta property="og:url" content="https://www.next-genius.com/partners.html">
-  <meta property="og:type" content="website">
+  <title>Partner with Next Genius</title>
+  <meta name="robots" content="noindex">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,171 +15,57 @@
       --ink: #1c1b18;
       --ink-soft: #55524b;
       --line: #e6e3dc;
-      --paper: #fbfaf7;
+      --paper: #f4f2ee;
       --gold: #FFC72C;
       --gold-deep: #E8A020;
-      --white: #ffffff;
-      --radius: 14px;
-      --shadow: 0 1px 2px rgba(28,27,24,.04), 0 12px 32px rgba(28,27,24,.06);
     }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
     body {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      color: var(--ink);
-      background: var(--paper);
-      -webkit-font-smoothing: antialiased;
-      line-height: 1.6;
+      background: var(--paper); color: var(--ink);
+      -webkit-font-smoothing: antialiased; line-height: 1.6;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 40px 20px;
     }
-    h1, h2, h3, .display { font-family: 'Poppins', sans-serif; letter-spacing: -0.02em; }
+    .card {
+      width: 100%; max-width: 640px; background: #fff;
+      border: 1px solid var(--line); border-radius: 16px; overflow: hidden;
+      box-shadow: 0 1px 2px rgba(28,27,24,.04), 0 16px 40px rgba(28,27,24,.07);
+    }
+    .head { background: var(--ink); padding: 26px 36px; text-align: center; }
+    .head img { width: 40px; height: 40px; border-radius: 9px; }
+    .head .wm {
+      font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 1.4px; color: #fff; text-transform: uppercase; margin-top: 9px;
+    }
+    .head .fee {
+      display: inline-block; margin-top: 14px; font-family: 'Poppins', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
+      color: #6b4c00; background: var(--gold); padding: 5px 12px; border-radius: 6px;
+    }
+    .intro { padding: 30px 36px 6px; }
+    .intro h1 { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 8px; }
+    .intro p { font-size: 15px; color: var(--ink-soft); }
+    .intro p strong { color: var(--ink); }
 
-    /* ── Top bar ─────────────────────────────────────── */
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 32px; background: var(--ink);
-    }
-    .topbar .mark { display: flex; align-items: center; gap: 12px; }
-    .topbar img { width: 34px; height: 34px; border-radius: 8px; }
-    .topbar .wordmark {
-      font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 700;
-      letter-spacing: 1.4px; color: #fff; text-transform: uppercase;
-    }
-    .topbar a.signin {
-      font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500;
-      color: #d9d5cc; text-decoration: none; border: 1px solid #3a3833;
-      padding: 7px 16px; border-radius: 999px;
-    }
-    .topbar a.signin:hover { color: #fff; border-color: #6a665d; }
-
-    /* ── Hero ────────────────────────────────────────── */
-    .hero {
-      background: var(--ink);
-      color: #fff;
-      padding: 72px 32px 96px;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::after {
-      /* a single warm sweep, not a gradient wash */
-      content: ""; position: absolute; right: -180px; top: -140px;
-      width: 620px; height: 620px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,199,44,.16) 0%, rgba(255,199,44,0) 62%);
-      pointer-events: none;
-    }
-    .hero-inner { max-width: 1080px; margin: 0 auto; position: relative; }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 10px;
-      font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600;
-      letter-spacing: 1.6px; text-transform: uppercase; color: var(--gold);
-      border: 1px solid rgba(255,199,44,.35); border-radius: 999px;
-      padding: 7px 16px; margin-bottom: 26px;
-    }
-    .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
-    .hero h1 {
-      font-size: clamp(34px, 5vw, 60px); font-weight: 700; line-height: 1.08;
-      max-width: 15ch; margin-bottom: 22px;
-    }
-    .hero h1 em { font-style: normal; color: var(--gold); }
-    .hero p.lede {
-      font-size: clamp(16px, 1.6vw, 19px); color: #cfcbc2; max-width: 58ch; margin-bottom: 38px;
-    }
-    .hero-cta {
-      display: inline-block; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600;
-      color: var(--ink); background: var(--gold); padding: 15px 34px; border-radius: 999px;
-      text-decoration: none; box-shadow: 0 10px 30px rgba(255,199,44,.22);
-      transition: transform .15s ease, background .15s ease;
-    }
-    .hero-cta:hover { background: #ffd35a; transform: translateY(-1px); }
-
-    /* ── Proof strip ─────────────────────────────────── */
-    .proof {
-      max-width: 1080px; margin: -48px auto 0; padding: 0 32px; position: relative; z-index: 2;
-    }
-    .proof-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
-      background: var(--line); border: 1px solid var(--line);
-      border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
-    }
-    .stat { background: var(--white); padding: 28px 26px; }
-    .stat .n {
-      font-family: 'Poppins', sans-serif; font-size: 34px; font-weight: 700; line-height: 1;
-      margin-bottom: 8px;
-    }
-    .stat .n span { color: var(--gold-deep); }
-    .stat .l { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
-
-    /* ── Sections ────────────────────────────────────── */
-    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
-    section.body { padding: 84px 0 0; }
-    .section-title {
-      font-size: clamp(24px, 3vw, 34px); font-weight: 600; margin-bottom: 18px; max-width: 22ch;
-    }
-    .prose { max-width: 66ch; color: #3d3a35; font-size: 16.5px; }
-    .prose p + p { margin-top: 16px; }
-
-    .quote {
-      margin: 44px 0 0; padding: 26px 30px; background: var(--white);
-      border: 1px solid var(--line); border-left: 3px solid var(--gold);
-      border-radius: 10px; box-shadow: var(--shadow);
-      font-size: 17px; color: #2f2d29; max-width: 68ch;
-    }
-    .quote .src { display: block; margin-top: 12px; font-size: 13px; color: var(--ink-soft); }
-
-    /* ── Offer card ──────────────────────────────────── */
-    .offer {
-      margin: 72px 0 0; background: var(--white); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 40px; box-shadow: var(--shadow);
-      display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center;
-    }
-    .badge {
-      display: inline-block; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700;
-      letter-spacing: 1.2px; text-transform: uppercase; color: #6b4c00;
-      background: var(--gold); padding: 6px 12px; border-radius: 6px; margin-bottom: 16px;
-    }
-    .offer h3 { font-size: 24px; font-weight: 600; margin-bottom: 10px; }
-    .offer p { color: #3d3a35; font-size: 16px; }
-    .offer ul { list-style: none; }
-    .offer li {
-      display: flex; gap: 12px; align-items: flex-start;
-      padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 15px; color: #3d3a35;
-    }
-    .offer li:last-child { border-bottom: 0; }
-    .offer li .tick {
-      flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%;
-      background: var(--ink); color: var(--gold);
-      display: grid; place-items: center; font-size: 11px; font-weight: 700; margin-top: 1px;
-    }
-
-    /* ── Form ────────────────────────────────────────── */
-    section.form-section { padding: 84px 0 96px; }
-    .form-card {
-      background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
-      box-shadow: var(--shadow); overflow: hidden;
-    }
-    .form-head { padding: 34px 40px; border-bottom: 1px solid var(--line); }
-    .form-head h2 { font-size: 26px; font-weight: 600; margin-bottom: 6px; }
-    .form-head p { font-size: 15px; color: var(--ink-soft); }
-    .form-body { padding: 34px 40px 40px; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .field { margin-bottom: 20px; }
+    .form { padding: 24px 36px 36px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .field { margin-bottom: 18px; }
     .field label {
       display: block; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500;
-      margin-bottom: 7px; color: var(--ink);
+      margin-bottom: 7px;
     }
     .field .hint { font-weight: 400; color: var(--ink-soft); }
     .field input {
       width: 100%; padding: 13px 15px; border: 1px solid #dcd8d0; border-radius: 10px;
-      font-size: 15px; font-family: inherit; color: var(--ink); background: #fff; outline: none;
+      font-size: 15px; font-family: inherit; color: var(--ink); outline: none;
       transition: border-color .12s ease, box-shadow .12s ease;
     }
     .field input:focus { border-color: var(--gold-deep); box-shadow: 0 0 0 3px rgba(255,199,44,.18); }
     .field input::placeholder { color: #b3aea4; }
 
-    .choice { margin-bottom: 22px; }
-    .choice > .q {
-      font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500;
-      margin-bottom: 10px; color: var(--ink);
-    }
+    .choice { margin-bottom: 20px; }
+    .choice .q { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500; margin-bottom: 10px; }
     .toggle { display: inline-flex; border: 1px solid #dcd8d0; border-radius: 999px; padding: 4px; background: #f6f4f0; }
     .toggle button {
       font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500;
@@ -197,228 +78,128 @@
     .submit {
       width: 100%; font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600;
       color: var(--ink); background: var(--gold); border: 0; border-radius: 999px;
-      padding: 16px; cursor: pointer; margin-top: 8px;
+      padding: 16px; cursor: pointer; margin-top: 6px;
       transition: background .15s ease, transform .15s ease;
     }
     .submit:hover:not(:disabled) { background: #ffd35a; transform: translateY(-1px); }
     .submit:disabled { opacity: .55; cursor: wait; transform: none; }
     .err { color: #c0392b; font-size: 14px; margin-top: 12px; min-height: 20px; }
 
-    .success { display: none; padding: 56px 40px; text-align: center; }
-    .success .ring {
-      width: 62px; height: 62px; border-radius: 50%; background: var(--gold);
-      display: grid; place-items: center; margin: 0 auto 20px;
-      font-size: 26px; color: var(--ink); font-weight: 700;
+    .done { display: none; padding: 52px 36px; text-align: center; }
+    .done .ring {
+      width: 60px; height: 60px; border-radius: 50%; background: var(--gold);
+      display: grid; place-items: center; margin: 0 auto 18px;
+      font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);
     }
-    .success h2 { font-size: 24px; font-weight: 600; margin-bottom: 10px; }
-    .success p { color: var(--ink-soft); font-size: 15.5px; max-width: 46ch; margin: 0 auto; }
+    .done h2 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 10px; }
+    .done p { color: var(--ink-soft); font-size: 15px; max-width: 42ch; margin: 0 auto; }
+    .foot { text-align: center; padding: 18px; font-size: 12.5px; color: #8f8a80; border-top: 1px solid var(--line); }
 
-    /* ── Footer ──────────────────────────────────────── */
-    footer {
-      background: var(--ink); color: #9a958a; padding: 44px 32px; text-align: center;
-    }
-    footer img { width: 36px; height: 36px; border-radius: 8px; margin-bottom: 12px; }
-    footer .fw {
-      font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 700;
-      letter-spacing: 1.2px; color: #fff; text-transform: uppercase; margin-bottom: 10px;
-    }
-    footer a { color: var(--gold); text-decoration: none; font-weight: 600; font-size: 13px; }
-    footer .links { margin-bottom: 8px; }
-    footer .links span { color: #55524b; padding: 0 8px; }
-    footer .legal { font-size: 12px; color: #6a665d; margin-top: 10px; }
-
-    /* ── Tablet ──────────────────────────────────────── */
-    @media (max-width: 900px) {
-      .hero { padding: 56px 24px 88px; }
-      .wrap, .proof { padding: 0 24px; }
-      .offer { grid-template-columns: 1fr; gap: 28px; padding: 32px; }
-      .form-head, .form-body { padding-left: 28px; padding-right: 28px; }
-      section.body { padding-top: 64px; }
-    }
-
-    /* ── Mobile ──────────────────────────────────────── */
     @media (max-width: 640px) {
-      .topbar { padding: 14px 18px; }
-      .topbar a.signin { display: none; }
-      .hero { padding: 44px 18px 76px; }
-      .hero h1 { max-width: 100%; }
-      .wrap, .proof { padding: 0 18px; }
-      .proof-grid { grid-template-columns: 1fr; }
-      .stat { padding: 22px 20px; }
-      .stat .n { font-size: 28px; }
+      body { padding: 0; align-items: flex-start; }
+      .card { border-radius: 0; border-left: 0; border-right: 0; min-height: 100vh; }
+      .head { padding: 22px; }
+      .intro { padding: 24px 20px 4px; }
+      .form { padding: 20px 20px 32px; }
       .grid2 { grid-template-columns: 1fr; gap: 0; }
-      .form-head, .form-body { padding-left: 20px; padding-right: 20px; }
-      .form-head { padding-top: 26px; padding-bottom: 26px; }
-      .quote { padding: 22px; }
-      .toggle button { padding: 9px 20px; }
-      section.form-section { padding: 56px 0 72px; }
+      .toggle button { padding: 9px 22px; }
     }
   </style>
 </head>
 <body>
-
-  <div class="topbar">
-    <a class="mark" href="index.html" style="text-decoration:none;">
+  <div class="card">
+    <div class="head">
       <img src="NG_Logo.avif" alt="Next Genius">
-      <span class="wordmark">The Next Genius Foundation</span>
-    </a>
-    <a class="signin" href="dashboard.html">Student sign in</a>
-  </div>
-
-  <header class="hero">
-    <div class="hero-inner">
-      <span class="eyebrow"><span class="dot"></span> Invitation to partner colleges</span>
-      <h1>Join this year's cohort with the <em>membership fee waived</em>.</h1>
-      <p class="lede">
-        Since 2014, the Next Genius Scholarship Program has placed high performing students from
-        India and South Asia at selected colleges across the United States and Europe. This year we
-        are inviting a limited number of partner colleges to take part at no membership cost.
-      </p>
-      <a class="hero-cta" href="#apply">Apply to partner</a>
+      <div class="wm">The Next Genius Foundation</div>
+      <span class="fee">Membership fee waived</span>
     </div>
-  </header>
 
-  <div class="proof">
-    <div class="proof-grid">
-      <div class="stat">
-        <div class="n">2014</div>
-        <div class="l">Awarding full and partial tuition scholarships to low and middle income students since.</div>
-      </div>
-      <div class="stat">
-        <div class="n"><span>~500</span></div>
-        <div class="l">Scholars from India and South Asia enrolled at our partner colleges to date.</div>
-      </div>
-      <div class="stat">
-        <div class="n">US <span>+</span> EU</div>
-        <div class="l">Selected partner colleges across the United States and Europe.</div>
-      </div>
-    </div>
-  </div>
-
-  <section class="body">
-    <div class="wrap">
-      <h2 class="section-title">The students our partners keep asking for.</h2>
-      <div class="prose">
-        <p>
-          Our partner colleges tell us the same thing, year after year. Next Genius scholars arrive
-          with a strong work ethic, they behave well, and they become leaders and volunteers on
-          campus. They do not sit quietly at the edge of college life.
-        </p>
-        <p>
-          Many go on to work inside the admissions office itself, sitting in on information sessions
-          and giving campus tours to the next set of families walking through the gate.
-        </p>
+    <div id="formView">
+      <div class="intro">
+        <h1 id="introTitle">Partner with Next Genius</h1>
+        <p id="introText">Six quick questions and you are done. We reply from <strong>apply@next-genius.com</strong>.</p>
       </div>
 
-      <div class="quote">
-        Some of the most promising students in our community, and among the most active. Several of
-        them now represent the college to prospective families.
-        <span class="src">Feedback from partner college admissions teams</span>
-      </div>
-
-      <div class="offer">
-        <div>
-          <span class="badge">Fee waived for this cycle</span>
-          <h3>Why we are waiving the fee</h3>
-          <p>
-            The international admissions community has backed the growth of this program in a very
-            big way. At a time when the international environment is difficult for students and for
-            colleges alike, this is our way of giving something back.
-          </p>
-        </div>
-        <ul>
-          <li><span class="tick">1</span><span>No membership fee for participating colleges this year.</span></li>
-          <li><span class="tick">2</span><span>Access to a vetted pool of scholars from India and South Asia.</span></li>
-          <li><span class="tick">3</span><span>Offer a full or a partial tuition scholarship, whichever fits your aid budget.</span></li>
-          <li><span class="tick">4</span><span>A limited number of colleges will be accepted for this cycle.</span></li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="form-section" id="apply">
-    <div class="wrap">
-      <div class="form-card">
-        <div id="formView">
-          <div class="form-head">
-            <h2>Apply to partner with Next Genius</h2>
-            <p>Six questions. It takes under a minute, and we reply from apply@next-genius.com.</p>
+      <div class="form">
+        <div class="grid2">
+          <div class="field">
+            <label for="college">Name of your college</label>
+            <input id="college" type="text" placeholder="e.g. Beloit College" autocomplete="organization">
           </div>
-          <div class="form-body">
-            <div class="grid2">
-              <div class="field">
-                <label for="college">Name of your college</label>
-                <input id="college" type="text" placeholder="e.g. Beloit College" autocomplete="organization">
-              </div>
-              <div class="field">
-                <label for="country">Which country are you in?</label>
-                <input id="country" type="text" placeholder="e.g. United States" autocomplete="country-name">
-              </div>
-            </div>
-
-            <div class="choice">
-              <div class="q">Are you ready to offer a full tuition scholarship to a selected candidate?</div>
-              <div class="toggle" id="fullToggle">
-                <button type="button" data-v="Yes">Yes</button>
-                <button type="button" data-v="No">No</button>
-              </div>
-            </div>
-
-            <div class="choice">
-              <div class="q">Are you open to giving a partial tuition scholarship to a shortlisted candidate?</div>
-              <div class="toggle" id="partialToggle">
-                <button type="button" data-v="Yes">Yes</button>
-                <button type="button" data-v="No">No</button>
-              </div>
-            </div>
-
-            <div class="grid2">
-              <div class="field">
-                <label for="name">Your name</label>
-                <input id="name" type="text" placeholder="Full name" autocomplete="name">
-              </div>
-              <div class="field">
-                <label for="email">Your email ID</label>
-                <input id="email" type="email" placeholder="name@college.edu" autocomplete="email">
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="whatsapp">WhatsApp number <span class="hint">(optional, with country code)</span></label>
-              <input id="whatsapp" type="tel" placeholder="+1 555 000 1234" autocomplete="tel">
-            </div>
-
-            <button class="submit" id="submitBtn" onclick="submitPartner()">Submit application</button>
-            <div class="err" id="err"></div>
+          <div class="field">
+            <label for="country">Which country are you in?</label>
+            <input id="country" type="text" placeholder="e.g. United States" autocomplete="country-name">
           </div>
         </div>
 
-        <div class="success" id="successView">
-          <div class="ring">OK</div>
-          <h2>Your application is in.</h2>
-          <p>
-            We have emailed a confirmation to you from apply@next-genius.com. Our team will be in
-            touch shortly with next steps for this year's cohort.
-          </p>
+        <div class="choice">
+          <div class="q">Are you ready to offer a full tuition scholarship to a selected candidate?</div>
+          <div class="toggle" id="fullToggle">
+            <button type="button" data-v="Yes">Yes</button>
+            <button type="button" data-v="No">No</button>
+          </div>
         </div>
+
+        <div class="choice">
+          <div class="q">Are you open to giving a partial tuition scholarship to a shortlisted candidate?</div>
+          <div class="toggle" id="partialToggle">
+            <button type="button" data-v="Yes">Yes</button>
+            <button type="button" data-v="No">No</button>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="name">Your name</label>
+            <input id="name" type="text" placeholder="Full name" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="email">Your email ID</label>
+            <input id="email" type="email" placeholder="name@college.edu" autocomplete="email">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="whatsapp">WhatsApp number <span class="hint">(optional, with country code)</span></label>
+          <input id="whatsapp" type="tel" placeholder="+1 555 000 1234" autocomplete="tel">
+        </div>
+
+        <button class="submit" id="submitBtn" onclick="submitPartner()">Submit</button>
+        <div class="err" id="err"></div>
       </div>
     </div>
-  </section>
 
-  <footer>
-    <img src="NG_Logo.avif" alt="Next Genius">
-    <div class="fw">The Next Genius Foundation</div>
-    <div class="links">
-      <a href="https://instagram.com/nextgeniusindia">Instagram</a><span>&middot;</span>
-      <a href="https://www.linkedin.com/company/nextgenius">LinkedIn</a><span>&middot;</span>
-      <a href="https://www.youtube.com/@nextgenius">YouTube</a>
+    <div class="done" id="doneView">
+      <div class="ring">OK</div>
+      <h2>You are in.</h2>
+      <p>We have emailed a confirmation from apply@next-genius.com. Our team will be in touch shortly with the next steps for this year's cohort.</p>
     </div>
-    <div class="legal">Questions? Write to apply@next-genius.com</div>
-  </footer>
+
+    <div class="foot">Questions? Write to apply@next-genius.com</div>
+  </div>
 
   <script>
     const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
+    const TOKEN = new URLSearchParams(location.search).get('t') || '';
     const answers = { full: '', partial: '' };
+
+    // Prefill from the emailed link so the college types as little as possible.
+    if (TOKEN) {
+      const s = document.createElement('script');
+      window.ngLead = function (d) {
+        if (!d || !d.ok) return;
+        if (d.college) document.getElementById('college').value = d.college;
+        if (d.country) document.getElementById('country').value = d.country;
+        if (d.contactName) document.getElementById('name').value = d.contactName;
+        if (d.email) document.getElementById('email').value = d.email;
+        if (d.college) {
+          document.getElementById('introTitle').textContent = 'Great news, ' + d.college + '.';
+          document.getElementById('introText').innerHTML = 'Confirm a few details and you are part of this year\'s cohort. We reply from <strong>apply@next-genius.com</strong>.';
+        }
+      };
+      s.src = SHEET_WEBHOOK_URL + '?partner_lead=1&t=' + encodeURIComponent(TOKEN) + '&callback=ngLead';
+      document.body.appendChild(s);
+    }
 
     function wireToggle(id, key) {
       const box = document.getElementById(id);
@@ -438,6 +219,7 @@
       const err = document.getElementById('err');
       const btn = document.getElementById('submitBtn');
       const payload = {
+        token: TOKEN,
         college: document.getElementById('college').value.trim(),
         country: document.getElementById('country').value.trim(),
         fullScholarship: answers.full,
@@ -466,11 +248,10 @@
           body: JSON.stringify(payload)
         });
         document.getElementById('formView').style.display = 'none';
-        document.getElementById('successView').style.display = 'block';
-        window.scrollTo({ top: document.getElementById('apply').offsetTop - 40, behavior: 'smooth' });
+        document.getElementById('doneView').style.display = 'block';
       } catch (e) {
         btn.disabled = false;
-        btn.textContent = 'Submit application';
+        btn.textContent = 'Submit';
         err.textContent = 'Something went wrong. Please try again, or write to apply@next-genius.com.';
       }
     };
