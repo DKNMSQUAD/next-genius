@@ -1464,15 +1464,20 @@
     window.resetPassword = async function() {
       const email = document.getElementById('loginEmail').value.trim();
       if (!email) { alert('Enter your email above first'); return; }
-      // Use our branded Gmail-sent reset (avoids Firebase noreply spam)
+      // Every Next Genius email must come from apply@next-genius.com. The Apps Script mailer is
+      // the ONLY sender; Firebase's native reset would go out as noreply@...firebaseapp.com, so
+      // there is deliberately no fallback to it — we retry instead.
       const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwVxIhz6N-vUNVhpTJOw2rFOfO8ZZOcsbL9JOj7-Ha2eWY7YEFlB6R-Ptg9PNC7NmT-xQ/exec";
-      try {
-        await fetch(SHEET_WEBHOOK_URL + '?reset_password=' + encodeURIComponent(email), { mode: 'no-cors' });
-        alert('Password reset link sent to ' + email + '. Check your inbox (and Promotions tab if you don\'t see it).');
-      } catch (e) {
-        // fallback to Firebase native if our endpoint fails
-        try { await sendPasswordResetEmail(auth, email); alert('Password reset email sent.'); }
-        catch (er) { alert(er.message); }
+      const url = SHEET_WEBHOOK_URL + '?reset_password=' + encodeURIComponent(email);
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          await fetch(url, { mode: 'no-cors' });
+          alert('Password reset link sent to ' + email + '. Check your inbox (and Promotions tab if you don\'t see it).');
+          return;
+        } catch (e) {
+          if (attempt === 3) alert('Could not send the reset email right now. Please write to apply@next-genius.com and we will reset it for you.');
+          else await new Promise(r => setTimeout(r, 1200 * attempt));
+        }
       }
     };
 
