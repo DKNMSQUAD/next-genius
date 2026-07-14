@@ -717,16 +717,15 @@
       fetch(SHEET_WEBHOOK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ ...payload, createdAt: new Date().toISOString(), status: "registered" }) }).catch(()=>{});
 
       // Aiyyo newsletter: the consent line above the Submit button tells the student this happens.
-      // Fire and forget — a newsletter hiccup must never block a scholarship registration.
-      // NOTE: this uses ng_subscribe, NOT welcome_newsletter. welcome_newsletter sends the
-      // "Aiyyo UK MBBS Conference: your seat is confirmed" email, which is false for a
-      // school student registering for a scholarship.
+      // welcome_newsletter sends the Aiyyo newsletter welcome and logs them to the subscriber
+      // sheet. Fire and forget, so a newsletter hiccup can never block a scholarship registration.
       try {
         const AIYYO_MAILER_URL = "https://script.google.com/macros/s/AKfycbwJSZMs5BZhMZRTQWZuu1Yq3JXxET0_AQEhpCeEK689OJ9Aw9tAx3lFxMRhKbOD_EMF/exec";
         const q = new URLSearchParams({
-          ng_subscribe: payload.email || '',
+          welcome_newsletter: payload.email || '',
           firstName: payload.firstName || '',
           lastName: payload.lastName || '',
+          orgType: 'Student',
           orgName: payload.school || '',
           city: payload.city || '',
           country: 'India',
