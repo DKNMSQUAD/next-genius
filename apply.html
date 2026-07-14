@@ -718,18 +718,19 @@
 
       // Aiyyo newsletter: the consent line above the Submit button tells the student this happens.
       // Fire and forget — a newsletter hiccup must never block a scholarship registration.
+      // NOTE: this uses ng_subscribe, NOT welcome_newsletter. welcome_newsletter sends the
+      // "Aiyyo UK MBBS Conference: your seat is confirmed" email, which is false for a
+      // school student registering for a scholarship.
       try {
         const AIYYO_MAILER_URL = "https://script.google.com/macros/s/AKfycbwJSZMs5BZhMZRTQWZuu1Yq3JXxET0_AQEhpCeEK689OJ9Aw9tAx3lFxMRhKbOD_EMF/exec";
         const q = new URLSearchParams({
-          welcome_newsletter: payload.email || '',
+          ng_subscribe: payload.email || '',
           firstName: payload.firstName || '',
           lastName: payload.lastName || '',
-          orgType: 'Student',
           orgName: payload.school || '',
           city: payload.city || '',
           country: 'India',
-          phone: payload.whatsapp || '',
-          source: 'next-genius-registration'
+          phone: payload.whatsapp || ''
         });
         fetch(AIYYO_MAILER_URL + '?' + q.toString(), { mode: 'no-cors' }).catch(() => {});
       } catch (_) {}
