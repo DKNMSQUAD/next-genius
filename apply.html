@@ -54,6 +54,12 @@
     }
     .submit-btn:hover:not(:disabled) { background: #F0B71F; }
     .submit-btn:disabled { opacity: 0.6; cursor: wait; }
+    .consent-note {
+      font-size: 11.5px; line-height: 1.5; color: #8a867e;
+      margin-top: 18px; text-align: center;
+    }
+    .consent-note a { color: #8a867e; text-decoration: underline; }
+    .consent-note a:hover { color: #111; }
 
     .success { text-align: center; padding: 40px 0; }
     .success .check {
@@ -655,6 +661,10 @@
         <input type="tel" id="whatsapp" autocomplete="tel">
       </div>
 
+      <p class="consent-note">
+        By registering you also subscribe to <a href="https://www.aiyyo.in" target="_blank" rel="noopener">Aiyyo</a>,
+        our free newsletter on studying abroad. You can unsubscribe from any issue.
+      </p>
       <button class="submit-btn" onclick="submitForm()">Submit</button>
     </div>
 
@@ -705,6 +715,25 @@
       const pend = JSON.stringify({ ...payload, createdAt: new Date().toISOString() });
       try { localStorage.setItem('ng_pending', pend); } catch(_) { try { sessionStorage.setItem('ng_pending', pend); } catch(__){} }
       fetch(SHEET_WEBHOOK_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ ...payload, createdAt: new Date().toISOString(), status: "registered" }) }).catch(()=>{});
+
+      // Aiyyo newsletter: the consent line above the Submit button tells the student this happens.
+      // Fire and forget — a newsletter hiccup must never block a scholarship registration.
+      try {
+        const AIYYO_MAILER_URL = "https://script.google.com/macros/s/AKfycbwJSZMs5BZhMZRTQWZuu1Yq3JXxET0_AQEhpCeEK689OJ9Aw9tAx3lFxMRhKbOD_EMF/exec";
+        const q = new URLSearchParams({
+          welcome_newsletter: payload.email || '',
+          firstName: payload.firstName || '',
+          lastName: payload.lastName || '',
+          orgType: 'Student',
+          orgName: payload.school || '',
+          city: payload.city || '',
+          country: 'India',
+          phone: payload.whatsapp || '',
+          source: 'next-genius-registration'
+        });
+        fetch(AIYYO_MAILER_URL + '?' + q.toString(), { mode: 'no-cors' }).catch(() => {});
+      } catch (_) {}
+
       return { saved: true };
     };
   </script>
