@@ -356,6 +356,11 @@
           <span class="ico"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3 3-1.5-1.5"/></svg></span>
           <span>Counsellor Nominations</span>
         </a>
+        <div class="group-label">Outreach</div>
+        <a data-tab="aocampaign">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></span>
+          <span>AO Campaign</span>
+        </a>
         <div class="group-label">External</div>
         <a href="https://docs.google.com/spreadsheets/d/1aURna2hml5A3yPYCQiTldEq6UGHvTLzPLP6o8MXARug/edit" target="_blank">
           <span class="ico"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></span>
@@ -492,6 +497,27 @@
         </section>
 
         <!-- COUNSELLOR NOMINATIONS -->
+        <section class="panel" id="panel-aocampaign">
+          <h1>AO Campaign</h1>
+          <p class="subtitle">Partner-college invitations to Admissions Officers: who we emailed, who opened, who answered, who signed up.</p>
+
+          <div id="aoSummary" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;"></div>
+
+          <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center;">
+            <button class="nom-pill active" data-ao="all">All</button>
+            <button class="nom-pill" data-ao="opened">Opened</button>
+            <button class="nom-pill" data-ao="signed">Signed up</button>
+            <button class="nom-pill" data-ao="declined">Declined</button>
+            <button class="nom-pill" data-ao="noreply">No reply</button>
+            <input id="aoSearch" placeholder="Search college or email" style="flex:1; min-width:200px; max-width:320px; font-family:inherit; font-size:13px; padding:8px 14px; border:1px solid #e5e7eb; border-radius:999px;">
+            <button class="btn-sec" onclick="loadAoCampaign(true)">Refresh</button>
+            <button class="btn-sec" onclick="exportAoCsv()">Export CSV</button>
+          </div>
+
+          <div id="aoApps" style="margin-bottom:18px;"></div>
+          <div id="aoTable" class="card" style="overflow-x:auto;">Open this tab to load the campaign.</div>
+        </section>
+
         <section class="panel" id="panel-nominations">
           <style>
             .nom-pill{ font-family:inherit; font-size:14px; font-weight:600; color:#374151; background:#fff; border:1px solid #e5e7eb; border-radius:999px; padding:8px 18px; cursor:pointer; }
@@ -1524,7 +1550,91 @@
       document.getElementById('panel-' + el.getAttribute('data-tab')).classList.add('active');
       if (el.getAttribute('data-tab') === 'automations') loadReminderStatus();
       if (el.getAttribute('data-tab') === 'nominations') initNominationsTab();
+      if (el.getAttribute('data-tab') === 'aocampaign') initAoCampaignTab();
     }));
+
+    // ======================= AO Campaign (partner college outreach) =======================
+    let aoRows = [], aoApps = [], aoFilter = 'all', aoTabInit = false, aoLoaded = false;
+    function initAoCampaignTab() {
+      if (!aoTabInit) {
+        aoTabInit = true;
+        document.querySelectorAll('[data-ao]').forEach(b => b.addEventListener('click', () => {
+          document.querySelectorAll('[data-ao]').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          aoFilter = b.getAttribute('data-ao');
+          renderAoTable();
+        }));
+        document.getElementById('aoSearch').addEventListener('input', renderAoTable);
+      }
+      if (!aoLoaded) loadAoCampaign();
+    }
+    window.loadAoCampaign = async function (force) {
+      const box = document.getElementById('aoTable');
+      box.innerHTML = 'Loading campaign data...';
+      try {
+        const idToken = await currentUser.getIdToken();
+        const d = await nomJsonp(SHEET_WEBHOOK_URL + '?partner_report=1&idToken=' + encodeURIComponent(idToken));
+        if (!d || !d.ok) throw new Error((d && d.error) || 'request failed');
+        aoLoaded = true;
+        aoRows = d.rows || []; aoApps = d.applications || [];
+        const s = d.status || {};
+        const opened = aoRows.filter(r => r.openedAtISO).length;
+        const chip = (n, label, bg) => '<div style="background:' + (bg || '#fff') + '; border:1px solid #e6e3dc; border-radius:12px; padding:12px 18px; min-width:90px;">'
+          + '<div style="font-size:22px; font-weight:700; color:#111;">' + (n == null ? 0 : n) + '</div>'
+          + '<div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#6b7280; padding-top:2px;">' + label + '</div></div>';
+        document.getElementById('aoSummary').innerHTML =
+          chip(s.leads, 'Colleges on list') + chip(s.wave1, 'Emailed wave 1') + chip(s.wave2, 'Wave 2') + chip(s.wave3, 'Wave 3')
+          + chip(opened, 'Opened', '#fef9ec') + chip(s.applications, 'Signed up', '#ecfdf5') + chip(s.no, 'Declined', '#fef2f2')
+          + chip(s.noReply, 'No reply yet') + chip(s.quotaLeftToday, 'Email quota left today');
+        renderAoApps();
+        renderAoTable();
+      } catch (err) {
+        box.innerHTML = '<span style="color:#c0392b;">Could not load the campaign: ' + err.message + '</span>';
+      }
+    };
+    function aoDate(v) { return v ? String(v).slice(0, 10) : ''; }
+    function renderAoApps() {
+      const el = document.getElementById('aoApps');
+      if (!aoApps.length) { el.innerHTML = ''; return; }
+      el.innerHTML = '<div class="card" style="background:#ecfdf5; border-color:#bbf7d0;">'
+        + '<div style="font-size:13px; font-weight:700; color:#166534; margin-bottom:10px;">Signed up (' + aoApps.length + ')</div>'
+        + aoApps.map(a => '<div style="font-size:13px; color:#111; padding:6px 0; border-top:1px solid #d1fae5;">'
+          + '<strong>' + (a.college || '') + '</strong>' + (a.country ? ' (' + a.country + ')' : '')
+          + ' - ' + (a.contactName || '') + ', ' + (a.contactEmail || '')
+          + ' - full: ' + (a.fullScholarship || '-') + ', partial: ' + (a.partialScholarship || '-')
+          + ' <span style="color:#6b7280;">' + aoDate(a.submittedAt) + '</span></div>').join('')
+        + '</div>';
+    }
+    function renderAoTable() {
+      const q = (document.getElementById('aoSearch').value || '').toLowerCase();
+      let rows = aoRows;
+      if (aoFilter === 'opened') rows = rows.filter(r => r.openedAtISO);
+      if (aoFilter === 'signed') rows = rows.filter(r => r.applied);
+      if (aoFilter === 'declined') rows = rows.filter(r => String(r.response) === 'No');
+      if (aoFilter === 'noreply') rows = rows.filter(r => !String(r.response || '') && !r.applied);
+      if (q) rows = rows.filter(r => (String(r.college || '') + ' ' + String(r.email || '') + ' ' + String(r.contactName || '')).toLowerCase().includes(q));
+      const badge = (r) => r.applied ? '<span class="nb nb-ok">Signed up</span>'
+        : String(r.response) === 'No' ? '<span class="nb nb-no">Declined</span>'
+        : r.openedAtISO ? '<span class="nb nb-mid">Opened</span>'
+        : '<span class="nb" style="background:#f3f4f6;color:#6b7280;">Sent</span>';
+      document.getElementById('aoTable').innerHTML =
+        '<div style="font-size:12px; color:#6b7280; margin-bottom:8px;">' + rows.length + ' of ' + aoRows.length + ' colleges</div>'
+        + '<table class="nomtable"><thead><tr><th>College</th><th>Contact</th><th>Email</th><th>Country</th><th>Wave 1</th><th>Wave 2</th><th>Wave 3</th><th>Opened</th><th>Status</th></tr></thead><tbody>'
+        + rows.map(r => '<tr><td><strong>' + (r.college || '-') + '</strong></td><td>' + (r.contactName || '') + '</td><td>' + (r.email || '')
+          + '</td><td>' + (r.country || '') + '</td><td>' + aoDate(r.wave1SentISO) + '</td><td>' + aoDate(r.wave2SentISO) + '</td><td>' + aoDate(r.wave3SentISO)
+          + '</td><td>' + (r.openedAtISO ? aoDate(r.openedAtISO) + (Number(r.openCount) > 1 ? ' (' + r.openCount + 'x)' : '') : '')
+          + '</td><td>' + badge(r) + '</td></tr>').join('')
+        + '</tbody></table>';
+    }
+    window.exportAoCsv = function () {
+      const head = ['college', 'contactName', 'email', 'country', 'wave1SentISO', 'wave2SentISO', 'wave3SentISO', 'openedAtISO', 'openCount', 'response', 'respondedAt', 'applied'];
+      const csv = [head.join(',')].concat(aoRows.map(r => head.map(h => '"' + String(r[h] == null ? '' : r[h]).replace(/"/g, '""') + '"').join(','))).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'ao-campaign.csv'; a.click();
+      URL.revokeObjectURL(url);
+    };
 
     // ======================= NGSP Counsellor Nominations =======================
     let nomTabInit = false, nomReportRows = [];
