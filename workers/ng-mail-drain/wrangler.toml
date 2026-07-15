@@ -1,0 +1,9 @@
+name = "ng-mail-drain"
+main = "worker.js"
+compatibility_date = "2026-07-01"
+# runs on the ismynamedk CF account (1d6d) like the other cron workers; the
+# Pages account (869a) has no Workers-scoped credentials on this machine
+account_id = "1d6d003f1767d5fcd352a12893849047"
+
+[triggers]
+crons = ["30 3,9,15 * * *"]
