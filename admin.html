@@ -1634,7 +1634,8 @@
           chip(s.leads, 'Colleges on list') + chip(dW1, 'Delivered wave 1') + chip(qAll, 'In queue, sends daily', '#eff6ff')
           + chip(s.deliveredW2 != null ? s.deliveredW2 : s.wave2, 'Delivered wave 2') + chip(s.deliveredW3 != null ? s.deliveredW3 : s.wave3, 'Delivered wave 3')
           + chip(opened, 'Opened', '#fef9ec') + chip(s.applications, 'Signed up', '#ecfdf5') + chip(s.no, 'Declined', '#fef2f2')
-          + chip(s.noReply, 'No reply yet') + chip(s.quotaLeftToday, 'Email quota left today');
+          + chip(s.noReply, 'No reply yet')
+          + chip((s.quotaLeftToday || 0) + (s.brevoQuotaLeft || 0), 'Send quota left today');
         renderAoApps();
         renderAoTable();
       } catch (err) {
