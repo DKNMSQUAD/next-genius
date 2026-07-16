@@ -1487,12 +1487,21 @@
       toast('Message dispatched to ' + targets.length + ' recipient(s)');
     };
 
+    // Follow-ups go to Grade 12 students only. A stated grade wins; legacy docs
+    // (registered before the grade field existed) count as Class 12 only once the
+    // Academic step is completed, which proves it. Everyone can still register.
+    function isGrade12(a) {
+      const g = String(a.grade || '').trim();
+      if (g) return /12/.test(g);
+      return !!(a.onboarding && a.onboarding.academic);
+    }
     window.inviteAllToInterview = async function() {
       const targets = applicants.filter(a => a.email && !a.exitedAt
         && !['helpdesk@next-genius.com','apply@next-genius.com','dknmsquad@gmail.com','mandhana.neeraj@gmail.com'].includes((a.email||'').toLowerCase())
+        && isGrade12(a)
         && !a.onboarding?.interview);
-      if (!targets.length) { alert('Everyone has already submitted their interview video.'); return; }
-      if (!confirm('Email the interview invite to ' + targets.length + " participant(s) who haven't recorded yet?\n\nSends from apply@next-genius.com (falls back to the default sender until the alias is verified). Up to " + '90' + '/day send immediately; the rest queue and drain daily. Nothing is dropped.')) return;
+      if (!targets.length) { alert('Every Grade 12 student has already submitted their interview video.'); return; }
+      if (!confirm('Email the interview invite to ' + targets.length + " Grade 12 participant(s) who haven't recorded yet?\n\nSends from apply@next-genius.com (falls back to the default sender until the alias is verified). Up to " + '90' + '/day send immediately; the rest queue and drain daily. Nothing is dropped.')) return;
       const status = document.getElementById('msgStatus') || document.createElement('div');
       try {
         const idToken = await currentUser.getIdToken();
@@ -1509,9 +1518,9 @@
       }
     };
     window.bulkReminder = async function() {
-      const stuck = applicants.filter(a => !a.exitedAt && (!a.onboarding?.photo || !a.onboarding?.personal || !a.onboarding?.academic));
-      if (!stuck.length) { alert('No stuck applicants'); return; }
-      if (!confirm('Send reminder email to ' + stuck.length + ' stuck applicant(s)?')) return;
+      const stuck = applicants.filter(a => !a.exitedAt && isGrade12(a) && (!a.onboarding?.photo || !a.onboarding?.personal || !a.onboarding?.academic));
+      if (!stuck.length) { alert('No stuck Grade 12 applicants'); return; }
+      if (!confirm('Send reminder email to ' + stuck.length + ' stuck Grade 12 applicant(s)?')) return;
       const status = document.getElementById('msgStatus') || document.createElement('div');
       const subject = 'Quick reminder — finish your Next Genius profile';
       const body = `We noticed you haven't finished your profile yet. The team can't review your application until photo, personal and academic profiles are complete.\n\nIt only takes 10 minutes:\nhttps://www.next-genius.com/dashboard.html`;
