@@ -516,6 +516,19 @@
 
           <div id="aoApps" style="margin-bottom:18px;"></div>
           <div id="aoTable" class="card" style="overflow-x:auto;">Open this tab to load the campaign.</div>
+
+          <div id="aoDrawer" style="display:none; position:fixed; top:0; right:0; width:min(700px,92vw); height:100vh; background:#fff; box-shadow:-12px 0 40px rgba(0,0,0,0.18); z-index:1000; flex-direction:column;">
+            <div style="display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid #eee;">
+              <div style="flex:1; min-width:0;">
+                <div id="aoDrawerTitle" style="font-weight:700; font-size:15px; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+                <div id="aoDrawerSub" style="font-size:12px; color:#6b7280; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+              </div>
+              <button class="nom-pill active" data-aowave="1">Wave 1 (sent)</button>
+              <button class="nom-pill" data-aowave="2">Wave 2 preview</button>
+              <button class="btn-sec" onclick="closeAoDrawer()">Close</button>
+            </div>
+            <iframe id="aoDrawerFrame" sandbox="" title="Sent email preview" style="flex:1; width:100%; border:0; background:#f4f2ee;"></iframe>
+          </div>
         </section>
 
         <section class="panel" id="panel-nominations">
@@ -1565,8 +1578,41 @@
           renderAoTable();
         }));
         document.getElementById('aoSearch').addEventListener('input', renderAoTable);
+        document.getElementById('aoTable').addEventListener('click', (ev) => {
+          const tr = ev.target.closest('tr[data-aoemail]');
+          if (tr) openAoPreview(tr.getAttribute('data-aoemail'), tr.getAttribute('data-aocollege'));
+        });
+        document.querySelectorAll('[data-aowave]').forEach(b => b.addEventListener('click', () => {
+          document.querySelectorAll('[data-aowave]').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          aoDrawerWave = Number(b.getAttribute('data-aowave'));
+          loadAoPreview();
+        }));
       }
       if (!aoLoaded) loadAoCampaign();
+    }
+    let aoDrawerEmail = '', aoDrawerWave = 1;
+    window.closeAoDrawer = function () { document.getElementById('aoDrawer').style.display = 'none'; };
+    function openAoPreview(email, college) {
+      aoDrawerEmail = email;
+      document.getElementById('aoDrawerTitle').textContent = college || email;
+      document.getElementById('aoDrawerSub').textContent = email;
+      document.getElementById('aoDrawer').style.display = 'flex';
+      loadAoPreview();
+    }
+    async function loadAoPreview() {
+      const f = document.getElementById('aoDrawerFrame');
+      f.srcdoc = '<p style="font-family:Arial,sans-serif;padding:24px;color:#6b7280;">Rendering the email...</p>';
+      try {
+        const idToken = await currentUser.getIdToken();
+        const d = await nomJsonp(SHEET_WEBHOOK_URL + '?partner_email_preview=1&idToken=' + encodeURIComponent(idToken)
+          + '&email=' + encodeURIComponent(aoDrawerEmail) + '&wave=' + aoDrawerWave);
+        if (!d || !d.ok) throw new Error((d && d.error) || 'request failed');
+        document.getElementById('aoDrawerSub').textContent = aoDrawerEmail + '  |  Subject: ' + d.subject;
+        f.srcdoc = d.html;
+      } catch (err) {
+        f.srcdoc = '<p style="font-family:Arial,sans-serif;padding:24px;color:#c0392b;">Could not load the email: ' + err.message + '</p>';
+      }
     }
     window.loadAoCampaign = async function (force) {
       const box = document.getElementById('aoTable');
@@ -1623,7 +1669,7 @@
       document.getElementById('aoTable').innerHTML =
         '<div style="font-size:12px; color:#6b7280; margin-bottom:8px;">' + rows.length + ' of ' + aoRows.length + ' colleges</div>'
         + '<table class="nomtable"><thead><tr><th>College</th><th>Contact</th><th>Email</th><th>Country</th><th>Wave 1</th><th>Wave 2</th><th>Wave 3</th><th>Opened</th><th>Status</th></tr></thead><tbody>'
-        + rows.map(r => '<tr><td><strong>' + (r.college || '-') + '</strong></td><td>' + (r.contactName || '') + '</td><td>' + (r.email || '')
+        + rows.map(r => '<tr data-aoemail="' + String(r.email || '').replace(/"/g, '&quot;') + '" data-aocollege="' + String(r.college || '').replace(/"/g, '&quot;') + '" style="cursor:pointer;" title="Click to preview the email sent to this college"><td><strong>' + (r.college || '-') + '</strong></td><td>' + (r.contactName || '') + '</td><td>' + (r.email || '')
           + '</td><td>' + (r.country || '') + '</td><td>' + aoDate(r.wave1SentISO) + '</td><td>' + aoDate(r.wave2SentISO) + '</td><td>' + aoDate(r.wave3SentISO)
           + '</td><td>' + (r.openedAtISO ? aoDate(r.openedAtISO) + (Number(r.openCount) > 1 ? ' (' + r.openCount + 'x)' : '') : '')
           + '</td><td>' + badge(r) + '</td></tr>').join('')
