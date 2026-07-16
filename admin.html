@@ -1582,8 +1582,11 @@
         const chip = (n, label, bg) => '<div style="background:' + (bg || '#fff') + '; border:1px solid #e6e3dc; border-radius:12px; padding:12px 18px; min-width:90px;">'
           + '<div style="font-size:22px; font-weight:700; color:#111;">' + (n == null ? 0 : n) + '</div>'
           + '<div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#6b7280; padding-top:2px;">' + label + '</div></div>';
+        const dW1 = (s.deliveredW1 != null ? s.deliveredW1 : s.wave1);
+        const qAll = (s.queuedW1 || 0) + (s.queuedW2 || 0) + (s.queuedW3 || 0);
         document.getElementById('aoSummary').innerHTML =
-          chip(s.leads, 'Colleges on list') + chip(s.wave1, 'Emailed wave 1') + chip(s.wave2, 'Wave 2') + chip(s.wave3, 'Wave 3')
+          chip(s.leads, 'Colleges on list') + chip(dW1, 'Delivered wave 1') + chip(qAll, 'In queue, sends daily', '#eff6ff')
+          + chip(s.deliveredW2 != null ? s.deliveredW2 : s.wave2, 'Delivered wave 2') + chip(s.deliveredW3 != null ? s.deliveredW3 : s.wave3, 'Delivered wave 3')
           + chip(opened, 'Opened', '#fef9ec') + chip(s.applications, 'Signed up', '#ecfdf5') + chip(s.no, 'Declined', '#fef2f2')
           + chip(s.noReply, 'No reply yet') + chip(s.quotaLeftToday, 'Email quota left today');
         renderAoApps();
