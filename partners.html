@@ -222,6 +222,14 @@
       };
       s.src = SHEET_WEBHOOK_URL + '?partner_lead=1&t=' + encodeURIComponent(TOKEN) + '&callback=ngLead';
       document.body.appendChild(s);
+
+      // Landing here means they pressed "Yes, Interested To Explore" in the email.
+      // Record that intent now: the form below is the detail step, not the gate.
+      // (Colleges were clicking through and leaving the form unfinished.)
+      const i = document.createElement('script');
+      window.ngInterest = function () {};
+      i.src = SHEET_WEBHOOK_URL + '?partner_interest=1&src=page&t=' + encodeURIComponent(TOKEN) + '&callback=ngInterest';
+      document.body.appendChild(i);
     }
 
     function wireToggle(id, key) {

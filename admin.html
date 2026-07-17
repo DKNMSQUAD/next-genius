@@ -507,6 +507,7 @@
           <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center;">
             <button class="nom-pill active" data-ao="all">All</button>
             <button class="nom-pill" data-ao="opened">Opened</button>
+            <button class="nom-pill" data-ao="interested">Interested</button>
             <button class="nom-pill" data-ao="signed">Signed up</button>
             <button class="nom-pill" data-ao="declined">Declined</button>
             <button class="nom-pill" data-ao="noreply">No reply</button>
@@ -1643,7 +1644,8 @@
         document.getElementById('aoSummary').innerHTML =
           chip(s.leads, 'Colleges on list') + chip(dW1, 'Delivered wave 1') + chip(qAll, 'In queue, sends daily', '#eff6ff')
           + chip(s.deliveredW2 != null ? s.deliveredW2 : s.wave2, 'Delivered wave 2') + chip(s.deliveredW3 != null ? s.deliveredW3 : s.wave3, 'Delivered wave 3')
-          + chip(opened, 'Opened', '#fef9ec') + chip(s.applications, 'Signed up', '#ecfdf5') + chip(s.no, 'Declined', '#fef2f2')
+          + chip(opened, 'Opened', '#fef9ec') + chip(s.clicked, 'Clicked', '#fef9ec')
+          + chip(s.interested, 'Interested', '#dbeafe') + chip(s.applications, 'Signed up', '#ecfdf5') + chip(s.no, 'Declined', '#fef2f2')
           + chip(s.noReply, 'No reply yet')
           + chip((s.quotaLeftToday || 0) + (s.brevoQuotaLeft || 0), 'Send quota left today');
         renderAoHealth(d.health);
@@ -1684,12 +1686,15 @@
       const q = (document.getElementById('aoSearch').value || '').toLowerCase();
       let rows = aoRows;
       if (aoFilter === 'opened') rows = rows.filter(r => r.openedAtISO);
+      if (aoFilter === 'interested') rows = rows.filter(r => String(r.response) === 'Interested');
       if (aoFilter === 'signed') rows = rows.filter(r => r.applied);
       if (aoFilter === 'declined') rows = rows.filter(r => String(r.response) === 'No');
       if (aoFilter === 'noreply') rows = rows.filter(r => !String(r.response || '') && !r.applied);
       if (q) rows = rows.filter(r => (String(r.college || '') + ' ' + String(r.email || '') + ' ' + String(r.contactName || '')).toLowerCase().includes(q));
       const badge = (r) => r.applied ? '<span class="nb nb-ok">Signed up</span>'
+        : String(r.response) === 'Interested' ? '<span class="nb" style="background:#dbeafe;color:#1e40af;">Interested — needs a reply</span>'
         : String(r.response) === 'No' ? '<span class="nb nb-no">Declined</span>'
+        : r.clickedAt ? '<span class="nb" style="background:#fef3c7;color:#92400e;">Clicked</span>'
         : r.openedAtISO ? '<span class="nb nb-mid">Opened</span>'
         : '<span class="nb" style="background:#f3f4f6;color:#6b7280;">Sent</span>';
       document.getElementById('aoTable').innerHTML =
