@@ -501,6 +501,7 @@
           <h1>AO Campaign</h1>
           <p class="subtitle">Partner-college invitations to Admissions Officers: who we emailed, who opened, who answered, who signed up.</p>
 
+          <div id="aoHealth" style="margin-bottom:14px;"></div>
           <div id="aoSummary" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;"></div>
 
           <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center;">
@@ -1645,12 +1646,27 @@
           + chip(opened, 'Opened', '#fef9ec') + chip(s.applications, 'Signed up', '#ecfdf5') + chip(s.no, 'Declined', '#fef2f2')
           + chip(s.noReply, 'No reply yet')
           + chip((s.quotaLeftToday || 0) + (s.brevoQuotaLeft || 0), 'Send quota left today');
+        renderAoHealth(d.health);
         renderAoApps();
         renderAoTable();
       } catch (err) {
         box.innerHTML = '<span style="color:#c0392b;">Could not load the campaign: ' + err.message + '</span>';
       }
     };
+    function renderAoHealth(h) {
+      const el = document.getElementById('aoHealth');
+      if (!h) { el.innerHTML = ''; return; }
+      const ok = h.watchdogOk && !h.errored && !h.stalledSince;
+      const age = h.lastTickAgeMin == null ? 'never' : (h.lastTickAgeMin < 60 ? h.lastTickAgeMin + ' min ago' : Math.round(h.lastTickAgeMin / 60) + ' h ago');
+      const bits = ['Last check ' + age, h.queued + ' waiting to send', 'Sent quota left today: ' + ((h.gmailQuotaLeft || 0) + (h.brevoQuotaLeft || 0))];
+      if (h.errored) bits.push(h.errored + ' errored (auto-retried hourly)');
+      if (h.stalledSince) bits.push('STALLED since ' + String(h.stalledSince).slice(0, 16));
+      el.innerHTML = '<div style="display:flex; align-items:center; gap:10px; background:' + (ok ? '#ecfdf5' : '#fef2f2')
+        + '; border:1px solid ' + (ok ? '#bbf7d0' : '#fecaca') + '; border-radius:10px; padding:10px 14px; font-size:13px; color:#111;">'
+        + '<span style="width:9px; height:9px; border-radius:50%; background:' + (ok ? '#16a34a' : '#dc2626') + '; flex:none;"></span>'
+        + '<strong>Sending watchdog: ' + (ok ? 'running' : 'needs attention') + '</strong>'
+        + '<span style="color:#6b7280;">' + bits.join('  ·  ') + '</span></div>';
+    }
     function aoDate(v) { return v ? String(v).slice(0, 10) : ''; }
     function renderAoApps() {
       const el = document.getElementById('aoApps');

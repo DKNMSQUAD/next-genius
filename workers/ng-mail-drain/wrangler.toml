@@ -6,4 +6,5 @@ compatibility_date = "2026-07-01"
 account_id = "1d6d003f1767d5fcd352a12893849047"
 
 [triggers]
-crons = ["30 3,9,15 * * *"]
+# hourly: picks up freed quota as soon as it appears, and doubles as the heartbeat
+crons = ["7 * * * *"]
