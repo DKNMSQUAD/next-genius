@@ -35,7 +35,9 @@ if (!TOKEN) {
 // Gmail's published ceiling for a Workspace mailbox is 2000 recipients/day. Stop
 // short of it: hitting the wall gets the account rate-limited, not just refused.
 const DAILY_CAP = 1800;
-const BATCH = 40;        // rows claimed per pull
+// Rows are claimed at pull time, so the batch size IS the blast radius if this
+// process dies mid-batch. Keep it small: a stranded row needs a manual recover.
+const BATCH = 10;
 const GAP_MS = 700;      // ~5100/hr, gentle enough that Google does not throttle
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > -1 ? (process.argv[i + 1] || true) : d; };
@@ -61,10 +63,20 @@ function credentials() {
   return { user, pass: pass.replace(/\s+/g, '') };
 }
 
-async function api(query) {
-  const r = await fetch(EXEC + '?' + query + '&token=' + encodeURIComponent(TOKEN), { redirect: 'follow' });
-  const t = await r.text();
-  try { return JSON.parse(t); } catch (err) { throw new Error('bad response: ' + t.slice(0, 160)); }
+// Apps Script intermittently answers with an HTML error page instead of JSON,
+// usually when a scheduled tick is touching the same sheet. That is a blip, not a
+// failure: retry it. Letting it kill the run once left rows claimed but unsent.
+async function api(query, tries = 4) {
+  let last = '';
+  for (let n = 0; n < tries; n++) {
+    try {
+      const r = await fetch(EXEC + '?' + query + '&token=' + encodeURIComponent(TOKEN), { redirect: 'follow' });
+      const t = await r.text();
+      try { return JSON.parse(t); } catch (err) { last = t.slice(0, 120); }
+    } catch (err) { last = String(err.message || err).slice(0, 120); }
+    await sleep(2000 * (n + 1));
+  }
+  throw new Error('api failed after ' + tries + ' tries: ' + last);
 }
 
 (async () => {
