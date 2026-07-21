@@ -1,0 +1,42 @@
+name: SMTP mail drain
+
+# Apps Script can only send ~100 emails/day and that ceiling cannot be raised.
+# The same Workspace mailbox sends ~2000/day over SMTP, which is a separate
+# budget, so the wide lane runs here instead: free, serverless, and nothing
+# depends on DK's laptop being open.
+
+on:
+  schedule:
+    - cron: "20 */3 * * *"   # every 3 hours (GitHub cron is best-effort)
+  workflow_dispatch:
+    inputs:
+      max:
+        description: "Max messages this run"
+        required: false
+        default: "600"
+
+concurrency:
+  group: smtp-drain          # never let two runs claim the same queue rows
+  cancel-in-progress: false
+
+jobs:
+  drain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install
+        working-directory: smtp-drain
+        run: npm install --omit=dev
+
+      - name: Drain the queue
+        working-directory: smtp-drain
+        env:
+          NG_OPS_TOKEN: ${{ secrets.NG_OPS_TOKEN }}
+          NG_SMTP_USER: ${{ secrets.NG_SMTP_USER }}
+          NG_SMTP_PASS: ${{ secrets.NG_SMTP_PASS }}
+        run: node drain.js --max ${{ github.event.inputs.max || '600' }}

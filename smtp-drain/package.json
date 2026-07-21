@@ -1,0 +1,8 @@
+{
+  "name": "ng-smtp-drain",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Wide SMTP lane draining the Next Genius mailqueue via the Workspace mailbox",
+  "main": "drain.js",
+  "dependencies": { "nodemailer": "^6.9.14" }
+}
