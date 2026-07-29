@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>Syracuse India Desk | Next Genius</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1c1b18;
+      --ink-soft: #55524b;
+      --line: #e6e3dc;
+      --paper: #f4f2ee;
+      --gold: #FFC72C;
+      --gold-deep: #E8A020;
+      --orange: #F76900;   /* Syracuse */
+      --ok: #157347;
+      --warn: #b26a00;
+      --bad: #c0392b;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: var(--paper); color: var(--ink);
+      -webkit-font-smoothing: antialiased; line-height: 1.55; font-size: 15px;
+    }
+    .p, h1, h2, h3, button, label, th { font-family: 'Poppins', sans-serif; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+    button { font-family: 'Poppins', sans-serif; cursor: pointer; }
+
+    /* ---- gate ---- */
+    #gate { min-height: 100vh; display: grid; place-items: center; padding: 30px 20px; }
+    #gate .box {
+      width: 100%; max-width: 420px; background: #fff; border: 1px solid var(--line);
+      border-radius: 16px; padding: 40px 34px; text-align: center;
+      box-shadow: 0 1px 2px rgba(28,27,24,.04), 0 16px 40px rgba(28,27,24,.07);
+    }
+    #gate img.mark { width: 84px; height: 84px; object-fit: contain; }
+    #gate h1 { font-size: 21px; font-weight: 600; margin: 14px 0 4px; letter-spacing: -.02em; }
+    #gate p { font-size: 14px; color: var(--ink-soft); }
+    #gate .syr { display: inline-flex; align-items: center; gap: 9px; margin-top: 16px; padding: 7px 14px;
+      border: 1px solid var(--line); border-radius: 999px; font-size: 13px; }
+    #gate .syr img { width: 22px; height: 22px; object-fit: contain; }
+    .gbtn {
+      margin-top: 26px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: var(--ink); color: #fff; border: 0; border-radius: 999px; padding: 14px;
+      font-size: 15px; font-weight: 600;
+    }
+    .gbtn:hover { background: #33312c; }
+    .gerr { color: var(--bad); font-size: 13.5px; margin-top: 14px; min-height: 20px; }
+    .glink { display: inline-block; margin-top: 18px; font-size: 13px; color: var(--ink-soft); }
+
+    /* ---- shell ---- */
+    #app { display: none; }
+    header { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20; }
+    header .bar { display: flex; align-items: center; gap: 14px; height: 66px; }
+    header .logo { display: flex; align-items: center; gap: 10px; }
+    header .logo img { height: 32px; width: 32px; object-fit: contain; }
+    header .logo .t { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; line-height: 1.15; }
+    header .logo .t small { display: block; font-weight: 400; font-size: 11px; letter-spacing: .7px;
+      text-transform: uppercase; color: var(--ink-soft); }
+    header .sep { width: 1px; height: 30px; background: var(--line); }
+    header .who { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--ink-soft); }
+    header .who button { background: none; border: 1px solid var(--line); border-radius: 999px;
+      padding: 7px 14px; font-size: 12.5px; color: var(--ink); }
+    nav.tabs { display: flex; gap: 4px; overflow-x: auto; border-top: 1px solid var(--line); }
+    nav.tabs button {
+      background: none; border: 0; border-bottom: 2px solid transparent; padding: 13px 16px;
+      font-size: 13.5px; font-weight: 500; color: var(--ink-soft); white-space: nowrap;
+    }
+    nav.tabs button.on { color: var(--ink); border-bottom-color: var(--orange); font-weight: 600; }
+    nav.tabs button .c {
+      display: inline-block; margin-left: 7px; background: #efece6; color: var(--ink-soft);
+      border-radius: 999px; padding: 1px 7px; font-size: 11px;
+    }
+    nav.tabs button.on .c { background: var(--orange); color: #fff; }
+
+    /* ---- stats ---- */
+    .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 22px 0 6px; }
+    .stat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+    .stat .k { font-size: 11px; letter-spacing: .9px; text-transform: uppercase; color: var(--ink-soft); }
+    .stat .v { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 600; letter-spacing: -.02em; }
+
+    /* ---- panels ---- */
+    .panel { display: none; padding: 20px 0 60px; }
+    .panel.on { display: block; }
+    .head2 { display: flex; align-items: flex-end; gap: 14px; margin: 16px 0 14px; flex-wrap: wrap; }
+    .head2 h2 { font-size: 19px; font-weight: 600; letter-spacing: -.02em; }
+    .head2 p { font-size: 13.5px; color: var(--ink-soft); }
+    .head2 .right { margin-left: auto; display: flex; gap: 8px; }
+
+    .box { background: #fff; border: 1px solid var(--line); border-radius: 14px; }
+    form.card { padding: 20px 22px; }
+    .fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .f { display: flex; flex-direction: column; gap: 6px; }
+    .f.wide { grid-column: span 2; }
+    .f.full { grid-column: 1 / -1; }
+    .f label { font-size: 12.5px; font-weight: 500; }
+    .f label i { font-style: normal; color: var(--bad); }
+    .f input, .f select, .f textarea {
+      width: 100%; padding: 11px 13px; border: 1px solid #dcd8d0; border-radius: 10px;
+      font-size: 14.5px; font-family: inherit; color: var(--ink); outline: none; background: #fff;
+      transition: border-color .12s ease, box-shadow .12s ease;
+    }
+    .f textarea { min-height: 72px; resize: vertical; }
+    .f input:focus, .f select:focus, .f textarea:focus {
+      border-color: var(--orange); box-shadow: 0 0 0 3px rgba(247,105,0,.15);
+    }
+    .actions { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+    .save {
+      background: var(--gold); color: var(--ink); border: 0; border-radius: 999px;
+      padding: 12px 28px; font-size: 14.5px; font-weight: 600;
+    }
+    .save:hover:not(:disabled) { background: #ffd35a; }
+    .save:disabled { opacity: .55; cursor: wait; }
+    .msg { font-size: 13.5px; }
+    .msg.ok { color: var(--ok); }
+    .msg.bad { color: var(--bad); }
+
+    /* ---- table ---- */
+    .tablewrap { overflow-x: auto; border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { font-size: 11px; letter-spacing: .8px; text-transform: uppercase; color: var(--ink-soft); font-weight: 600;
+      background: #fbfaf8; position: sticky; top: 0; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fdfcfa; }
+    td .sub { display: block; font-size: 12.5px; color: var(--ink-soft); }
+    .pill {
+      display: inline-block; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600;
+      letter-spacing: .4px; padding: 3px 10px; border-radius: 999px; background: #efece6; color: var(--ink-soft);
+    }
+    .pill.Pending, .pill.Submitted { background: #fdf1d8; color: var(--warn); }
+    .pill.Approved, .pill.Verified, .pill.Applied { background: #e4f1ea; color: var(--ok); }
+    .pill.Booked, .pill.Reimbursed, .pill.Admitted, .pill.Deposited { background: #e2ecfa; color: #1f5fa8; }
+    .pill.Declined, .pill.Denied, .pill.Query, .pill.Withdrawn { background: #fae4e1; color: var(--bad); }
+    .del { background: none; border: 0; color: #b3aea4; font-size: 15px; padding: 2px 6px; }
+    .del:hover { color: var(--bad); }
+    .empty { padding: 44px 20px; text-align: center; color: var(--ink-soft); font-size: 14px; }
+    .filters { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .filters input, .filters select {
+      padding: 9px 13px; border: 1px solid #dcd8d0; border-radius: 999px; font-size: 13.5px;
+      font-family: inherit; outline: none; background: #fff;
+    }
+    .ghost { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px;
+      font-size: 13px; font-weight: 500; color: var(--ink); }
+    .ghost:hover { border-color: var(--ink-soft); }
+    .file { font-size: 13px; }
+    .file a { color: #1f5fa8; }
+    .note { font-size: 13px; color: var(--ink-soft); margin-top: 10px; }
+    .soonbar {
+      display: flex; align-items: center; gap: 10px; background: #fdf1d8; border: 1px solid #f2e0b5;
+      color: var(--warn); border-radius: 12px; padding: 12px 16px; font-size: 13.5px; margin-bottom: 16px;
+    }
+
+    @media (max-width: 1000px) { .stats { grid-template-columns: repeat(3, 1fr); } .fields { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 620px)  { .stats { grid-template-columns: repeat(2, 1fr); } .fields { grid-template-columns: 1fr; } .f.wide { grid-column: span 1; } }
+  </style>
+</head>
+<body>
+
+<!-- ------------------------------------------------------------- sign in -->
+<div id="gate">
+  <div class="box">
+    <img class="mark" src="/indiadesk/india-desk-mark.png" alt="India Desk">
+    <h1>India Desk</h1>
+    <p>by Next Genius</p>
+    <div class="syr"><img src="/indiadesk/syracuse-logo.png" alt="">Syracuse University desk</div>
+    <button class="gbtn" id="signin">Sign in with Google</button>
+    <div class="gerr" id="gerr"></div>
+    <a class="glink" href="/indiadesk/">About India Desk</a>
+  </div>
+</div>
+
+<!-- --------------------------------------------------------------- app --->
+<div id="app">
+  <header>
+    <div class="wrap">
+      <div class="bar">
+        <div class="logo">
+          <img src="/indiadesk/india-desk-mark.png" alt="India Desk">
+          <div class="t">India Desk<small>by Next Genius</small></div>
+        </div>
+        <div class="sep"></div>
+        <div class="logo">
+          <img src="/indiadesk/syracuse-logo.png" alt="Syracuse University">
+          <div class="t">Syracuse University<small id="deskowner">India Desk</small></div>
+        </div>
+        <div class="who">
+          <span id="me"></span>
+          <button id="signout">Sign out</button>
+        </div>
+      </div>
+      <nav class="tabs">
+        <button data-tab="visits" class="on">Visits <span class="c" id="c-visits">0</span></button>
+        <button data-tab="interactions">Non-visit interactions <span class="c" id="c-interactions">0</span></button>
+        <button data-tab="requests">Requests <span class="c" id="c-requests">0</span></button>
+        <button data-tab="accounts">Accounts <span class="c" id="c-accounts">0</span></button>
+        <button data-tab="applications">Applications <span class="c" id="c-applications">0</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="k">Visits</div><div class="v" id="s-visits">0</div></div>
+      <div class="stat"><div class="k">Interactions</div><div class="v" id="s-inter">0</div></div>
+      <div class="stat"><div class="k">Counselors</div><div class="v" id="s-couns">0</div></div>
+      <div class="stat"><div class="k">Cities</div><div class="v" id="s-cities">0</div></div>
+      <div class="stat"><div class="k">Open requests</div><div class="v" id="s-req">0</div></div>
+      <div class="stat"><div class="k">Spend logged</div><div class="v" id="s-spend">0</div></div>
+    </div>
+
+    <!-- 1. VISITS -->
+    <section class="panel on" id="p-visits">
+      <div class="head2">
+        <div>
+          <h2>Clock a visit</h2>
+          <p>Log a school, IEC or partner visit the day it happens. One row per counselor met.</p>
+        </div>
+      </div>
+      <div class="box">
+        <form class="card" id="f-visits">
+          <div class="fields">
+            <div class="f"><label>Date <i>*</i></label><input type="date" name="visit_date" required></div>
+            <div class="f"><label>Name of counselor <i>*</i></label><input name="counselor" placeholder="Full name" required></div>
+            <div class="f"><label>Email</label><input type="email" name="email" placeholder="name@school.edu"></div>
+            <div class="f"><label>WhatsApp</label><input name="whatsapp" placeholder="+91 ..."></div>
+            <div class="f"><label>School / IEC / Other</label>
+              <select name="org_type"><option>School</option><option>IEC</option><option>Other</option></select></div>
+            <div class="f wide"><label>Organization name</label><input name="org_name" placeholder="Where they work"></div>
+            <div class="f"><label>City</label><input name="city" placeholder="City"></div>
+            <div class="f full"><label>Notes</label><textarea name="notes" placeholder="What was discussed, what was promised, what happens next."></textarea></div>
+          </div>
+          <div class="actions"><button class="save" type="submit">Clock visit</button><span class="msg" data-msg></span></div>
+        </form>
+      </div>
+      <div class="head2"><h2>Logged visits</h2></div>
+      <div class="filters">
+        <input type="search" placeholder="Search counselor, organization, city" data-search="visits">
+        <button class="ghost" data-csv="visits">Download CSV</button>
+      </div>
+      <div class="tablewrap box"><table>
+        <thead><tr><th>Date</th><th>Counselor</th><th>Organization</th><th>City</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="t-visits"></tbody>
+      </table></div>
+    </section>
+
+    <!-- 2. INTERACTIONS -->
+    <section class="panel" id="p-interactions">
+      <div class="head2">
+        <div>
+          <h2>Clock a non-visit interaction</h2>
+          <p>Everything that keeps the relationship alive between visits.</p>
+        </div>
+      </div>
+      <div class="box">
+        <form class="card" id="f-interactions">
+          <div class="fields">
+            <div class="f"><label>Type <i>*</i></label>
+              <select name="mode" required><option>Call</option><option>Meeting</option><option>Email</option>
+                <option>WhatsApp</option><option>Video call</option><option>Event</option><option>Other</option></select></div>
+            <div class="f"><label>Date <i>*</i></label><input type="date" name="contact_date" required></div>
+            <div class="f"><label>Name of counselor <i>*</i></label><input name="counselor" required></div>
+            <div class="f"><label>Email</label><input type="email" name="email"></div>
+            <div class="f"><label>WhatsApp</label><input name="whatsapp" placeholder="+91 ..."></div>
+            <div class="f"><label>School / IEC / Other</label>
+              <select name="org_type"><option>School</option><option>IEC</option><option>Other</option></select></div>
+            <div class="f wide"><label>Organization name</label><input name="org_name"></div>
+            <div class="f"><label>City</label><input name="city"></div>
+            <div class="f full"><label>Notes</label><textarea name="notes"></textarea></div>
+          </div>
+          <div class="actions"><button class="save" type="submit">Clock interaction</button><span class="msg" data-msg></span></div>
+        </form>
+      </div>
+      <div class="head2"><h2>Logged interactions</h2></div>
+      <div class="filters">
+        <input type="search" placeholder="Search counselor, organization, city" data-search="interactions">
+        <button class="ghost" data-csv="interactions">Download CSV</button>
+      </div>
+      <div class="tablewrap box"><table>
+        <thead><tr><th>Date</th><th>Type</th><th>Counselor</th><th>Organization</th><th>City</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="t-interactions"></tbody>
+      </table></div>
+    </section>
+
+    <!-- 3. REQUESTS -->
+    <section class="panel" id="p-requests">
+      <div class="head2">
+        <div>
+          <h2>Request a ticket, a hotel or a budget</h2>
+          <p>Raised here, actioned by the Next Genius back office. You will see the status change.</p>
+        </div>
+      </div>
+      <div class="box">
+        <form class="card" id="f-requests">
+          <div class="fields">
+            <div class="f"><label>Request <i>*</i></label>
+              <select name="kind" id="reqkind" required><option>Flight</option><option>Hotel</option><option>Budget</option></select></div>
+            <div class="f wide"><label>Title <i>*</i></label><input name="title" placeholder="Mumbai school circuit, week of 12 Aug" required></div>
+            <div class="f"><label>Amount (estimate)</label><input type="number" name="amount" step="0.01" min="0" placeholder="0.00"></div>
+            <div class="f" data-only="Flight"><label>From</label><input name="from_place" placeholder="Bengaluru"></div>
+            <div class="f" data-only="Flight Hotel"><label id="lbl-to">To / city</label><input name="to_place" placeholder="Delhi"></div>
+            <div class="f" data-only="Flight Hotel"><label id="lbl-start">Depart / check in</label><input type="date" name="start_date"></div>
+            <div class="f" data-only="Flight Hotel"><label id="lbl-end">Return / check out</label><input type="date" name="end_date"></div>
+            <div class="f full"><label>Details</label><textarea name="notes" placeholder="Preferred timings, why it is needed, anything the back office must know."></textarea></div>
+          </div>
+          <div class="actions"><button class="save" type="submit">Raise request</button><span class="msg" data-msg></span></div>
+        </form>
+      </div>
+      <div class="head2"><h2>Your requests</h2></div>
+      <div class="filters"><button class="ghost" data-csv="requests">Download CSV</button></div>
+      <div class="tablewrap box"><table>
+        <thead><tr><th>Raised</th><th>Type</th><th>Request</th><th>Dates</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+        <tbody id="t-requests"></tbody>
+      </table></div>
+    </section>
+
+    <!-- 4. ACCOUNTS -->
+    <section class="panel" id="p-accounts">
+      <div class="head2">
+        <div>
+          <h2>Upload accounts</h2>
+          <p>Every bill and receipt against the desk. Image or PDF, up to 15 MB.</p>
+        </div>
+      </div>
+      <div class="box">
+        <form class="card" id="f-accounts">
+          <div class="fields">
+            <div class="f"><label>Date of spend <i>*</i></label><input type="date" name="spend_date" required></div>
+            <div class="f"><label>Category</label>
+              <select name="category"><option>Travel</option><option>Stay</option><option>Food</option>
+                <option>Event</option><option>Printing</option><option>Local transport</option><option>Other</option></select></div>
+            <div class="f"><label>Paid to</label><input name="vendor" placeholder="Airline, hotel, vendor"></div>
+            <div class="f"><label>Amount <i>*</i></label><input type="number" name="amount" step="0.01" min="0" required></div>
+            <div class="f wide"><label>Bill / receipt</label><input type="file" name="file" accept="image/*,application/pdf"></div>
+            <div class="f wide"><label>Notes</label><input name="notes" placeholder="What this was for"></div>
+          </div>
+          <div class="actions"><button class="save" type="submit">Upload</button><span class="msg" data-msg></span></div>
+        </form>
+      </div>
+      <div class="head2"><h2>Submitted accounts</h2></div>
+      <div class="filters"><button class="ghost" data-csv="accounts">Download CSV</button></div>
+      <div class="tablewrap box"><table>
+        <thead><tr><th>Date</th><th>Category</th><th>Paid to</th><th>Amount</th><th>Bill</th><th>Status</th><th></th></tr></thead>
+        <tbody id="t-accounts"></tbody>
+      </table></div>
+    </section>
+
+    <!-- 5. APPLICATIONS -->
+    <section class="panel" id="p-applications">
+      <div class="head2">
+        <div>
+          <h2>Tracking applications</h2>
+          <p>Students the desk sent toward Syracuse, and where each one stands.</p>
+        </div>
+      </div>
+      <div class="soonbar">
+        <strong>Pending:</strong> this tracker is manual until Syracuse gives us a feed. Every row you add here is already stored and visible to the back office.
+      </div>
+      <div class="box">
+        <form class="card" id="f-applications">
+          <div class="fields">
+            <div class="f wide"><label>Student <i>*</i></label><input name="student" required></div>
+            <div class="f"><label>Email</label><input type="email" name="email"></div>
+            <div class="f"><label>WhatsApp</label><input name="whatsapp"></div>
+            <div class="f wide"><label>School</label><input name="school"></div>
+            <div class="f"><label>City</label><input name="city"></div>
+            <div class="f"><label>Program</label><input name="program" placeholder="Intended major"></div>
+            <div class="f"><label>Intake</label><input name="intake" placeholder="Fall 2027"></div>
+            <div class="f wide"><label>Came from</label><input name="source" placeholder="Counselor or visit that produced this student"></div>
+            <div class="f"><label>Status</label>
+              <select name="app_status"><option>Pending</option><option>Applied</option><option>Admitted</option>
+                <option>Deposited</option><option>Denied</option><option>Withdrawn</option></select></div>
+            <div class="f full"><label>Notes</label><textarea name="notes"></textarea></div>
+          </div>
+          <div class="actions"><button class="save" type="submit">Add student</button><span class="msg" data-msg></span></div>
+        </form>
+      </div>
+      <div class="head2"><h2>Pipeline</h2></div>
+      <div class="filters">
+        <input type="search" placeholder="Search student, school, city" data-search="applications">
+        <button class="ghost" data-csv="applications">Download CSV</button>
+      </div>
+      <div class="tablewrap box"><table>
+        <thead><tr><th>Student</th><th>School</th><th>City</th><th>Program</th><th>Intake</th><th>Status</th><th></th></tr></thead>
+        <tbody id="t-applications"></tbody>
+      </table></div>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut }
+    from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg",
+    authDomain: "next-genius-auto.firebaseapp.com",
+    projectId: "next-genius-auto",
+    storageBucket: "next-genius-auto.firebasestorage.app",
+    messagingSenderId: "557092273631",
+    appId: "1:557092273631:web:192264bb43324a69a4186a"
+  };
+  const auth = getAuth(initializeApp(firebaseConfig));
+  const UNI = "syracuse";
+
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  let data = { visits: [], interactions: [], requests: [], accounts: [], applications: [] };
+  const search = {};
+
+  /* ---------------------------------------------------------- sign in --- */
+
+  $("#signin").onclick = async () => {
+    $("#gerr").textContent = "";
+    try {
+      const p = new GoogleAuthProvider();
+      p.setCustomParameters({ prompt: "select_account" });
+      await signInWithPopup(auth, p);
+    } catch (e) {
+      $("#gerr").textContent = e.code === "auth/popup-closed-by-user"
+        ? "Sign-in was closed before it finished." : "Could not sign in. " + (e.message || "");
+    }
+  };
+  $("#signout").onclick = () => signOut(auth).then(() => location.reload());
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { $("#gate").style.display = "grid"; $("#app").style.display = "none"; return; }
+    $("#me").textContent = user.email;
+    const r = await load();
+    if (!r.ok) {
+      $("#gate").style.display = "grid"; $("#app").style.display = "none";
+      $("#gerr").textContent = r.error || "This account cannot open the Syracuse desk.";
+      await signOut(auth).catch(() => {});
+      return;
+    }
+    $("#gate").style.display = "none";
+    $("#app").style.display = "block";
+  });
+
+  async function token() { return auth.currentUser ? auth.currentUser.getIdToken() : null; }
+
+  async function api(payload) {
+    const idToken = await token();
+    if (!idToken) return { ok: false, error: "signed out" };
+    const r = await fetch("/api/indiadesk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken, uni: UNI, ...payload }),
+    });
+    return r.json().catch(() => ({ ok: false, error: "server did not answer" }));
+  }
+
+  /* ------------------------------------------------------------- load --- */
+
+  async function load() {
+    const r = await api({ action: "list" });
+    if (!r.ok) return r;
+    data = r;
+    $("#deskowner").textContent = "India Desk";
+    const s = r.stats || {};
+    $("#s-visits").textContent = s.visits || 0;
+    $("#s-inter").textContent  = s.interactions || 0;
+    $("#s-couns").textContent  = s.counselors || 0;
+    $("#s-cities").textContent = s.cities || 0;
+    $("#s-req").textContent    = s.requestsOpen || 0;
+    $("#s-spend").textContent  = money(s.spend || 0);
+    for (const k of ["visits", "interactions", "requests", "accounts", "applications"]) {
+      $("#c-" + k).textContent = (data[k] || []).length;
+      render(k);
+    }
+    return r;
+  }
+
+  const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+  const day = (d) => {
+    if (!d) return "—";
+    const t = new Date(d + (d.length === 10 ? "T00:00:00" : ""));
+    return isNaN(t) ? d : t.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  };
+  const pill = (s) => `<span class="pill ${esc(s)}">${esc(s)}</span>`;
+
+  function rows(kind) {
+    const q = (search[kind] || "").trim().toLowerCase();
+    const list = data[kind] || [];
+    if (!q) return list;
+    return list.filter((r) => JSON.stringify(r).toLowerCase().includes(q));
+  }
+
+  /* ----------------------------------------------------------- render --- */
+
+  function render(kind) {
+    const tb = $("#t-" + kind);
+    const list = rows(kind);
+    const cols = { visits: 6, interactions: 7, requests: 7, accounts: 7, applications: 7 }[kind];
+    if (!list.length) {
+      tb.innerHTML = `<tr><td colspan="${cols}"><div class="empty">Nothing here yet.</div></td></tr>`;
+      return;
+    }
+    tb.innerHTML = list.map((r) => {
+      const del = `<td style="width:36px"><button class="del" data-del="${kind}" data-id="${esc(r.id)}" title="Delete">&times;</button></td>`;
+      const org = `${esc(r.org_name || "—")}<span class="sub">${esc(r.org_type || "")}</span>`;
+      const who = `${esc(r.counselor)}<span class="sub">${esc([r.email, r.whatsapp].filter(Boolean).join(" · "))}</span>`;
+      if (kind === "visits")
+        return `<tr><td>${day(r.visit_date)}</td><td>${who}</td><td>${org}</td><td>${esc(r.city || "—")}</td>
+                <td>${esc(r.notes || "")}</td>${del}</tr>`;
+      if (kind === "interactions")
+        return `<tr><td>${day(r.contact_date)}</td><td>${pill(r.mode)}</td><td>${who}</td><td>${org}</td>
+                <td>${esc(r.city || "—")}</td><td>${esc(r.notes || "")}</td>${del}</tr>`;
+      if (kind === "requests")
+        return `<tr><td>${day((r.created_at || "").slice(0, 10))}</td><td>${pill(r.kind)}</td>
+                <td>${esc(r.title)}<span class="sub">${esc([r.from_place, r.to_place].filter(Boolean).join(" → "))}</span>
+                <span class="sub">${esc(r.notes || "")}</span></td>
+                <td>${r.start_date ? day(r.start_date) : "—"}${r.end_date ? "<span class='sub'>to " + day(r.end_date) + "</span>" : ""}</td>
+                <td>${r.amount ? money(r.amount) : "—"}</td>
+                <td>${pill(r.status)}${r.status_note ? `<span class="sub">${esc(r.status_note)}</span>` : ""}</td>${del}</tr>`;
+      if (kind === "accounts")
+        return `<tr><td>${day(r.spend_date)}</td><td>${esc(r.category || "—")}</td>
+                <td>${esc(r.vendor || "—")}<span class="sub">${esc(r.notes || "")}</span></td>
+                <td>${money(r.amount)}</td>
+                <td class="file">${r.file_url ? `<a href="${esc(r.file_url)}" target="_blank" rel="noopener">View</a>` : "—"}</td>
+                <td>${pill(r.status)}${r.status_note ? `<span class="sub">${esc(r.status_note)}</span>` : ""}</td>${del}</tr>`;
+      return `<tr><td>${esc(r.student)}<span class="sub">${esc([r.email, r.whatsapp].filter(Boolean).join(" · "))}</span></td>
+              <td>${esc(r.school || "—")}</td><td>${esc(r.city || "—")}</td><td>${esc(r.program || "—")}</td>
+              <td>${esc(r.intake || "—")}</td>
+              <td><select data-app="${esc(r.id)}">${["Pending","Applied","Admitted","Deposited","Denied","Withdrawn"]
+                .map((s) => `<option${s === r.app_status ? " selected" : ""}>${s}</option>`).join("")}</select></td>${del}</tr>`;
+    }).join("");
+  }
+
+  /* ------------------------------------------------------------ forms --- */
+
+  const KINDS = ["visits", "interactions", "requests", "accounts", "applications"];
+
+  for (const kind of KINDS) {
+    const form = $("#f-" + kind);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $(".save", form), msg = $("[data-msg]", form);
+      btn.disabled = true; msg.className = "msg"; msg.textContent = "Saving…";
+      try {
+        const fd = new FormData(form);
+        const row = {};
+        for (const [k, v] of fd.entries()) if (k !== "file") row[k] = v;
+
+        if (kind === "accounts") {
+          const file = fd.get("file");
+          if (file && file.size) {
+            msg.textContent = "Uploading bill…";
+            const up = new FormData();
+            up.append("idToken", await token());
+            up.append("file", file);
+            const r = await fetch("/api/indiadesk", { method: "POST", body: up }).then((x) => x.json());
+            if (!r.ok) throw new Error(r.error || "upload failed");
+            row.file_url = r.url; row.file_name = r.name;
+          }
+        }
+
+        const r = await api({ action: "add", kind, row });
+        if (!r.ok) throw new Error(r.error || "could not save");
+        form.reset();
+        msg.className = "msg ok"; msg.textContent = "Saved.";
+        setTimeout(() => { msg.textContent = ""; }, 2500);
+        await load();
+      } catch (err) {
+        msg.className = "msg bad"; msg.textContent = err.message || String(err);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
+  // Request form: only show the fields that the chosen request type needs.
+  const reqkind = $("#reqkind");
+  function reqFields() {
+    const k = reqkind.value;
+    $$("#f-requests [data-only]").forEach((el) => {
+      el.style.display = el.dataset.only.split(" ").includes(k) ? "" : "none";
+    });
+    $("#lbl-to").textContent    = k === "Hotel" ? "City" : "To";
+    $("#lbl-start").textContent = k === "Hotel" ? "Check in" : "Depart";
+    $("#lbl-end").textContent   = k === "Hotel" ? "Check out" : "Return";
+  }
+  reqkind.addEventListener("change", reqFields);
+  reqFields();
+
+  /* ----------------------------------------------------------- events --- */
+
+  $$("nav.tabs button").forEach((b) => b.onclick = () => {
+    $$("nav.tabs button").forEach((x) => x.classList.toggle("on", x === b));
+    $$(".panel").forEach((p) => p.classList.toggle("on", p.id === "p-" + b.dataset.tab));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  $$("[data-search]").forEach((i) => i.addEventListener("input", () => {
+    search[i.dataset.search] = i.value; render(i.dataset.search);
+  }));
+
+  document.addEventListener("click", async (e) => {
+    const d = e.target.closest("[data-del]");
+    if (!d) return;
+    if (!confirm("Delete this row? This cannot be undone.")) return;
+    const r = await api({ action: "delete", kind: d.dataset.del, id: d.dataset.id });
+    if (!r.ok) return alert(r.error || "Could not delete.");
+    await load();
+  });
+
+  document.addEventListener("change", async (e) => {
+    const sel = e.target.closest("[data-app]");
+    if (!sel) return;
+    const r = await api({ action: "appstatus", id: sel.dataset.app, status: sel.value });
+    if (!r.ok) { alert(r.error || "Could not update."); return load(); }
+    await load();
+  });
+
+  $$("[data-csv]").forEach((b) => b.onclick = () => {
+    const kind = b.dataset.csv, list = rows(kind);
+    if (!list.length) return alert("Nothing to download yet.");
+    const cols = Object.keys(list[0]).filter((c) => c !== "uni");
+    const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const csv = [cols.join(","), ...list.map((r) => cols.map((c) => cell(r[c])).join(","))].join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
+    a.download = `syracuse-india-desk-${kind}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+</script>
+</body>
+</html>
