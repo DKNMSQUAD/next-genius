@@ -80,12 +80,6 @@
     }
     nav.tabs button.on .c { background: var(--orange); color: #fff; }
 
-    /* ---- stats ---- */
-    .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 22px 0 6px; }
-    .stat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
-    .stat .k { font-size: 11px; letter-spacing: .9px; text-transform: uppercase; color: var(--ink-soft); }
-    .stat .v { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 600; letter-spacing: -.02em; }
-
     /* ---- panels ---- */
     .panel { display: none; padding: 20px 0 60px; }
     .panel.on { display: block; }
@@ -206,14 +200,6 @@
   </header>
 
   <div class="wrap">
-    <div class="stats">
-      <div class="stat"><div class="k">Visits</div><div class="v" id="s-visits">0</div></div>
-      <div class="stat"><div class="k">Interactions</div><div class="v" id="s-inter">0</div></div>
-      <div class="stat"><div class="k">Counselors</div><div class="v" id="s-couns">0</div></div>
-      <div class="stat"><div class="k">Cities</div><div class="v" id="s-cities">0</div></div>
-      <div class="stat"><div class="k">Open requests</div><div class="v" id="s-req">0</div></div>
-      <div class="stat"><div class="k">Spend logged</div><div class="v" id="s-spend">0</div></div>
-    </div>
 
     <!-- 1. VISITS -->
     <section class="panel on" id="p-visits">
@@ -467,13 +453,6 @@
     if (!r.ok) return r;
     data = r;
     $("#deskowner").textContent = "India Desk";
-    const s = r.stats || {};
-    $("#s-visits").textContent = s.visits || 0;
-    $("#s-inter").textContent  = s.interactions || 0;
-    $("#s-couns").textContent  = s.counselors || 0;
-    $("#s-cities").textContent = s.cities || 0;
-    $("#s-req").textContent    = s.requestsOpen || 0;
-    $("#s-spend").textContent  = money(s.spend || 0);
     for (const k of ["visits", "interactions", "requests", "accounts", "applications"]) {
       $("#c-" + k).textContent = (data[k] || []).length;
       render(k);
