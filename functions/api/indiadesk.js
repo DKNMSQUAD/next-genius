@@ -10,14 +10,26 @@
 //      POST { token: <INDIADESK_MAINT_TOKEN>, action, ... } - shared maint token,
 //      never leaves a server. Can read everything and move statuses.
 //
-// Store is D1 (binding INDIADESK_DB). Bills/receipts are relayed to Cloudinary
-// from Cloudflare's network, not the counsellor's laptop - api.cloudinary.com is
-// unreachable from some Indian networks (see nm-squad-portal functions/api/upload.js).
+// STORE = Firestore on next-genius-auto, reached with the Admin service account
+// (secret FIREBASE_SA) over the REST API. D1 was the first choice and is the
+// better long-term home, but creating a D1 database needs a Cloudflare token
+// scope this project does not have (the stored one is Pages-only), and this path
+// needs nothing but a Pages secret. Same collections map 1:1 to schema/indiadesk.sql
+// if it ever moves.
 //
-// Secrets are bound at DEPLOY time on Pages: after `wrangler pages secret put`,
+// The service account BYPASSES firestore.rules, so the indiadesk_* collections
+// are never client-readable - the catch-all deny in firestore.rules covers them.
+// Nothing here opens a listener; reads are a handful per dashboard load.
+//
+// Bills/receipts are relayed to Cloudinary from Cloudflare's network, not the
+// counsellor's laptop - api.cloudinary.com is unreachable on some Indian
+// networks (see nm-squad-portal functions/api/upload.js).
+//
+// Secrets bind at DEPLOY time on Pages: after `wrangler pages secret put`,
 // redeploy or the binding does not exist.
 
 const API_KEY = "AIzaSyAf7Pv2zEaM3eVMqM7QGQCXBPruU0tgmFg"; // public web key, next-genius-auto
+const PROJECT = "next-genius-auto";
 
 // Always allowed, whatever the env says. Desk staff come from INDIADESK_EMAILS.
 const ALWAYS = ["dknmsquad@gmail.com", "mandhana.neeraj@gmail.com", "helpdesk@next-genius.com"];
@@ -27,18 +39,42 @@ const UPLOAD_PRESET = "otg_unsigned";
 const MAX_BYTES = 15 * 1024 * 1024;
 const OK_TYPES = /^(image\/|application\/pdf)/;
 
-const TABLES = {
-  visits:       "id_visits",
-  interactions: "id_interactions",
-  requests:     "id_requests",
-  accounts:     "id_accounts",
-  applications: "id_applications",
+const COLL = {
+  visits:       "indiadesk_visits",
+  interactions: "indiadesk_interactions",
+  requests:     "indiadesk_requests",
+  accounts:     "indiadesk_accounts",
+  applications: "indiadesk_applications",
+};
+
+const FIELDS = {
+  visits:       ["visit_date", "counselor", "email", "whatsapp", "org_type", "org_name", "city", "notes"],
+  interactions: ["mode", "contact_date", "counselor", "email", "whatsapp", "org_type", "org_name", "city", "notes"],
+  requests:     ["kind", "title", "from_place", "to_place", "start_date", "end_date", "amount", "currency", "notes"],
+  accounts:     ["spend_date", "category", "vendor", "amount", "currency", "file_url", "file_name", "notes"],
+  applications: ["student", "email", "whatsapp", "school", "city", "program", "intake", "source", "app_status", "notes"],
+};
+
+const REQUIRED = {
+  visits:       ["visit_date", "counselor"],
+  interactions: ["mode", "contact_date", "counselor"],
+  requests:     ["kind", "title"],
+  accounts:     ["spend_date", "amount"],
+  applications: ["student"],
+};
+
+const NUMERIC = new Set(["amount"]);
+
+// Rows are ordered newest-first on the date that matters for that record type.
+const SORT_KEY = {
+  visits: "visit_date", interactions: "contact_date",
+  requests: "created_at", accounts: "spend_date", applications: "created_at",
 };
 
 export async function onRequestPost(ctx) {
   const { request, env } = ctx;
   try {
-    if (!env.INDIADESK_DB) return json({ ok: false, error: "india desk db not bound" }, 500);
+    if (!env.FIREBASE_SA) return json({ ok: false, error: "india desk store not configured" }, 500);
 
     const ct = request.headers.get("content-type") || "";
 
@@ -56,14 +92,14 @@ export async function onRequestPost(ctx) {
     if (!who.ok) return json({ ok: false, error: who.error }, who.status);
 
     const uni = slug(body.uni || "syracuse");
-    const db = env.INDIADESK_DB;
+    const at = await accessToken(env);
 
     switch (body.action) {
-      case "list":       return list(db, uni, who);
-      case "add":        return add(db, uni, who, body);
-      case "status":     return setStatus(db, who, body);
-      case "appstatus":  return setAppStatus(db, who, body);
-      case "delete":     return remove(db, uni, who, body);
+      case "list":       return list(at, uni, who);
+      case "add":        return add(at, uni, who, body);
+      case "status":     return setStatus(at, who, body);
+      case "appstatus":  return setAppStatus(at, who, body);
+      case "delete":     return remove(at, uni, who, body);
       default:           return json({ ok: false, error: "unknown action" }, 400);
     }
   } catch (e) {
@@ -104,17 +140,127 @@ function safeEq(a, b) {
   return d === 0;
 }
 
+/* -------------------------------------------------- google access token --- */
+// Signed JWT assertion -> OAuth access token. Cached in module scope for the
+// life of the isolate; Google issues them for an hour, we drop at 50 minutes.
+
+let tokenCache = { at: 0, value: "" };
+
+async function accessToken(env) {
+  if (tokenCache.value && Date.now() - tokenCache.at < 50 * 60 * 1000) return tokenCache.value;
+
+  const sa = JSON.parse(env.FIREBASE_SA);
+  const now = Math.floor(Date.now() / 1000);
+  const claim = {
+    iss: sa.client_email,
+    scope: "https://www.googleapis.com/auth/datastore",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600,
+  };
+  const head = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const body = b64url(JSON.stringify(claim));
+  const signed = `${head}.${body}`;
+
+  const key = await crypto.subtle.importKey(
+    "pkcs8", pem(sa.private_key),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"],
+  );
+  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(signed));
+
+  const r = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: `${signed}.${b64urlBytes(new Uint8Array(sig))}`,
+    }),
+  });
+  const d = await r.json();
+  if (!d.access_token) throw new Error("could not authenticate to the store");
+  tokenCache = { at: Date.now(), value: d.access_token };
+  return d.access_token;
+}
+
+const b64url = (s) => b64urlBytes(new TextEncoder().encode(s));
+function b64urlBytes(bytes) {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function pem(key) {
+  const body = key.replace(/-----[A-Z ]+-----/g, "").replace(/\s+/g, "");
+  const raw = atob(body);
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out.buffer;
+}
+
+/* -------------------------------------------------------------- firestore -- */
+
+const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
+
+async function fs(at, path, init = {}) {
+  const r = await fetch(BASE + path, {
+    ...init,
+    headers: { Authorization: `Bearer ${at}`, "Content-Type": "application/json", ...(init.headers || {}) },
+  });
+  if (!r.ok && r.status !== 404) {
+    const t = await r.text();
+    throw new Error(`store ${r.status}: ${t.slice(0, 160)}`);
+  }
+  return r.status === 404 ? null : r.json();
+}
+
+// Firestore's typed values, both directions.
+function toValue(v) {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (typeof v === "number") return { doubleValue: v };
+  if (typeof v === "boolean") return { booleanValue: v };
+  return { stringValue: String(v).slice(0, 2000) };
+}
+function fromValue(v) {
+  if (!v) return null;
+  if ("nullValue" in v) return null;
+  if ("doubleValue" in v) return Number(v.doubleValue);
+  if ("integerValue" in v) return Number(v.integerValue);
+  if ("booleanValue" in v) return v.booleanValue;
+  return v.stringValue ?? null;
+}
+function toDoc(obj) {
+  const fields = {};
+  for (const [k, v] of Object.entries(obj)) fields[k] = toValue(v);
+  return { fields };
+}
+function fromDoc(d) {
+  const out = { id: (d.name || "").split("/").pop() };
+  for (const [k, v] of Object.entries(d.fields || {})) out[k] = fromValue(v);
+  return out;
+}
+
+// Every desk is one university, so a single equality filter is the whole query.
+// Sorting happens here rather than in Firestore: an orderBy alongside a where
+// needs a composite index, and these are hundreds of rows, not millions.
+async function fetchKind(at, kind, uni) {
+  const body = {
+    structuredQuery: {
+      from: [{ collectionId: COLL[kind] }],
+      where: { fieldFilter: { field: { fieldPath: "uni" }, op: "EQUAL", value: { stringValue: uni } } },
+      limit: 1000,
+    },
+  };
+  const res = await fs(at, ":runQuery", { method: "POST", body: JSON.stringify(body) });
+  const rows = (res || []).filter((r) => r.document).map((r) => fromDoc(r.document));
+  const key = SORT_KEY[kind];
+  return rows.sort((a, b) => String(b[key] || "").localeCompare(String(a[key] || "")));
+}
+
 /* ------------------------------------------------------------------ read --- */
 
-async function list(db, uni, who) {
-  const q = (sql) => db.prepare(sql).bind(uni).all().then((r) => r.results || []);
-  const [visits, interactions, requests, accounts, applications] = await Promise.all([
-    q("SELECT * FROM id_visits       WHERE uni = ? ORDER BY visit_date DESC, created_at DESC LIMIT 500"),
-    q("SELECT * FROM id_interactions WHERE uni = ? ORDER BY contact_date DESC, created_at DESC LIMIT 500"),
-    q("SELECT * FROM id_requests     WHERE uni = ? ORDER BY created_at DESC LIMIT 300"),
-    q("SELECT * FROM id_accounts     WHERE uni = ? ORDER BY spend_date DESC, created_at DESC LIMIT 300"),
-    q("SELECT * FROM id_applications WHERE uni = ? ORDER BY created_at DESC LIMIT 500"),
-  ]);
+async function list(at, uni, who) {
+  const [visits, interactions, requests, accounts, applications] = await Promise.all(
+    ["visits", "interactions", "requests", "accounts", "applications"].map((k) => fetchKind(at, k, uni)),
+  );
 
   const spend = accounts.reduce((n, a) => n + (Number(a.amount) || 0), 0);
   const stats = {
@@ -133,76 +279,79 @@ async function list(db, uni, who) {
 
 /* ----------------------------------------------------------------- write --- */
 
-const FIELDS = {
-  visits:       ["visit_date", "counselor", "email", "whatsapp", "org_type", "org_name", "city", "notes"],
-  interactions: ["mode", "contact_date", "counselor", "email", "whatsapp", "org_type", "org_name", "city", "notes"],
-  requests:     ["kind", "title", "from_place", "to_place", "start_date", "end_date", "amount", "currency", "notes"],
-  accounts:     ["spend_date", "category", "vendor", "amount", "currency", "file_url", "file_name", "notes"],
-  applications: ["student", "email", "whatsapp", "school", "city", "program", "intake", "source", "app_status", "notes"],
-};
-
-const REQUIRED = {
-  visits:       ["visit_date", "counselor"],
-  interactions: ["mode", "contact_date", "counselor"],
-  requests:     ["kind", "title"],
-  accounts:     ["spend_date", "amount"],
-  applications: ["student"],
-};
-
-async function add(db, uni, who, body) {
+async function add(at, uni, who, body) {
   const kind = String(body.kind || "");
-  const table = TABLES[kind];
-  if (!table) return json({ ok: false, error: "unknown record type" }, 400);
+  if (!COLL[kind]) return json({ ok: false, error: "unknown record type" }, 400);
 
   const row = body.row || {};
   for (const f of REQUIRED[kind]) {
     if (!String(row[f] ?? "").trim()) return json({ ok: false, error: `${f.replace(/_/g, " ")} is required` }, 400);
   }
 
-  const cols = ["id", "uni", "created_at", "created_by", ...FIELDS[kind]];
-  const vals = [crypto.randomUUID(), uni, new Date().toISOString(), who.email,
-    ...FIELDS[kind].map((f) => clean(row[f]))];
-  if (kind === "applications") { cols.push("updated_at"); vals.push(new Date().toISOString()); }
+  const doc = { uni, created_at: new Date().toISOString(), created_by: who.email };
+  for (const f of FIELDS[kind]) doc[f] = clean(row[f], NUMERIC.has(f));
+  if (kind === "requests")     { doc.status = "Pending";   doc.status_note = null; doc.status_at = null; doc.status_by = null; }
+  if (kind === "accounts")     { doc.status = "Submitted"; doc.status_note = null; doc.status_at = null; doc.status_by = null; }
+  if (kind === "applications") { doc.app_status = doc.app_status || "Pending"; doc.updated_at = doc.created_at; }
 
-  await db.prepare(
-    `INSERT INTO ${table} (${cols.join(", ")}) VALUES (${cols.map(() => "?").join(", ")})`
-  ).bind(...vals).run();
-
-  return json({ ok: true, id: vals[0] });
+  const id = crypto.randomUUID();
+  await fs(at, `/${COLL[kind]}?documentId=${id}`, { method: "POST", body: JSON.stringify(toDoc(doc)) });
+  return json({ ok: true, id });
 }
 
 // Back office moves a request or a bill along. Desk staff cannot.
-async function setStatus(db, who, body) {
+async function setStatus(at, who, body) {
   if (!who.admin) return json({ ok: false, error: "the back office sets this" }, 403);
-  const table = body.kind === "requests" ? "id_requests" : body.kind === "accounts" ? "id_accounts" : null;
-  if (!table || !body.id) return json({ ok: false, error: "bad request" }, 400);
+  const kind = body.kind === "requests" ? "requests" : body.kind === "accounts" ? "accounts" : null;
+  if (!kind || !body.id) return json({ ok: false, error: "bad request" }, 400);
 
-  const ok = table === "id_requests"
+  const ok = kind === "requests"
     ? ["Pending", "Approved", "Booked", "Declined"]
     : ["Submitted", "Verified", "Reimbursed", "Query"];
   if (!ok.includes(body.status)) return json({ ok: false, error: "bad status" }, 400);
 
-  await db.prepare(`UPDATE ${table} SET status = ?, status_note = ?, status_at = ?, status_by = ? WHERE id = ?`)
-    .bind(body.status, clean(body.note), new Date().toISOString(), who.email, String(body.id)).run();
+  await patch(at, COLL[kind], String(body.id), {
+    status: body.status,
+    status_note: clean(body.note),
+    status_at: new Date().toISOString(),
+    status_by: who.email,
+  });
   return json({ ok: true });
 }
 
-async function setAppStatus(db, who, body) {
+async function setAppStatus(at, who, body) {
   const ok = ["Pending", "Applied", "Admitted", "Deposited", "Denied", "Withdrawn"];
   if (!body.id || !ok.includes(body.status)) return json({ ok: false, error: "bad request" }, 400);
-  await db.prepare("UPDATE id_applications SET app_status = ?, updated_at = ? WHERE id = ?")
-    .bind(body.status, new Date().toISOString(), String(body.id)).run();
+  await patch(at, COLL.applications, String(body.id), {
+    app_status: body.status,
+    updated_at: new Date().toISOString(),
+  });
   return json({ ok: true });
+}
+
+// updateMask keeps the patch to the named fields; without it Firestore would
+// blank everything else on the document.
+async function patch(at, coll, id, fields) {
+  const mask = Object.keys(fields).map((f) => `updateMask.fieldPaths=${f}`).join("&");
+  await fs(at, `/${coll}/${encodeURIComponent(id)}?${mask}`, {
+    method: "PATCH", body: JSON.stringify(toDoc(fields)),
+  });
 }
 
 // Only the person who logged it, or the back office, can remove a row.
-async function remove(db, uni, who, body) {
-  const table = TABLES[body.kind];
-  if (!table || !body.id) return json({ ok: false, error: "bad request" }, 400);
-  const sql = who.admin
-    ? `DELETE FROM ${table} WHERE id = ? AND uni = ?`
-    : `DELETE FROM ${table} WHERE id = ? AND uni = ? AND created_by = '${who.email.replace(/'/g, "")}'`;
-  await db.prepare(sql).bind(String(body.id), uni).run();
+async function remove(at, uni, who, body) {
+  const kind = String(body.kind || "");
+  if (!COLL[kind] || !body.id) return json({ ok: false, error: "bad request" }, 400);
+
+  const cur = await fs(at, `/${COLL[kind]}/${encodeURIComponent(String(body.id))}`);
+  if (!cur) return json({ ok: true });
+  const row = fromDoc(cur);
+  if (row.uni !== uni) return json({ ok: false, error: "not this desk" }, 403);
+  if (!who.admin && row.created_by !== who.email) {
+    return json({ ok: false, error: "only the person who logged it can remove it" }, 403);
+  }
+
+  await fs(at, `/${COLL[kind]}/${encodeURIComponent(String(body.id))}`, { method: "DELETE" });
   return json({ ok: true });
 }
 
@@ -230,9 +379,9 @@ async function upload(form) {
 
 /* ----------------------------------------------------------------- utils --- */
 
-function clean(v) {
+function clean(v, numeric = false) {
   if (v === undefined || v === null || v === "") return null;
-  if (typeof v === "number") return v;
+  if (numeric) { const n = Number(v); return isNaN(n) ? null : n; }
   return String(v).slice(0, 2000);
 }
 
