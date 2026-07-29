@@ -147,6 +147,24 @@
     .file { font-size: 13px; }
     .file a { color: #1f5fa8; }
     .note { font-size: 13px; color: var(--ink-soft); margin-top: 10px; }
+    /* Applications is built and its rows still store, but the desk should not
+       work it until Syracuse gives us a feed: the real thing sits behind a blur
+       so it reads as coming, not missing. */
+    .veilwrap { position: relative; }
+    .veiled { filter: blur(6px); pointer-events: none; user-select: none; opacity: .85; }
+    .veil { position: absolute; inset: 0; display: grid; place-items: start center; padding-top: 110px; z-index: 5; }
+    .veilcard {
+      position: sticky; top: 170px; text-align: center; background: #fff;
+      border: 1px solid var(--line); border-radius: 18px; padding: 34px 40px;
+      box-shadow: 0 1px 2px rgba(28,27,24,.04), 0 20px 50px rgba(28,27,24,.10);
+    }
+    .veilcard img { width: 78px; height: 78px; object-fit: contain; }
+    .veilcard .t {
+      font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 600;
+      letter-spacing: -.02em; margin-top: 12px;
+    }
+    .veilcard p { font-size: 13.5px; color: var(--ink-soft); margin-top: 6px; max-width: 300px; }
+
     .soonbar {
       display: flex; align-items: center; gap: 10px; background: #fdf1d8; border: 1px solid #f2e0b5;
       color: var(--warn); border-radius: 12px; padding: 12px 16px; font-size: 13.5px; margin-bottom: 16px;
@@ -338,44 +356,50 @@
     </section>
 
     <!-- 5. APPLICATIONS -->
-    <section class="panel" id="p-applications">
-      <div class="head2">
-        <div>
-          <h2>Tracking applications</h2>
-          <p>Students the desk sent toward Syracuse, and where each one stands.</p>
+    <section class="panel veilwrap" id="p-applications">
+      <div class="veiled">
+        <div class="head2">
+          <div>
+            <h2>Tracking applications</h2>
+            <p>Students the desk sent toward Syracuse, and where each one stands.</p>
+          </div>
+        </div>
+        <div class="box">
+          <form class="card" id="f-applications">
+            <div class="fields">
+              <div class="f wide"><label>Student <i>*</i></label><input name="student" required></div>
+              <div class="f"><label>Email</label><input type="email" name="email"></div>
+              <div class="f"><label>WhatsApp</label><input name="whatsapp"></div>
+              <div class="f wide"><label>School</label><input name="school"></div>
+              <div class="f"><label>City</label><input name="city"></div>
+              <div class="f"><label>Program</label><input name="program" placeholder="Intended major"></div>
+              <div class="f"><label>Intake</label><input name="intake" placeholder="Fall 2027"></div>
+              <div class="f wide"><label>Came from</label><input name="source" placeholder="Counselor or visit that produced this student"></div>
+              <div class="f"><label>Status</label>
+                <select name="app_status"><option>Pending</option><option>Applied</option><option>Admitted</option>
+                  <option>Deposited</option><option>Denied</option><option>Withdrawn</option></select></div>
+              <div class="f full"><label>Notes</label><textarea name="notes"></textarea></div>
+            </div>
+            <div class="actions"><button class="save" type="submit">Add student</button><span class="msg" data-msg></span></div>
+          </form>
+        </div>
+        <div class="head2"><h2>Pipeline</h2></div>
+        <div class="filters">
+          <input type="search" placeholder="Search student, school, city" data-search="applications">
+          <button class="ghost" data-csv="applications">Download CSV</button>
+        </div>
+        <div class="tablewrap box"><table>
+          <thead><tr><th>Student</th><th>School</th><th>City</th><th>Program</th><th>Intake</th><th>Status</th><th></th></tr></thead>
+          <tbody id="t-applications"></tbody>
+        </table></div>
+      </div>
+      <div class="veil">
+        <div class="veilcard">
+          <img src="/indiadesk/india-desk-mark.png" alt="India Desk">
+          <div class="t">Coming soon</div>
+          <p>Application tracking opens once Syracuse gives the desk a feed.</p>
         </div>
       </div>
-      <div class="soonbar">
-        <strong>Pending:</strong> this tracker is manual until Syracuse gives us a feed. Every row you add here is already stored and visible to the back office.
-      </div>
-      <div class="box">
-        <form class="card" id="f-applications">
-          <div class="fields">
-            <div class="f wide"><label>Student <i>*</i></label><input name="student" required></div>
-            <div class="f"><label>Email</label><input type="email" name="email"></div>
-            <div class="f"><label>WhatsApp</label><input name="whatsapp"></div>
-            <div class="f wide"><label>School</label><input name="school"></div>
-            <div class="f"><label>City</label><input name="city"></div>
-            <div class="f"><label>Program</label><input name="program" placeholder="Intended major"></div>
-            <div class="f"><label>Intake</label><input name="intake" placeholder="Fall 2027"></div>
-            <div class="f wide"><label>Came from</label><input name="source" placeholder="Counselor or visit that produced this student"></div>
-            <div class="f"><label>Status</label>
-              <select name="app_status"><option>Pending</option><option>Applied</option><option>Admitted</option>
-                <option>Deposited</option><option>Denied</option><option>Withdrawn</option></select></div>
-            <div class="f full"><label>Notes</label><textarea name="notes"></textarea></div>
-          </div>
-          <div class="actions"><button class="save" type="submit">Add student</button><span class="msg" data-msg></span></div>
-        </form>
-      </div>
-      <div class="head2"><h2>Pipeline</h2></div>
-      <div class="filters">
-        <input type="search" placeholder="Search student, school, city" data-search="applications">
-        <button class="ghost" data-csv="applications">Download CSV</button>
-      </div>
-      <div class="tablewrap box"><table>
-        <thead><tr><th>Student</th><th>School</th><th>City</th><th>Program</th><th>Intake</th><th>Status</th><th></th></tr></thead>
-        <tbody id="t-applications"></tbody>
-      </table></div>
     </section>
   </div>
 </div>
