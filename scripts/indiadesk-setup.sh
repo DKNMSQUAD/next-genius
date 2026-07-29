@@ -1,58 +1,58 @@
 #!/usr/bin/env bash
-# India Desk - one-time provisioning. Everything else is already in the repo.
+# India Desk - provisioning. ALREADY DONE on 2026-07-29; kept as the runbook for
+# a rebuild, or for opening a second university desk.
 #
-# NEEDS a Cloudflare API token on the WORK account 869a5c91069a60c128ed30838b881be2
-# with:  D1:Edit  +  Cloudflare Pages:Edit  +  Account Settings:Read
-# The existing ~/.cloudflare-fm-token is Pages-scope ONLY and cannot make a D1 database.
+# Store is Firestore on next-genius-auto, reached with the Admin service account.
+# D1 was the first choice (schema/indiadesk.sql still matches the collections
+# 1:1) but creating a D1 database needs a Cloudflare token with D1:Edit on the
+# work account, and the only token on this Mac is Pages-scope. Firestore needs
+# nothing but a Pages secret, so that is the live path.
 #
-#   export CLOUDFLARE_API_TOKEN=<the new token>
-#   export DENVER_EMAIL=<denver's google account>
+#   export CLOUDFLARE_API_TOKEN=$(source ~/.cloudflare-fm-token; echo "$CLOUDFLARE_API_TOKEN")
 #   bash scripts/indiadesk-setup.sh
 #
-# Pages binds secrets at DEPLOY time. The last step redeploys - do not skip it.
+# Pages binds secrets at DEPLOY time. The redeploy at the end is not optional.
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 export CLOUDFLARE_ACCOUNT_ID=869a5c91069a60c128ed30838b881be2
 PAGES_PROJECT=next-genius
-DB=next-genius-indiadesk
+SA=~/.config/next-genius-worker/sa.json
 
-: "${CLOUDFLARE_API_TOKEN:?set CLOUDFLARE_API_TOKEN to a D1+Pages token on the work account}"
-: "${DENVER_EMAIL:?set DENVER_EMAIL to the Google account Denver will sign in with}"
-: "${INDIADESK_MAINT_TOKEN:?set INDIADESK_MAINT_TOKEN - the same value goes on nm-squad-crm}"
+: "${CLOUDFLARE_API_TOKEN:?source ~/.cloudflare-fm-token first}"
+: "${INDIADESK_MAINT_TOKEN:?the shared back-office token - the SAME value must be set on nm-squad-crm}"
 
-echo "== 1. create the D1 database (skips if it exists)"
-npx wrangler d1 create "$DB" || echo "   (already exists, continuing)"
+echo "== 1. the Firebase Admin service account becomes a Pages secret"
+python3 -c "import json;print(json.dumps(json.load(open('$SA'))),end='')" \
+  | npx wrangler pages secret put FIREBASE_SA --project-name "$PAGES_PROJECT"
 
-echo "== 2. apply the schema"
-npx wrangler d1 execute "$DB" --remote --file=schema/indiadesk.sql --yes
+echo "== 2. the shared back-office token"
+printf '%s' "$INDIADESK_MAINT_TOKEN" \
+  | npx wrangler pages secret put INDIADESK_MAINT_TOKEN --project-name "$PAGES_PROJECT"
 
-echo "== 3. secrets on the Pages project"
-printf '%s' "$DENVER_EMAIL"          | npx wrangler pages secret put INDIADESK_EMAILS      --project-name "$PAGES_PROJECT"
-printf '%s' "$INDIADESK_MAINT_TOKEN" | npx wrangler pages secret put INDIADESK_MAINT_TOKEN --project-name "$PAGES_PROJECT"
+echo "== 3. desk staff whitelist (comma separated; DK, Neeraj and helpdesk@ are always allowed)"
+if [ -n "${INDIADESK_EMAILS:-}" ]; then
+  printf '%s' "$INDIADESK_EMAILS" | npx wrangler pages secret put INDIADESK_EMAILS --project-name "$PAGES_PROJECT"
+else
+  echo "   INDIADESK_EMAILS not set - skipping. Denver cannot sign in until it is."
+fi
+
+echo "== 4. redeploy (GitHub auto-build is broken on this project, so POST it)"
+curl -s -X POST \
+  "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PAGES_PROJECT/deployments" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | head -c 200
+echo
 
 cat <<'MSG'
 
-== 4. BIND THE DATABASE (dashboard, 30 seconds - the API path is fiddlier than it is worth)
-   Cloudflare dashboard -> Workers & Pages -> next-genius -> Settings -> Bindings
-   -> Add -> D1 database
-        Variable name : INDIADESK_DB
-        D1 database   : next-genius-indiadesk
-   Add it to BOTH Production and Preview.
-
-== 5. redeploy (GitHub auto-build is broken on this project, so POST it)
-   source ~/.cloudflare-fm-token
-   curl -s -X POST \
-     "https://api.cloudflare.com/client/v4/accounts/869a5c91069a60c128ed30838b881be2/pages/projects/next-genius/deployments" \
-     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | head -c 200
-
-== 6. the portal side (nm-squad-crm), same maint token
+== the portal side (nm-squad-crm, same Cloudflare account, same maint token)
    cd "/Volumes/T7 Shield/DK-Mac/projects/nm-squad-portal"
    printf '%s' "$INDIADESK_MAINT_TOKEN" | npx wrangler pages secret put INDIADESK_MAINT_TOKEN --project-name nm-squad-crm
-   npm run build && npx wrangler pages deploy dist --project-name nm-squad-crm
+   rm -rf dist && npm run build && npx wrangler pages deploy dist --project-name nm-squad-crm
+   (rm -rf dist matters: a stale hashed asset makes the upload fail with ENOENT)
 
-== 7. check
-   https://www.next-genius.com/indiadesk/syracuse   (sign in as Denver)
-   https://<portal>/admin/india-desk                (Neeraj/DK: India Desk in the rail)
+== check
+   https://www.next-genius.com/indiadesk/syracuse    the desk
+   https://portal.neerajmandhana.com/admin/india-desk  the back office
 MSG

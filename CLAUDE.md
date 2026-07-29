@@ -52,15 +52,22 @@ back office = NM/Ravisha inside the NM Squad portal.
   ID token (next-genius-auto, whitelist in the `INDIADESK_EMAILS` secret), and the
   portal with the shared `INDIADESK_MAINT_TOKEN`. Only the maint caller can move a
   request or a bill's status.
-- Store: **D1** `next-genius-indiadesk`, binding `INDIADESK_DB`, schema in
-  `schema/indiadesk.sql`. `uni` column = the desk slug, so a second university is a
-  row value, not a new table.
+- Store: **Firestore on next-genius-auto**, collections `indiadesk_visits`,
+  `_interactions`, `_requests`, `_accounts`, `_applications`, reached with the Admin
+  service account (Pages secret `FIREBASE_SA`) over the REST API. The SA bypasses
+  firestore.rules, so the catch-all deny keeps these collections off every client.
+  No listeners. D1 was the first choice and `schema/indiadesk.sql` still maps 1:1,
+  but creating a D1 database needs a work-account token with D1:Edit and the only
+  token on this Mac is Pages-scope. `uni` field = the desk slug, so a second
+  university is a field value, not a new collection.
 - Bills go to Cloudinary (`dclcl4mox`, unsigned preset `otg_unsigned`, folder
   `india-desk`) relayed FROM Cloudflare, never from the counsellor's laptop -
   api.cloudinary.com is unreachable on some Indian networks.
 - Free stack: CF Pages + Pages Functions + D1 + existing Firebase auth + Cloudinary.
   $0/month, no new service.
-- Provisioning: `bash scripts/indiadesk-setup.sh` (needs a D1-scoped CF token; the
-  stored ~/.cloudflare-fm-token is Pages-scope only and CANNOT create the database).
+- LIVE since 2026-07-29. Provisioning runbook: `scripts/indiadesk-setup.sh`.
+  Secrets on next-genius: `FIREBASE_SA`, `INDIADESK_MAINT_TOKEN`, `INDIADESK_EMAILS`
+  (still empty - Denver's Google account has not been given yet, so only DK, Neeraj
+  and helpdesk@ can open the desk). Same `INDIADESK_MAINT_TOKEN` on nm-squad-crm.
 - Portal side lives in nm-squad-portal: `functions/api/indiadesk.js`,
   `src/lib/indiadesk.ts`, `src/team/indiadesk/`.
